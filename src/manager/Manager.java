@@ -5,6 +5,7 @@ import task.Task;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
+
 /**
  * Класс для объекта-менеджера
  */
@@ -40,6 +41,12 @@ public class Manager {
         return subTaskStorage;
     }
     /**
+     * 0. Метод для добавления SubTask в список.
+     */
+    public void addSubtaskToList(EpicTask.SubTask subTask, ArrayList<EpicTask.SubTask> listSubtasks){
+        listSubtasks.add(subTask);
+    }
+    /**
      * 1. Метод для сохранения задач всех типов.
      */
     public void saveToTaskStorage(Task task) {
@@ -57,30 +64,30 @@ public class Manager {
      * 2. Методы для каждого из типа задач(Задача/Эпик/Подзадача):
      *  2.1 Получение списка всех задач;
      */
-    public ArrayList<Task> getListOfTasks(TreeMap<Integer, Task> treeMap) {
-        return new ArrayList<>(treeMap.values());
+    public ArrayList<Task> getListOfTasks() {
+        return new ArrayList<>(taskStorage.values());
     }
 
-    public ArrayList<EpicTask> getListOfEpicTasks(TreeMap<Integer, EpicTask> treeMap) {
-        return new ArrayList<>(treeMap.values());
+    public ArrayList<EpicTask> getListOfEpicTasks() {
+        return new ArrayList<>(epicTaskStorage.values());
     }
 
-    public ArrayList<EpicTask.SubTask> getListOfSubTasks(TreeMap<Integer, EpicTask.SubTask> treeMap) {
-        return new ArrayList<>(treeMap.values());
+    public ArrayList<EpicTask.SubTask> getListOfSubTasks() {
+        return new ArrayList<>(subTaskStorage.values());
     }
     /**
      *  2.2 Удаление всех задач;
      */
-    public void deleteAllTasks(TreeMap<Integer, Task> treeMap) {
-        treeMap.clear();
+    public void deleteAllTasks() {
+        taskStorage.clear();
     }
 
-    public void deleteAllEpicTasks(TreeMap<Integer, EpicTask> treeMap) {
-        treeMap.clear();
+    public void deleteAllEpicTasks() {
+        epicTaskStorage.clear();
     }
 
-    public void deleteAllSubTasks(TreeMap<Integer, EpicTask.SubTask> treeMap) {
-        treeMap.clear();
+    public void deleteAllSubTasks() {
+        subTaskStorage.clear();
     }
     /**
      *  2.3 Получение по идентификатору;
@@ -169,39 +176,16 @@ public class Manager {
      * 3. Дополнительные методы:
      *  3.1 Получение списка всех подзадач определённого эпика.
      */
-    public ArrayList<EpicTask.SubTask> getCompleteListOfSubTaskByEpicTask(EpicTask epicTask) {
-        return epicTask.getSubTasks();
+    public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTask(int id) {
+        ArrayList<EpicTask.SubTask> listSubtasks = null;
+        for (Integer idEpicTask : epicTaskStorage.keySet()) {
+            if (id == idEpicTask) {
+                listSubtasks = epicTaskStorage.get(id).getSubTasks();
+            }
+        }
+        return listSubtasks;
     }
-    /**
-     * 4. Метод для управления статусом для эпик задач.
-     * @return
-     */
-    public static Status getEpicTaskStatus(ArrayList<EpicTask.SubTask> subTasks) {
-        Status statusEpicTask;
-        int countNew = 0;
-        int countDone = 0;
 
-        for (EpicTask.SubTask subTask : subTasks) {
-            if (subTask.getStatus().equals(Status.NEW)) {
-                countNew++;
-            }
-            if (!subTask.getStatus().equals(Status.DONE)) {
-                countDone++;
-            }
-        }
-/**
- * Если у эпика нет подзадач или все они имеют статус NEW | DONE, то статус должен быть NEW | DONE.
- * Во всех остальных случаях статус должен быть IN_PROGRESS.
- */
-        if ((subTasks.isEmpty()) || (countNew == subTasks.size())) {
-            statusEpicTask = Status.NEW;
-        } else if (countDone == subTasks.size()) {
-            statusEpicTask = Status.DONE;
-        } else {
-            statusEpicTask = Status.IN_PROGRESS;
-        }
-        return statusEpicTask;
-    }
     public enum Status {
         NEW,
         DONE,

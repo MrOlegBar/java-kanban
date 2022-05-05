@@ -9,16 +9,17 @@ import java.util.Arrays;
  * Класс для создания Epic задач
  */
 public class EpicTask extends Task {
-    private final ArrayList<SubTask> subTasks;
+    private ArrayList<SubTask> subTasks;
 
     /**
      * Конструктор для создания Epic задач
      */
     public EpicTask(String nameEpicTask, String descriptionEpicTask, ArrayList<SubTask> subTasks) {
         super(nameEpicTask, descriptionEpicTask);
-        this.setStatus(Manager.getEpicTaskStatus(subTasks)); // 4. Метод для управления статусом для эпик задач.
         this.subTasks = subTasks;
+        this.setStatus(getEpicTaskStatus()); // 4. Метод для управления статусом для эпик задач.
     }
+
     /**
      * Конструктор для копирования Epic задач
      */
@@ -30,6 +31,37 @@ public class EpicTask extends Task {
      */
     public ArrayList<SubTask> getSubTasks() {
         return subTasks;
+    }
+
+    public void setSubTasks(ArrayList<SubTask> subTasks) {
+        this.subTasks = subTasks;
+    }
+
+    /**
+     * 4. Метод для управления статусом для эпик задач.
+     */
+    public Manager.Status getEpicTaskStatus() {
+        Manager.Status statusEpicTask;
+        int countNew = 0;
+        int countDone = 0;
+
+        for (EpicTask.SubTask subTask : this.subTasks) {
+            if (subTask.getStatus().equals(Manager.Status.NEW)) {
+                countNew++;
+            }
+            if (!subTask.getStatus().equals(Manager.Status.DONE)) {
+                countDone++;
+            }
+        }
+
+        if ((subTasks.isEmpty()) || (countNew == subTasks.size())) {
+            statusEpicTask = Manager.Status.NEW;
+        } else if (countDone == subTasks.size()) {
+            statusEpicTask = Manager.Status.DONE;
+        } else {
+            statusEpicTask = Manager.Status.IN_PROGRESS;
+        }
+        return statusEpicTask;
     }
 
     @Override
