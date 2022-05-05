@@ -1,15 +1,19 @@
+package task;
+
+import manager.Manager;
+
 public class Task {
     /**
-     * Класс для создания Task задач
+     * Класс для создания Task.Task задач
      */
     private final int id;
     private final String name;
     private final String description;
-    private String status;
+    private Manager.Status status;
     /**
-     * Конструктор для создания Task задач
+     * Конструктор для создания Task.Task задач
      */
-    Task(String nameTask, String descriptionTask, String statusTask) {
+    public Task(String nameTask, String descriptionTask, Manager.Status statusTask) {
         this.id = Manager.getId() + 1;
         Manager.setId(this.id);
         this.name = nameTask;
@@ -19,43 +23,44 @@ public class Task {
     /**
      * Конструктор для создания задач наследников Epic задач и SubTask подзадач
      */
-    Task(String nameTask, String descriptionTask) {
+    public Task(String nameTask, String descriptionTask) {
         this.id = Manager.getId() + 1;
         Manager.setId(this.id);
         this.name = nameTask;
         this.description = descriptionTask;
     }
     /**
-     * Конструктор для копирования Task задач
+     * Конструктор для копирования Task.Task задач
      */
-    Task(Task task) {
+    public Task(Task task) {
         this(task.name, task.description, task.status);
     }
     /**
      * get и set методы
      */
-    int getId() {
+    public int getId() {
         return id;
     }
-    String getName() {
+
+    public String getName() {
         return name;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    String getStatus() {
+    public Manager.Status getStatus() {
         return status;
     }
 
-    void setStatus(String status) {
+    public void setStatus(Manager.Status status) {
         this.status = status;
     }
 
     @Override
     public String toString() {
-        return "ID задачи Task=\"" + id + "\", Название задачи=\"" + name + "\", Описание=\"" + description
+        return "ID задачи Task.Task=\"" + id + "\", Название задачи=\"" + name + "\", Описание=\"" + description
                 + "\", Статус=\"" + status + "\"";
     }
 }
