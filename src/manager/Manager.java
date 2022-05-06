@@ -2,21 +2,15 @@ package manager;
 
 import epictask.EpicTask;
 import task.Task;
-
 import java.util.ArrayList;
 import java.util.TreeMap;
-
 /**
  * Класс для объекта-менеджера
  */
 public class Manager {
-
     private static int id = 0;
-
     private final TreeMap<Integer, Task> taskStorage = new TreeMap<>();
-
     private final TreeMap<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
-
     private final TreeMap<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     /**
      * get и set методы
@@ -41,13 +35,19 @@ public class Manager {
         return subTaskStorage;
     }
     /**
-     * 0. Метод для добавления SubTask в список.
+     * Метод для добавления подзадач в список
      */
     public void addSubtaskToList(EpicTask.SubTask subTask, ArrayList<EpicTask.SubTask> listSubtasks){
-        listSubtasks.add(subTask);
+        if (!listSubtasks.contains(subTask)) {
+            listSubtasks.add(subTask);
+        } else {
+            int indexSubTask = listSubtasks.indexOf(subTask);
+            listSubtasks.remove(indexSubTask);
+            listSubtasks.add(indexSubTask, subTask);
+        }
     }
     /**
-     * 1. Метод для сохранения задач всех типов.
+     * 1. Метод для сохранения задач
      */
     public void saveToTaskStorage(Task task) {
         taskStorage.put(task.getId(), task);
@@ -61,8 +61,8 @@ public class Manager {
         subTaskStorage.put(subTask.getId(), subTask);
     }
     /**
-     * 2. Методы для каждого из типа задач(Задача/Эпик/Подзадача):
-     *  2.1 Получение списка всех задач;
+     * 2. Методы для каждого из типа задач
+     *  2.1 Получение списка всех задач
      */
     public ArrayList<Task> getListOfTasks() {
         return new ArrayList<>(taskStorage.values());
@@ -76,7 +76,7 @@ public class Manager {
         return new ArrayList<>(subTaskStorage.values());
     }
     /**
-     *  2.2 Удаление всех задач;
+     *  2.2 Удаление всех задач
      */
     public void deleteAllTasks() {
         taskStorage.clear();
@@ -90,7 +90,7 @@ public class Manager {
         subTaskStorage.clear();
     }
     /**
-     *  2.3 Получение по идентификатору;
+     *  2.3 Получение задачи по идентификатору
      */
     public Task getTaskById(int id) {
         Task returnTask = null;
@@ -116,7 +116,7 @@ public class Manager {
         return returnSubTask;
     }
     /**
-     *  2.4 Создание. Сам объект должен передаваться в качестве параметра;
+     *  2.4 Создание задачи
      */
     public Task createCopyOfTask(Task task) {
         return new Task(task);
@@ -130,21 +130,25 @@ public class Manager {
         return new EpicTask.SubTask(subTask);
     }
     /**
-     *  2.5 Обновление. Новая версия объекта с верным идентификатором передаются в виде параметра;
+     *  2.5 Обновление задачи
      */
     public void updateTask(int id, Task task) {
-        taskStorage.put(id, task);
+        Task newTask = new Task(id, task.getName(), task.getDescription(), task.getStatus());
+        taskStorage.put(id, newTask);
     }
 
     public void updateEpicTask(int id, EpicTask epicTask) {
-        epicTaskStorage.put(id, epicTask);
+        EpicTask newEpicTask = new EpicTask(id, epicTask.getName(), epicTask.getDescription(),epicTask.getSubTasks());
+        epicTaskStorage.put(id, newEpicTask);
     }
 
-    public void updateSubTask(int id, EpicTask.SubTask subTask) {
-        subTaskStorage.put(id, subTask);
+    public void updateSubTask(int id,  EpicTask.SubTask subTask) {
+        EpicTask.SubTask newSubTask = new EpicTask.SubTask(id, subTask.getNameEpicTask(), subTask.getName()
+                ,subTask.getDescription(), subTask.getStatus());
+        subTaskStorage.put(id, newSubTask);
     }
     /**
-     *  2.6 Удаление по идентификатору.
+     *  2.6 Удаление задачи
      */
     public void removeTaskById(int id) {
         for (Integer idTask : taskStorage.keySet()) {
@@ -173,8 +177,8 @@ public class Manager {
         }
     }
     /**
-     * 3. Дополнительные методы:
-     *  3.1 Получение списка всех подзадач определённого эпика.
+     * 3. Дополнительные методы
+     *  3.1 Получение списка всех подзадач определённого эпика
      */
     public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTask(int id) {
         ArrayList<EpicTask.SubTask> listSubtasks = null;
@@ -185,7 +189,9 @@ public class Manager {
         }
         return listSubtasks;
     }
-
+    /**
+     * Перечисление статусов задач
+     */
     public enum Status {
         NEW,
         DONE,
