@@ -1,6 +1,6 @@
 package manager;
 
-import epictask.EpicTask;
+import task.EpicTask;
 import task.Task;
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -8,57 +8,42 @@ import java.util.TreeMap;
  * Класс для объекта-менеджера
  */
 public class Manager {
-    private static int id = 0;
+    private Integer id = 0;
+    private ArrayList<Integer> listOfSubTaskId;
     private final TreeMap<Integer, Task> taskStorage = new TreeMap<>();
     private final TreeMap<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final TreeMap<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
-    /**
-     * get и set методы
-     */
-    public static int getId() {
-        return id;
-    }
 
-    public static void setId(int id) {
-        Manager.id = id;
-    }
-
-    public TreeMap<Integer, Task> getTaskStorage() {
-        return taskStorage;
-    }
-
-    public TreeMap<Integer, EpicTask> getEpicTaskStorage() {
-        return epicTaskStorage;
-    }
-
-    public TreeMap<Integer, EpicTask.SubTask> getSubTaskStorage() {
-        return subTaskStorage;
-    }
     /**
      * Метод для добавления подзадач в список
      */
-    public void addSubtaskToList(EpicTask.SubTask subTask, ArrayList<EpicTask.SubTask> listSubtasks){
-        if (!listSubtasks.contains(subTask)) {
-            listSubtasks.add(subTask);
+    public void addSubtaskToList(EpicTask.SubTask subTask, ArrayList<Integer> listOfSubTaskId){
+        if (!listOfSubTaskId.contains(subTask.getId())) {
+            listOfSubTaskId.add(subTask.getId());
         } else {
-            int indexSubTask = listSubtasks.indexOf(subTask);
-            listSubtasks.remove(indexSubTask);
-            listSubtasks.add(indexSubTask, subTask);
+            listOfSubTaskId.remove(subTask.getId());
+            listOfSubTaskId.add(subTask.getId());
         }
     }
     /**
      * 1. Метод для сохранения задач
      */
     public void saveToTaskStorage(Task task) {
-        taskStorage.put(task.getId(), task);
+        id += 1;
+        task.setId(id);
+        taskStorage.put(id , task);
     }
 
     public void saveToEpicTaskStorage(EpicTask epicTask) {
-        epicTaskStorage.put(epicTask.getId(), epicTask);
+        id += 1;
+        epicTask.setId(id);
+        epicTaskStorage.put(id, epicTask);
     }
 
     public void saveToSubTaskStorage(EpicTask.SubTask subTask) {
-        subTaskStorage.put(subTask.getId(), subTask);
+        id += 1;
+        subTask.setId(id);
+        subTaskStorage.put(id, subTask);
     }
     /**
      * 2. Методы для каждого из типа задач
@@ -132,20 +117,22 @@ public class Manager {
     /**
      *  2.5 Обновление задачи
      */
-    public void updateTask(int id, Task task) {
-        Task newTask = new Task(id, task.getName(), task.getDescription(), task.getStatus());
-        taskStorage.put(id, newTask);
+    public void taskUpdate(Task task) {
+        Task newTask = new Task(task.getId(), task.getName(), task.getDescription(), task.getStatus());
+        taskStorage.put(task.getId(), newTask);
     }
 
-    public void updateEpicTask(int id, EpicTask epicTask) {
-        EpicTask newEpicTask = new EpicTask(id, epicTask.getName(), epicTask.getDescription(),epicTask.getSubTasks());
-        epicTaskStorage.put(id, newEpicTask);
+    public void epicTaskUpdate(EpicTask epicTask) {
+        Task.Status epicTaskStatus = getEpicTaskStatus(epicTask.getListOfSubTaskId());
+        EpicTask newEpicTask = new EpicTask(epicTask.getId(), epicTask.getName(), epicTask.getDescription()
+                , epicTask.getListOfSubTaskId(), epicTaskStatus);
+        epicTaskStorage.put(epicTask.getId(), newEpicTask);
     }
 
-    public void updateSubTask(int id,  EpicTask.SubTask subTask) {
-        EpicTask.SubTask newSubTask = new EpicTask.SubTask(id, subTask.getNameEpicTask(), subTask.getName()
+    public void subTaskUpdate(EpicTask.SubTask subTask) {
+        EpicTask.SubTask newSubTask = new EpicTask.SubTask(subTask.getId(), subTask.getEpicTaskId(), subTask.getName()
                 ,subTask.getDescription(), subTask.getStatus());
-        subTaskStorage.put(id, newSubTask);
+        subTaskStorage.put(subTask.getId(), newSubTask);
     }
     /**
      *  2.6 Удаление задачи
@@ -180,21 +167,43 @@ public class Manager {
      * 3. Дополнительные методы
      *  3.1 Получение списка всех подзадач определённого эпика
      */
-    public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTask(int id) {
-        ArrayList<EpicTask.SubTask> listSubtasks = null;
+    /*public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTask(int id) {
+        ArrayList<Integer> listOfSubtasksId = null;
+        ArrayList<Integer> returnedListOfSubtasksId = null;
         for (Integer idEpicTask : epicTaskStorage.keySet()) {
             if (id == idEpicTask) {
-                listSubtasks = epicTaskStorage.get(id).getSubTasks();
+                listOfSubtasksId = epicTaskStorage.get(id).getSubTasksId();
+                for (Integer idSubtask : listOfSubtasksId) {
+                    returnedListOfSubtasksId.add(idSubtask);
+                }
             }
         }
-        return listSubtasks;
-    }
+        return returnedListOfSubtasksId;
+    }*/
     /**
-     * Перечисление статусов задач
+     * 4. Метод для управления статусом для EpicTask задач
      */
-    public enum Status {
-        NEW,
-        DONE,
-        IN_PROGRESS
+    public Task.Status getEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
+        Task.Status statusEpicTask;
+        int countNew = 0;
+        int countDone = 0;
+
+        for (Integer id : listOfSubTaskId) {
+            if (subTaskStorage.get(id).getStatus().equals(Task.Status.NEW)) {
+                countNew++;
+            }
+            if (subTaskStorage.get(id).getStatus().equals(Task.Status.DONE)) {
+                countDone++;
+            }
+        }
+
+        if ((listOfSubTaskId.isEmpty()) || (countNew == listOfSubTaskId.size())) {
+            statusEpicTask = Task.Status.NEW;
+        } else if (countDone == listOfSubTaskId.size()) {
+            statusEpicTask = Task.Status.DONE;
+        } else {
+            statusEpicTask = Task.Status.IN_PROGRESS;
+        }
+        return statusEpicTask;
     }
 }

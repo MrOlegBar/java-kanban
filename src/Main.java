@@ -1,9 +1,9 @@
-import epictask.EpicTask;
+import task.EpicTask;
 import manager.Manager;
 import task.Task;
 import java.util.ArrayList;
 import java.util.Arrays;
-import static manager.Manager.Status.*;
+import static task.Task.Status.*;
 /**
  * «Трекер задач»
  */
@@ -16,49 +16,55 @@ public class Main {
         /**
          * Создали 2е Task задачи
          */
-        Task taskFirst = new Task("Поесть","Принять пищу", NEW);
-        Task taskSecond = new Task("Поспать","Хорошенько выспаться", DONE);
+        Task firstTask = new Task("Поесть","Принять пищу", NEW);
+        manager.saveToTaskStorage(firstTask);
+
+        Task secondTask = new Task("Поспать","Хорошенько выспаться", DONE);
+        manager.saveToTaskStorage(secondTask);
         /**
          * Создали 1у EpicTask задачу с 2мя SubTask подзадачами
          */
-        ArrayList<EpicTask.SubTask> subTasksEpicTaskFirst = new ArrayList<>();
-        EpicTask.SubTask subtaskFirstEpicTaskFirst = new EpicTask.SubTask("Закончить учебу",
-                "Сдать все спринты", "Вовремя выполнить ТЗ", NEW);
-        EpicTask.SubTask subtaskSecondEpicTaskFirst = new EpicTask.SubTask("Закончить учебу",
-                "Сдать дипломный проект", "Сделать дипломный проект", DONE);
+        ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask = new ArrayList<>();
+        Task.Status statusOfTheFirstEpicTask = manager.getEpicTaskStatus(listOfSubtaskIdOfTheFirstEpicTask);
+        EpicTask firstEpicTask = new EpicTask("Закончить учебу",
+                "Получить сертификат обучения", listOfSubtaskIdOfTheFirstEpicTask, statusOfTheFirstEpicTask);
+        manager.saveToEpicTaskStorage(firstEpicTask);
 
-        manager.addSubtaskToList(subtaskFirstEpicTaskFirst, subTasksEpicTaskFirst);
-        manager.addSubtaskToList(subtaskSecondEpicTaskFirst, subTasksEpicTaskFirst);
+        EpicTask.SubTask firstSubtaskOfTheFirstEpicTask = new EpicTask.SubTask(firstEpicTask.getId(),"Сдать все спринты"
+                , "Вовремя выполнить ТЗ", NEW);
+        manager.saveToSubTaskStorage(firstSubtaskOfTheFirstEpicTask);
 
-        EpicTask epicTaskFirst = new EpicTask("Закончить учебу",
-                "Получить сертификат обучения", subTasksEpicTaskFirst);
+        EpicTask.SubTask secondSubtaskOfTheFirstEpicTask = new EpicTask.SubTask(firstEpicTask.getId(),"Сдать дипломный проект"
+                , "Сделать дипломный проект", DONE);
+        manager.saveToSubTaskStorage(secondSubtaskOfTheFirstEpicTask);
+
+        manager.addSubtaskToList(firstSubtaskOfTheFirstEpicTask, listOfSubtaskIdOfTheFirstEpicTask);
+        manager.addSubtaskToList(secondSubtaskOfTheFirstEpicTask, listOfSubtaskIdOfTheFirstEpicTask);
+
+        manager.epicTaskUpdate(firstEpicTask);
         /**
          * Создали 2ю EpicTask задачу с 1й SubTask подзадачей
          */
-        EpicTask.SubTask subtaskFirstEpicTaskSecond = new EpicTask.SubTask("Сменить работу",
-                "Закончить курс по Java","Научиться программировать на языке Java",
-                NEW);
-        ArrayList<EpicTask.SubTask> subTasksEpicTaskSecond = new ArrayList<>();
+        ArrayList<Integer> listOfSubtaskIdOfTheSecondEpicTask = new ArrayList<>();
+        Task.Status statusOfTheSecondEpicTask = manager.getEpicTaskStatus(listOfSubtaskIdOfTheSecondEpicTask);
+        EpicTask secondEpicTask = new EpicTask("Сменить работу"
+                ,"Начать работать Java разработчиком", listOfSubtaskIdOfTheSecondEpicTask, statusOfTheSecondEpicTask);
+        manager.saveToEpicTaskStorage(secondEpicTask);
 
-        manager.addSubtaskToList(subtaskFirstEpicTaskSecond, subTasksEpicTaskSecond);
+        EpicTask.SubTask firstSubtaskOfTheSecondEpicTask = new EpicTask.SubTask(secondEpicTask.getId(),"Закончить курс по Java"
+                ,"Научиться программировать на языке Java", NEW);
+        manager.saveToSubTaskStorage(firstSubtaskOfTheSecondEpicTask);
 
-        EpicTask epicTaskSecond = new EpicTask("Сменить работу"
-                ,"Начать работать Java разработчиком", subTasksEpicTaskSecond);
+        manager.addSubtaskToList(firstSubtaskOfTheSecondEpicTask, listOfSubtaskIdOfTheSecondEpicTask);
+
+        manager.epicTaskUpdate(secondEpicTask);
         /**
          * 1. Возможность хранить задачи всех типов
          */
-        manager.saveToTaskStorage(taskFirst);
-        manager.saveToTaskStorage(taskSecond);
-        manager.saveToSubTaskStorage(subtaskFirstEpicTaskFirst);
-        manager.saveToSubTaskStorage(subtaskSecondEpicTaskFirst);
-        manager.saveToEpicTaskStorage(epicTaskFirst);
-        manager.saveToSubTaskStorage(subtaskFirstEpicTaskSecond);
-        manager.saveToEpicTaskStorage(epicTaskSecond);
-
         System.out.println("\n    1. Возможность хранить задачи всех типов:");
-        System.out.println(manager.getTaskStorage());
-        System.out.println(manager.getSubTaskStorage());
-        System.out.println(manager.getEpicTaskStorage());
+        System.out.println(manager.getListOfTasks());
+        System.out.println(manager.getListOfSubTasks());
+        System.out.println(manager.getListOfEpicTasks());
         /**
          * 2. Методы для каждого из типа задач
          *  2.1 Получение списка всех задач
@@ -93,18 +99,18 @@ public class Main {
          *  2.4 Создание. Сам объект должен передаваться в качестве параметра;
          */
         System.out.println("\n    2.4 Создание. Сам объект должен передаваться в качестве параметра:");
-        System.out.println(manager.createCopyOfTask(taskFirst));
+/*        System.out.println(manager.createCopyOfTask(taskFirst));
         System.out.println(manager.createCopyOfTask(taskSecond));
         System.out.println(manager.createCopyOfSubTask(subtaskFirstEpicTaskFirst));
         System.out.println(manager.createCopyOfSubTask(subtaskSecondEpicTaskFirst));
         System.out.println(manager.createCopyOfEpicTask(epicTaskFirst));
         System.out.println(manager.createCopyOfSubTask(subtaskFirstEpicTaskSecond));
-        System.out.println(manager.createCopyOfEpicTask(epicTaskSecond));
+        System.out.println(manager.createCopyOfEpicTask(epicTaskSecond));*/
         /**
          *  2.5 Обновление. Новая версия объекта с верным идентификатором передаются в виде параметра;
          *  Статус задачи и подзадачи сохранился, а статус эпика рассчитался по статусам подзадач
          */
-        taskFirst.setStatus(DONE);
+        /*taskFirst.setStatus(DONE);
         manager.updateTask(1, taskFirst);
 
         subtaskFirstEpicTaskFirst.setStatus(DONE);
@@ -112,7 +118,7 @@ public class Main {
 
         manager.addSubtaskToList(subtaskFirstEpicTaskFirst, subTasksEpicTaskFirst);
         epicTaskFirst.setSubTasks(subTasksEpicTaskFirst);
-        manager.updateEpicTask(5, epicTaskFirst);
+        manager.updateEpicTask(5, epicTaskFirst);*/
 
         System.out.println("\n    Статус задачи и подзадачи сохранился, а статус эпика рассчитался по статусам"
                 + " подзадач");
@@ -141,7 +147,7 @@ public class Main {
          *  3.1 Получение списка всех подзадач определённого эпика.
          */
         System.out.println("\n    3.1 Получение списка всех подзадач определённого эпика:");
-        System.out.println(manager.getListOfSubTaskByEpicTask(5));
-        System.out.println(manager.getListOfSubTaskByEpicTask(7));
+        /*System.out.println(manager.getListOfSubTaskByEpicTask(5));
+        System.out.println(manager.getListOfSubTaskByEpicTask(7));*/
     }
 }
