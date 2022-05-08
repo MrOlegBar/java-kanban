@@ -1,38 +1,46 @@
 package task;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Класс для создания Epic задач
  */
 public class EpicTask extends Task {
-    private ArrayList<Integer> listOfSubTaskId;
+    private final ArrayList<Integer> listOfSubTaskId;
 
-    public ArrayList<Integer> getListOfSubTaskId() {
-        return listOfSubTaskId;
-    }
-    /**
-     * Конструктор для создания Epic задач
-     */
     public EpicTask(String epicTaskName, String epicTaskDescription, ArrayList<Integer> listOfSubTaskIdOfTheEpicTask
             , Status epicTaskStatus) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus);
-        this.listOfSubTaskId = listOfSubTaskIdOfTheEpicTask;
+        this.listOfSubTaskId = new ArrayList<>(listOfSubTaskIdOfTheEpicTask);
     }
+
     /**
      * Конструктор для обновления Epic задач
      */
-    public EpicTask(Integer epicTaskId, String epicTaskName, String epicTaskDescription
+    public EpicTask(int epicTaskId, String epicTaskName, String epicTaskDescription
             , ArrayList<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus);
         this.setId(epicTaskId);
         this.listOfSubTaskId = listOfSubTaskIdOfTheEpicTask;
     }
-    /**
-     * Конструктор для копирования Epic задач
-     */
-    public EpicTask(EpicTask epicTask) {
-        this(epicTask.getName(), epicTask.getDescription(), epicTask.listOfSubTaskId, epicTask.getStatus());
+
+    public ArrayList<Integer> getListOfSubTaskId() {
+        return listOfSubTaskId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EpicTask epicTask = (EpicTask) o;
+        return listOfSubTaskId.equals(epicTask.listOfSubTaskId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), listOfSubTaskId);
     }
 
     @Override
@@ -45,39 +53,50 @@ public class EpicTask extends Task {
                 ", status='" + getStatus() + '\'' +
                 '}';
     }
+
     /**
      * Внутренний класс для создания SubTask подзадач
      */
     public static class SubTask extends Task {
-        private Integer epicTaskId;
+        private int epicTaskId;
 
-        public Integer getEpicTaskId() {
-            return epicTaskId;
-        }
-        /**
-         * Конструктор внутреннего класса для создания SubTask подзадач
-         */
-        public SubTask(Integer epicTaskId, String subTaskName, String subTaskDescription, Status subTaskStatus) {
+        public SubTask(int epicTaskId, String subTaskName, String subTaskDescription, Status subTaskStatus) {
             super(subTaskName, subTaskDescription, subTaskStatus);
             this.epicTaskId = epicTaskId;
         }
+
         /**
          * Конструктор внутреннего класса для обновления SubTask подзадач
          */
-        public SubTask(Integer subTaskId, Integer epicTaskId, String subTaskName, String subTaskDescription
+        public SubTask(int subTaskId, int epicTaskId, String subTaskName, String subTaskDescription
                 , Status subTaskStatus) {
             super(subTaskName, subTaskDescription, subTaskStatus);
+            this.setId(subTaskId);
             this.epicTaskId = epicTaskId;
         }
-        /**
-         * Конструктор для копирования SubTask подзадач
-         */
-        public SubTask(SubTask subtask) {
-            this(subtask.epicTaskId, subtask.getName(), subtask.getDescription(), subtask.getStatus());
+
+        public int getEpicTaskId() {
+            return epicTaskId;
         }
-        /**
-         * Переопределенные методы класса Objects для SubTask подзадач
-         */
+
+        public void setEpicTaskId(int epicTaskId) {
+            this.epicTaskId = epicTaskId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            SubTask subTask = (SubTask) o;
+            return epicTaskId == subTask.epicTaskId;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), epicTaskId);
+        }
+
         @Override
         public String toString() {
             return "SubTask{" +

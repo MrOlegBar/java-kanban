@@ -1,20 +1,37 @@
 package task;
 
 import java.util.Objects;
+
 /**
  * Класс для создания Task задач
  */
 public class Task {
-    private Integer id;
     private final String name;
     private final String description;
+    private int id;
     private Status status;
 
-    public Integer getId() {
+    public Task(String taskName, String taskDescription, Status taskStatus) {
+        this.name = taskName;
+        this.description = taskDescription;
+        this.status = taskStatus;
+    }
+
+    /**
+     * Конструктор для обновления Task задач
+     */
+    public Task(int taskId, String taskName, String taskDescription, Status taskStatus) {
+        this.id = taskId;
+        this.name = taskName;
+        this.description = taskDescription;
+        this.status = taskStatus;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -33,37 +50,13 @@ public class Task {
     public void setStatus(Status status) {
         this.status = status;
     }
-    /**
-     * Конструктор для создания Task задач
-     */
-    public Task(String taskName, String taskDescription, Status taskStatus) {
-        this.name = taskName;
-        this.description = taskDescription;
-        this.status = taskStatus;
-    }
-    /**
-     * Конструктор для обновления Task задач
-     */
-    public Task(Integer taskId, String taskName, String taskDescription, Status taskStatus) {
-        this.id = taskId;
-        this.name = taskName;
-        this.description = taskDescription;
-        this.status = taskStatus;
-    }
-    /**
-     * Конструктор для копирования Task.Task задач
-     */
-    public Task(Task task) {
-        this(task.name, task.description, task.status);
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id.equals(task.id) && name.equals(task.name) && description.equals(task.description) && status
-                == task.status;
+        return id == task.id && name.equals(task.name) && description.equals(task.description) && status == task.status;
     }
 
     @Override
@@ -80,6 +73,7 @@ public class Task {
                 ", status='" + status + '\'' +
                 '}';
     }
+
     /**
      * Перечисление статусов задач
      */
