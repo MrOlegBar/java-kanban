@@ -51,7 +51,7 @@ public class EpicTask extends Task {
                 ", description='" + getDescription() + '\'' +
                 ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
                 ", status='" + getStatus() + '\'' +
-                '}';
+                "}\n";
     }
 
     /**
@@ -105,7 +105,7 @@ public class EpicTask extends Task {
                     ", name='" + getName() + '\'' +
                     ", description='" + getDescription() + '\'' +
                     ", status='" + getStatus() + '\'' +
-                    '}';
+                    "}\n";
         }
     }
 }
