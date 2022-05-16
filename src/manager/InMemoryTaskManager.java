@@ -4,7 +4,6 @@ import task.EpicTask;
 import task.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -15,7 +14,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final TreeMap<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final TreeMap<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
-    private final List<Task> listOfTenRecentTasks = new ArrayList<>(10);
+    HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+
 
     /**
      * Метод для добавления подзадач в список
@@ -119,22 +119,22 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Task getTaskById(int id) {
-        checkListOfTenRecentTasks();
-        listOfTenRecentTasks.add(taskStorage.get(id));
+        inMemoryHistoryManager.checkListOfTenRecentTasks();
+        InMemoryHistoryManager.listOfTenRecentTasks.add(taskStorage.get(id));
         return taskStorage.get(id);
     }
 
     @Override
     public EpicTask getEpicTaskById(int id) {
-        checkListOfTenRecentTasks();
-        listOfTenRecentTasks.add(epicTaskStorage.get(id));
+        inMemoryHistoryManager.checkListOfTenRecentTasks();
+        InMemoryHistoryManager.listOfTenRecentTasks.add(epicTaskStorage.get(id));
         return epicTaskStorage.get(id);
     }
 
     @Override
     public EpicTask.SubTask getSubTaskById(int id) {
-        checkListOfTenRecentTasks();
-        listOfTenRecentTasks.add(subTaskStorage.get(id));
+        inMemoryHistoryManager.checkListOfTenRecentTasks();
+        InMemoryHistoryManager.listOfTenRecentTasks.add(subTaskStorage.get(id));
         return subTaskStorage.get(id);
     }
 
@@ -216,24 +216,5 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         return listOfSubTaskByEpicTaskId;
-    }
-    /**
-     * Проверка списка десяти последних задач
-     */
-    private void checkListOfTenRecentTasks() {
-        int realArrayLength = listOfTenRecentTasks.toArray().length;
-        if (realArrayLength == 10) {
-            listOfTenRecentTasks.remove(0);
-            Task[] temporaryListOfRecentTasks = listOfTenRecentTasks.toArray(new Task[realArrayLength - 1]);
-            listOfTenRecentTasks.clear();
-            listOfTenRecentTasks.addAll(0, List.of(temporaryListOfRecentTasks));
-        }
-    }
-    /**
-     * История просмотров задач
-     */
-    @Override
-    public List<Task> getHistory() {
-        return listOfTenRecentTasks;
     }
 }

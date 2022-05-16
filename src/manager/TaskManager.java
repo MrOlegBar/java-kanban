@@ -4,7 +4,6 @@ import task.EpicTask;
 import task.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Интерфейс для объекта-менеджера
@@ -70,8 +69,14 @@ public interface TaskManager {
     void removeEpicTaskById(int id);
 
     void removeSubTaskById(int id);
+
     /**
-     * История просмотров задач
+     * Метод для добавления подзадач в список
      */
-    List<Task> getHistory();
+    void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask);
+
+    /**
+     * 4. Метод для управления статусом для EpicTask задач
+     */
+    Task.Status getEpicTaskStatus(ArrayList<Integer> listOfSubTaskId);
 }
