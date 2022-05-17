@@ -4,28 +4,31 @@ import task.EpicTask;
 import task.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Интерфейс для объекта-менеджера
  */
 public interface TaskManager {
+
+
     /**
      * 1. Метод для сохранения задач
      */
-    void saveToTaskStorage(Task task);
+    void saveTask(Task task);
 
-    void saveToTaskStorage(EpicTask epicTask);
+    void saveEpicTask(EpicTask epicTask);
 
-    void saveToTaskStorage(EpicTask.SubTask subTask);
+    void saveSubTask(EpicTask.SubTask subTask);
 
     /**
      * 2.1 Получение списка всех задач
      */
-    ArrayList<Task> getListOfTasks();
+    List<Task> getListOfTasks();
 
-    ArrayList<EpicTask> getListOfEpicTasks();
+    List<EpicTask> getListOfEpicTasks();
 
-    ArrayList<EpicTask.SubTask> getListOfSubTasks();
+    List<EpicTask.SubTask> getListOfSubTasks();
 
     /**
      * 2.2 Удаление всех задач
@@ -33,6 +36,8 @@ public interface TaskManager {
     void deleteAllTasks();
 
     void deleteAllEpicTasks();
+
+    void deleteAllSubTasks();
 
     /**
      * 2.3 Получение задачи по идентификатору
@@ -57,9 +62,9 @@ public interface TaskManager {
      */
     void updateTask(Task task);
 
-    void updateTask(EpicTask epicTask);
+    void updateEpicTask(EpicTask epicTask);
 
-    void updateTask(EpicTask.SubTask subTask);
+    void updateSubTask(EpicTask.SubTask subTask);
 
     /**
      * 2.6 Удаление задачи
@@ -78,5 +83,9 @@ public interface TaskManager {
     /**
      * 4. Метод для управления статусом для EpicTask задач
      */
-    Task.Status getEpicTaskStatus(ArrayList<Integer> listOfSubTaskId);
+    Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask);
+
+    HistoryManager getInMemoryHistoryManager();
+
+    List<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int i);
 }
