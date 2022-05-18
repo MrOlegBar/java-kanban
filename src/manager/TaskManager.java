@@ -11,6 +11,15 @@ import java.util.List;
  */
 public interface TaskManager {
 
+    /**
+     * Метод для добавления подзадач в список
+     */
+    void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask);
+
+    /**
+     * 4. Метод для управления статусом для EpicTask задач
+     */
+    Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask);
 
     /**
      * 1. Метод для сохранения задач
@@ -76,16 +85,12 @@ public interface TaskManager {
     void removeSubTaskById(int id);
 
     /**
-     * Метод для добавления подзадач в список
+     * 3.1 Получение списка всех подзадач определённого эпика
      */
-    void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask);
+    List<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int i);
 
     /**
-     * 4. Метод для управления статусом для EpicTask задач
+     * История просмотров задач
      */
-    Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask);
-
-    HistoryManager getInMemoryHistoryManager();
-
-    List<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int i);
+    List<Task> getHistory();
 }

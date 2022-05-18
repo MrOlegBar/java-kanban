@@ -18,7 +18,6 @@ public class Main {
          * Тестирование
          */
         TaskManager manager = Managers.getDefault();
-        HistoryManager historyManager = manager.getInMemoryHistoryManager();
 
         /**
          * Создали 2е Task задачи
@@ -88,65 +87,66 @@ public class Main {
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getTaskById(1));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getTaskById(2));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(3));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(4));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(5));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(6));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(7));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getTaskById(1));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getTaskById(2));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(3));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(4));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(5));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(6));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(7));
         System.out.println("    История просмотров задач:");
-        System.out.println(historyManager.getHistory());
+        System.out.println(manager.getHistory());
 
         /**
          *  2.2 Удаление всех задач;
          */
         manager.deleteAllTasks();
         manager.deleteAllEpicTasks();
+        manager.deleteAllSubTasks();
 
         System.out.println("\n    2.2 Удаление всех задач:");
         System.out.println(manager.getListOfTasks());

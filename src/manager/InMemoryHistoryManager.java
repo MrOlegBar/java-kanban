@@ -7,11 +7,7 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final List<Task> listOfTenRecentTasks = new ArrayList<>(10);
-
-    public List<Task> getListOfTenRecentTasks() {
-        return listOfTenRecentTasks;
-    }
+    private List<Task> listOfTenRecentTasks = new ArrayList<>(10);
 
     /**
      * История просмотров задач
