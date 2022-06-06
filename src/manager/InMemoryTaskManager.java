@@ -269,6 +269,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * История просмотров задач
+     * @return
      */
     @Override
     public List<Task> getHistory() {

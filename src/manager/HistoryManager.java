@@ -4,15 +4,17 @@ import task.Task;
 
 import java.util.List;
 
-public interface HistoryManager {
+public interface HistoryManager<E extends Task> {
 
     /**
      * Помечает задачи как просмотренные
      */
-    void add(Task task);
+    void add(E e);
 
     /**
      * История просмотров задач
      */
-    List<Task> getHistory();
+    List<E> getHistory();
+
+    void remove(int id);
 }

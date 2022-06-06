@@ -85,15 +85,17 @@ public class Main {
          *   История просмотров задач
          */
         System.out.println("\n    Получение по идентификатору:");
-        System.out.println(manager.getTaskById(1));
+        manager.getTaskById(1);
+        //System.out.println(manager.getTaskById(1));
         System.out.println("    История просмотров задач:");
-        System.out.println(manager.getHistory());
+        manager.getHistory();
+        //System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getTaskById(2));
         System.out.println("    История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
-        System.out.println(manager.getEpicTaskById(3));
+        /*System.out.println(manager.getEpicTaskById(3));
         System.out.println("    История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    Получение по идентификатору:");
@@ -139,24 +141,24 @@ public class Main {
         System.out.println("\n    Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(7));
         System.out.println("    История просмотров задач:");
-        System.out.println(manager.getHistory());
+        System.out.println(manager.getHistory());*/
 
         /**
          *  2.2 Удаление всех задач;
          */
-        manager.deleteAllTasks();
+        /*manager.deleteAllTasks();
         manager.deleteAllEpicTasks();
         manager.deleteAllSubTasks();
 
         System.out.println("\n    2.2 Удаление всех задач:");
         System.out.println(manager.getListOfTasks());
         System.out.println(manager.getListOfEpicTasks());
-        System.out.println(manager.getListOfSubTasks());
+        System.out.println(manager.getListOfSubTasks());*/
 
         /**
          *  2.4 Создание. Сам объект должен передаваться в качестве параметра;
          */
-        System.out.println("\n    2.4 Создание. Сам объект должен передаваться в качестве параметра:");
+        /*System.out.println("\n    2.4 Создание. Сам объект должен передаваться в качестве параметра:");
         Task newFirstTask = manager.createCopyOfTask(firstTask);
         manager.saveTask(newFirstTask);
         Task newSecondTask = manager.createCopyOfTask(secondTask);
@@ -193,12 +195,12 @@ public class Main {
         manager.updateEpicTask(newSecondEpicTask);
 
         System.out.println(newSecondEpicTask);
-        System.out.println(newFirstSubtaskOfTheSecondEpicTask);
+        System.out.println(newFirstSubtaskOfTheSecondEpicTask);*/
 
         /**
          *  2.5 Обновление. Новая версия объекта с верным идентификатором передаются в виде параметра;
          */
-        newFirstTask.setStatus(DONE);
+        /*newFirstTask.setStatus(DONE);
         manager.updateTask(newFirstTask);
 
         newFirstSubtaskOfTheFirstEpicTask.setStatus(DONE);
@@ -211,17 +213,17 @@ public class Main {
         System.out.println(manager.getListOfEpicTasks());
         System.out.println(manager.getListOfSubTasks());
 
-        /**
+        *//**
          *  3.1 Получение списка всех подзадач определённого эпика.
-         */
+         *//*
         System.out.println("\n    3.1 Получение списка всех подзадач определённого эпика:");
         System.out.println(manager.getListOfSubTaskByEpicTaskId(10));
-        System.out.println(manager.getListOfSubTaskByEpicTaskId(13));
+        System.out.println(manager.getListOfSubTaskByEpicTaskId(13));*/
 
         /**
          *  2.6 Удаление по идентификатору.
          */
-        manager.removeTaskById(8);
+        /*manager.removeTaskById(8);
         manager.removeTaskById(9);
 
         manager.removeEpicTaskById(10);
@@ -232,6 +234,6 @@ public class Main {
         System.out.println("\n    2.6 Удаление по идентификатору:");
         System.out.println(manager.getListOfTasks());
         System.out.println(manager.getListOfEpicTasks());
-        System.out.println(manager.getListOfSubTasks());
+        System.out.println(manager.getListOfSubTasks());*/
     }
 }
