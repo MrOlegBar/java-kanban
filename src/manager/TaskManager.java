@@ -93,4 +93,9 @@ public interface TaskManager {
      * История просмотров задач
      */
     List<Task> getHistory();
+
+    /**
+     * Удаляет задачи из просмотра
+     */
+    void remove(int id);
 }

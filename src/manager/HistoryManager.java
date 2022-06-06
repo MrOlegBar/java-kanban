@@ -16,5 +16,8 @@ public interface HistoryManager<E extends Task> {
      */
     List<E> getHistory();
 
+    /**
+     * Удаляет задачи из просмотра
+     */
     void remove(int id);
 }
