@@ -8,16 +8,14 @@ import java.util.*;
  * Класс для истории просмотра задач
  */
 public class InMemoryHistoryManager implements HistoryManager<Task> {
-    private static Node first;
-    private static Node last;
-
     private final Map<Integer, Node> historyManagerMap = new HashMap<>();
-    private static final InMemoryHistoryManager customLinkedList= new InMemoryHistoryManager();
+    private Node first;
+    private Node last;
 
     /**
      * Класс для узла двусвязного списка
      */
-    private static class Node {
+    private class Node {
         Task item;
         Node next;
         Node prev;
@@ -26,6 +24,40 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
             this.item = element;
             this.next = next;
             this.prev = prev;
+        }
+    }
+
+    /**
+     * Помечает задачи как просмотренные
+     */
+    @Override
+    public void add(Task task) {
+        int taskId = task.getId();
+        boolean isContainsNode = historyManagerMap.containsKey(taskId);
+        if (isContainsNode) {
+            remove(taskId);
+        }
+        linkLast(task);
+        historyManagerMap.put(taskId, last);
+    }
+
+    /**
+     * История просмотров задач
+     */
+    @Override
+    public List<Task> getHistory() {
+        return getTasks();
+    }
+
+    /**
+     * Удаляет задачи из просмотра
+     */
+    @Override
+    public void remove(int id) {
+        Node node = historyManagerMap.get(id);
+        if (node != null) {
+            removeNode(node);
+            historyManagerMap.remove(id);
         }
     }
 
@@ -75,36 +107,5 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
         }
 
         node.item = null;
-    }
-
-    /**
-     * Удаляет задачи из просмотра
-     */
-    public void remove(int id) {
-        Node node = historyManagerMap.get(id);
-        if (node != null) {
-            removeNode(node);
-            historyManagerMap.remove(id);
-        }
-    }
-
-    /**
-     * Помечает задачи как просмотренные
-     */
-    public void add(Task task) {
-        int taskId = task.getId();
-        boolean isContainsNode = historyManagerMap.containsKey(taskId);
-        if (isContainsNode) {
-            remove(taskId);
-        }
-        customLinkedList.linkLast(task);
-        historyManagerMap.put(taskId, last);
-    }
-
-    /**
-     * История просмотров задач
-     */
-    public List<Task> getHistory() {
-        return getTasks();
     }
 }

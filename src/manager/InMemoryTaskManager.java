@@ -5,26 +5,18 @@ import task.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * Класс для объекта-менеджера
  */
 public class InMemoryTaskManager implements TaskManager {
-    private final TreeMap<Integer, Task> taskStorage = new TreeMap<>();
-    private final TreeMap<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
-    private final TreeMap<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
+    private final Map<Integer, Task> taskStorage = new TreeMap<>();
+    private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
+    private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
-
-    /**
-     * Метод для генерирования ID
-     */
-    private int idGeneration(Task task) {
-        id += 1;
-        task.setId(id);
-        return id;
-    }
 
     /**
      * Метод для добавления подзадач в список
@@ -39,38 +31,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
         listOfSubTaskId.add(subTaskId);
         subTask.setEpicTaskId(epicTaskId);
-    }
-
-    /**
-     * 4. Метод для управления статусом для EpicTask задач
-     */
-    public Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
-        return getEpicTaskStatus(listOfSubTaskId);
-    }
-
-    private Task.Status getEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
-        Task.Status statusEpicTask;
-        int countNew = 0;
-        int countDone = 0;
-
-        for (var id : listOfSubTaskId) {
-            EpicTask.SubTask subTask = subTaskStorage.get(id);
-            if (subTask != null && subTask.getStatus().equals(Task.Status.NEW)) {
-                countNew++;
-            }
-            if (subTask != null && subTask.getStatus().equals(Task.Status.DONE)) {
-                countDone++;
-            }
-        }
-
-        if ((listOfSubTaskId.isEmpty()) || (countNew == listOfSubTaskId.size())) {
-            statusEpicTask = Task.Status.NEW;
-        } else if (countDone == listOfSubTaskId.size()) {
-            statusEpicTask = Task.Status.DONE;
-        } else {
-            statusEpicTask = Task.Status.IN_PROGRESS;
-        }
-        return statusEpicTask;
     }
 
     /**
@@ -315,5 +275,46 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void remove(int id) {
         inMemoryHistoryManager.remove(id);
+    }
+
+    /**
+     * 4. Метод для управления статусом для EpicTask задач
+     */
+    public Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
+        return getEpicTaskStatus(listOfSubTaskId);
+    }
+
+    private Task.Status getEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
+        Task.Status statusEpicTask;
+        int countNew = 0;
+        int countDone = 0;
+
+        for (var id : listOfSubTaskId) {
+            EpicTask.SubTask subTask = subTaskStorage.get(id);
+            if (subTask != null && subTask.getStatus().equals(Task.Status.NEW)) {
+                countNew++;
+            }
+            if (subTask != null && subTask.getStatus().equals(Task.Status.DONE)) {
+                countDone++;
+            }
+        }
+
+        if ((listOfSubTaskId.isEmpty()) || (countNew == listOfSubTaskId.size())) {
+            statusEpicTask = Task.Status.NEW;
+        } else if (countDone == listOfSubTaskId.size()) {
+            statusEpicTask = Task.Status.DONE;
+        } else {
+            statusEpicTask = Task.Status.IN_PROGRESS;
+        }
+        return statusEpicTask;
+    }
+
+    /**
+     * Метод для генерирования ID
+     */
+    private int idGeneration(Task task) {
+        id += 1;
+        task.setId(id);
+        return id;
     }
 }
