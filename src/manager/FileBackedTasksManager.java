@@ -9,9 +9,6 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
     /**
      * Метод для добавления подзадач в список
-     *
-     * @param subTask
-     * @param epicTask
      */
     @Override
     public void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask) {
@@ -19,9 +16,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     /**
+     * 4. Метод для управления статусом для EpicTask задач
+     */
+    @Override
+    public Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
+        return super.getterEpicTaskStatus(listOfSubTaskId);
+    }
+
+    /**
      * 1. Метод для сохранения задач
-     *
-     * @param task
      */
     @Override
     public void saveTask(Task task) {
@@ -76,8 +79,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * 2.3 Получение задачи по идентификатору
-     *
-     * @param id
      */
     @Override
     public Task getTaskById(int id) {
@@ -96,8 +97,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * 2.4 Создание задачи
-     *
-     * @param task
      */
     @Override
     public Task createCopyOfTask(Task task) {
@@ -116,8 +115,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * 2.5 Обновление задачи
-     *
-     * @param task
      */
     @Override
     public void updateTask(Task task) {
@@ -136,8 +133,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * 2.6 Удаление задачи
-     *
-     * @param id
      */
     @Override
     public void removeTaskById(int id) {
@@ -156,8 +151,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * 3.1 Получение списка всех подзадач определённого эпика
-     *
-     * @param id
      */
     @Override
     public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int id) {
@@ -170,20 +163,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     @Override
     public List<Task> getHistory() {
         return super.getHistory();
-    }
-
-    @Override
-    public void remove(int id) {
-        super.remove(id);
-    }
-
-    /**
-     * 4. Метод для управления статусом для EpicTask задач
-     *
-     * @param listOfSubTaskId
-     */
-    @Override
-    public Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
-        return super.getterEpicTaskStatus(listOfSubTaskId);
     }
 }
