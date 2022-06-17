@@ -16,6 +16,11 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
+
+    public HistoryManager getInMemoryHistoryManager() {
+        return inMemoryHistoryManager;
+    }
+
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     /**
@@ -316,5 +321,20 @@ public class InMemoryTaskManager implements TaskManager {
         id += 1;
         task.setId(id);
         return id;
+    }
+
+    /**
+     * Метод сохранения списка всех задач двусвязного списка в строку
+     */
+    public String getStringOfIdsFromTaskHistory(List<Integer> listOfIdsFromTaskHistory) {
+        StringBuilder stringBuilderOfIdsFromTaskHistory = new StringBuilder("{");
+        for (Integer id : listOfIdsFromTaskHistory) {
+            stringBuilderOfIdsFromTaskHistory.append(id);
+            stringBuilderOfIdsFromTaskHistory.append(" ");
+        }
+        stringBuilderOfIdsFromTaskHistory.append("}");
+        String stringOfIdsFromTaskHistory = stringBuilderOfIdsFromTaskHistory.toString();
+        stringOfIdsFromTaskHistory = stringOfIdsFromTaskHistory.replaceFirst(" }", "}");
+        return stringOfIdsFromTaskHistory;
     }
 }

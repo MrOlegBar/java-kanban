@@ -1,7 +1,10 @@
+import exception.FileException;
 import manager.*;
 import task.EpicTask;
 import task.Task;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static task.Task.Status.DONE;
@@ -12,7 +15,7 @@ import static task.Task.Status.NEW;
  */
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, FileException {
 
         /**
          * Тестирование
@@ -22,11 +25,11 @@ public class Main {
         /**
          * Создали 2е Task задачи
          */
-        /*Task firstTask = new Task("Поесть", "Принять пищу", NEW);
+        Task firstTask = new Task("Поесть", "Принять пищу", NEW);
         manager.saveTask(firstTask);
 
         Task secondTask = new Task("Поспать", "Хорошенько выспаться", DONE);
-        manager.saveTask(secondTask);*/
+        manager.saveTask(secondTask);
 
         /**
          * Создали 1у EpicTask задачу с 3мя SubTask подзадачами
@@ -72,11 +75,11 @@ public class Main {
          * 1. Возможность хранить задачи всех типов
          * 2.1 Получение списка всех задач
          */
-        System.out.println("\n    1. Возможность хранить задачи всех типов:");
+        /*System.out.println("\n    1. Возможность хранить задачи всех типов:");
         System.out.println("    2.1 Получение списка всех задач:");
         System.out.println(manager.getListOfTasks());
         System.out.println(manager.getListOfEpicTasks());
-        System.out.println(manager.getListOfSubTasks());
+        System.out.println(manager.getListOfSubTasks());*/
 
         /**
          *  2.3 Получение по идентификатору;
@@ -88,23 +91,15 @@ public class Main {
         System.out.println("    -История просмотров задач:");
         System.out.println("    -Удаление задачи, которая есть в истории:");
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getEpicTaskById(1));
+        System.out.println(manager.getTaskById(1));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getSubTaskById(2));
+        System.out.println(manager.getTaskById(2));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getSubTaskById(3));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getSubTaskById(4));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getEpicTaskById(5));
+        System.out.println(manager.getEpicTaskById(3));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
@@ -112,33 +107,33 @@ public class Main {
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getSubTaskById(3));
+        System.out.println(manager.getSubTaskById(5));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getSubTaskById(2));
+        System.out.println(manager.getSubTaskById(6));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getEpicTaskById(1));
+        System.out.println(manager.getEpicTaskById(7));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
 
         /**
          *  Удаление задачи, которая есть в истории;
          */
-        System.out.println("    -Удаление задачи, которая есть в истории:");
+        /*System.out.println("    -Удаление задачи, которая есть в истории:");
         manager.remove(3);
         System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
+        System.out.println(manager.getHistory());*/
 
         /**
          *  -Удаление эпика с 3мя подзадачамии;
          */
-        System.out.println("    -Удаление эпика с 3мя подзадачамии:");
+        /*System.out.println("    -Удаление эпика с 3мя подзадачамии:");
         manager.removeEpicTaskById(1);
         System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
+        System.out.println(manager.getHistory());*/
 
         /**
          *  2.2 Удаление всех задач;
