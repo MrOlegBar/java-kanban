@@ -17,12 +17,12 @@ public interface TaskManager {
     void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask);
 
     /**
-     * 4. Метод для управления статусом для EpicTask задач
+     * Метод для управления статусом для EpicTask задач
      */
     Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask);
 
     /**
-     * 1. Метод для сохранения задач
+     * Метод для сохранения задач
      */
     void saveTask(Task task);
 
@@ -31,7 +31,7 @@ public interface TaskManager {
     void saveSubTask(EpicTask.SubTask subTask);
 
     /**
-     * 2.1 Получение списка всех задач
+     * Получение списка всех задач
      */
     List<Task> getListOfTasks();
 
@@ -40,7 +40,7 @@ public interface TaskManager {
     List<EpicTask.SubTask> getListOfSubTasks();
 
     /**
-     * 2.2 Удаление всех задач
+     * Удаление всех задач
      */
     void deleteAllTasks();
 
@@ -49,7 +49,7 @@ public interface TaskManager {
     void deleteAllSubTasks();
 
     /**
-     * 2.3 Получение задачи по идентификатору
+     * Получение задачи по идентификатору
      */
     Task getTaskById(int id);
 
@@ -58,7 +58,7 @@ public interface TaskManager {
     EpicTask.SubTask getSubTaskById(int id);
 
     /**
-     * 2.4 Создание задачи
+     * Создание задачи
      */
     Task createCopyOfTask(Task task);
 
@@ -67,7 +67,7 @@ public interface TaskManager {
     EpicTask.SubTask createCopyOfTask(EpicTask.SubTask subTask);
 
     /**
-     * 2.5 Обновление задачи
+     * Обновление задачи
      */
     void updateTask(Task task);
 
@@ -76,7 +76,7 @@ public interface TaskManager {
     void updateSubTask(EpicTask.SubTask subTask);
 
     /**
-     * 2.6 Удаление задачи
+     * Удаление задачи
      */
     void removeTaskById(int id);
 
@@ -85,7 +85,7 @@ public interface TaskManager {
     void removeSubTaskById(int id);
 
     /**
-     * 3.1 Получение списка всех подзадач определённого эпика
+     * Получение списка всех подзадач определённого эпика
      */
     List<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int i);
 

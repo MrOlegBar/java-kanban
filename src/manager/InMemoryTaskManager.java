@@ -39,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 1. Метод для сохранения задач
+     * Метод для сохранения задач
      */
     @Override
     public void saveTask(Task task) {
@@ -60,7 +60,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.1 Получение списка всех задач
+     * Получение списка всех задач
      */
     @Override
     public ArrayList<Task> getListOfTasks() {
@@ -78,7 +78,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.2 Удаление всех задач
+     * Удаление всех задач
      */
     @Override
     public void deleteAllTasks() {
@@ -124,7 +124,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.3 Получение задачи по идентификатору
+     * Получение задачи по идентификатору
      */
     @Override
     public Task getTaskById(int id) {
@@ -154,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.4 Создание задачи
+     * Создание задачи
      */
     @Override
     public Task createCopyOfTask(Task task) {
@@ -172,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.5 Обновление задачи
+     * Обновление задачи
      */
     @Override
     public void updateTask(Task task) {
@@ -218,7 +218,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 2.6 Удаление задачи
+     * Удаление задачи
      */
     @Override
     public void removeTaskById(int id) {
@@ -256,7 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 3.1 Получение списка всех подзадач определённого эпика
+     * Получение списка всех подзадач определённого эпика
      */
     public ArrayList<EpicTask.SubTask> getListOfSubTaskByEpicTaskId(int id) {
         ArrayList<EpicTask.SubTask> listOfSubTaskByEpicTaskId = new ArrayList<>();
@@ -283,7 +283,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * 4. Метод для управления статусом для EpicTask задач
+     * Метод для управления статусом для EpicTask задач
      */
     public Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubTaskId) {
         return getEpicTaskStatus(listOfSubTaskId);
@@ -321,20 +321,5 @@ public class InMemoryTaskManager implements TaskManager {
         id += 1;
         task.setId(id);
         return id;
-    }
-
-    /**
-     * Метод сохранения списка всех задач двусвязного списка в строку
-     */
-    public String getStringOfIdsFromTaskHistory(List<Integer> listOfIdsFromTaskHistory) {
-        StringBuilder stringBuilderOfIdsFromTaskHistory = new StringBuilder("{");
-        for (Integer id : listOfIdsFromTaskHistory) {
-            stringBuilderOfIdsFromTaskHistory.append(id);
-            stringBuilderOfIdsFromTaskHistory.append(" ");
-        }
-        stringBuilderOfIdsFromTaskHistory.append("}");
-        String stringOfIdsFromTaskHistory = stringBuilderOfIdsFromTaskHistory.toString();
-        stringOfIdsFromTaskHistory = stringOfIdsFromTaskHistory.replaceFirst(" }", "}");
-        return stringOfIdsFromTaskHistory;
     }
 }

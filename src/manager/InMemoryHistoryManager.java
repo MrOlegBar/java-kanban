@@ -64,7 +64,7 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
     /**
      * Добавляет задачу в конец двусвязного списка
      */
-    private void linkLast(Task task) {
+    public void linkLast(Task task) {
         final Node saveLast = last;
         final Node newNode = new Node(saveLast, task, null);
         last = newNode;
