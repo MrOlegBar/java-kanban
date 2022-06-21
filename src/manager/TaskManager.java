@@ -3,7 +3,6 @@ package manager;
 import task.EpicTask;
 import task.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ public interface TaskManager {
     /**
      * Метод для управления статусом для EpicTask задач
      */
-    Task.Status getterEpicTaskStatus(ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask);
+    Task.Status getterEpicTaskStatus(List<Integer> listOfSubtaskIdOfTheFirstEpicTask);
 
     /**
      * Метод для сохранения задач

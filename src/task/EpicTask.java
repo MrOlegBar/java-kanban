@@ -8,9 +8,9 @@ import java.util.Objects;
  * Класс для создания Epic задач
  */
 public class EpicTask extends Task {
-    private final ArrayList<Integer> listOfSubTaskId;
+    private final List<Integer> listOfSubTaskId;
 
-    public EpicTask(String epicTaskName, String epicTaskDescription, ArrayList<Integer> listOfSubTaskIdOfTheEpicTask
+    public EpicTask(String epicTaskName, String epicTaskDescription, List<Integer> listOfSubTaskIdOfTheEpicTask
             , Status epicTaskStatus) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus);
         this.listOfSubTaskId = new ArrayList<>(listOfSubTaskIdOfTheEpicTask);
@@ -20,13 +20,13 @@ public class EpicTask extends Task {
      * Конструктор для обновления Epic задач
      */
     public EpicTask(int epicTaskId, String epicTaskName, String epicTaskDescription
-            , ArrayList<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus) {
+            , List<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus);
         this.setId(epicTaskId);
         this.listOfSubTaskId = listOfSubTaskIdOfTheEpicTask;
     }
 
-    public ArrayList<Integer> getListOfSubTaskId() {
+    public List<Integer> getListOfSubTaskId() {
         return listOfSubTaskId;
     }
 
