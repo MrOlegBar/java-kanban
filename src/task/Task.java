@@ -84,4 +84,13 @@ public class Task {
         DONE,
         IN_PROGRESS
     }
+
+    /**
+     * Перечисление типов задач
+     */
+    public enum Type {
+        TASK,
+        EPICTASK,
+        SUBTASK
+    }
 }

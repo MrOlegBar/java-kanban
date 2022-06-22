@@ -1,21 +1,13 @@
-import exception.FileException;
-import manager.*;
-import task.EpicTask;
-import task.Task;
+import exception.ManagerSaveException;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
-import static task.Task.Status.DONE;
-import static task.Task.Status.NEW;
 
 /**
  * «Трекер задач»
  */
 public class Main {
 
-    public static void main(String[] args) throws IOException, FileException {
+    public static void main(String[] args) throws IOException, ManagerSaveException {
 
         /**
          * Тестирование

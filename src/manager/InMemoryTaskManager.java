@@ -21,11 +21,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.id = id;
     }
 
-    public HistoryManager<Task> getInMemoryHistoryManager() {
-        return inMemoryHistoryManager;
-    }
-
-    private final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
+    protected static final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
 
     /**
      * Метод для добавления подзадач в список
