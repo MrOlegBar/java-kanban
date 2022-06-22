@@ -14,12 +14,11 @@ import static task.Task.Status.NEW;
 import static task.Task.Type.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private File autosaveFile;
+
+    private final File autosaveFile;
 
     public FileBackedTasksManager(File file) throws ManagerSaveException {
-        if (isFileExists(file)) {
-            this.autosaveFile = file;
-        }
+        this.autosaveFile = fileExists(file);
     }
 
     public static void main(String[] args) throws ManagerSaveException {
@@ -87,46 +86,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getTaskById(1));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getTaskById(2));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(3));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(4));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(5));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(6));
-        //System.out.println("    -История просмотров задач:");
-        //System.out.println(manager.getHistory());
-        //System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(7));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());
 
-        FileBackedTasksManager recoveryManager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
+        FileBackedTasksManager recoveryManager = manager.loadFromFile(new File("Autosave.csv"));
         System.out.println("    Восстановленный список всех задач:");
-        System.out.println(manager.getListOfTasks());
-        System.out.println(manager.getListOfEpicTasks());
-        System.out.println(manager.getListOfSubTasks());
+        System.out.println(recoveryManager.getListOfTasks());
+        System.out.println(recoveryManager.getListOfEpicTasks());
+        System.out.println(recoveryManager.getListOfSubTasks());
         System.out.println("    Восстановленная История просмотров задач:");
-        System.out.println(manager.getHistory());
+        System.out.println(recoveryManager.getHistory());
     }
 
     /**
      * Метод для восстановления данных менеджера из файла
      */
-    public static FileBackedTasksManager loadFromFile(File file) throws ManagerSaveException {
+    public FileBackedTasksManager loadFromFile(File file) throws ManagerSaveException {
         FileBackedTasksManager manager = new FileBackedTasksManager(file);
         List<Integer> taskHistoryIds = new ArrayList<>();
 
@@ -189,8 +170,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Метод для проверки файла для автосохранения
      */
-    private boolean isFileExists(File file) throws ManagerSaveException {
-        if(file.exists()) {
+    private File fileExists(File file) throws ManagerSaveException {
+        if (file.exists()) {
             System.out.println("Файл " + file.getName() + " создан");
             if(file.canRead()) {
                 System.out.println("Доступен для чтения");
@@ -203,11 +184,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             } else {
                 throw new ManagerSaveException("Недоступен для записи");
             }
-            return true;
         }
         else {
-            throw new ManagerSaveException("Файл " + file.getName() + " не создан");
+            file = new File(file.getPath());
         }
+        return file;
     }
 
     /**

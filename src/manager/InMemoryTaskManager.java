@@ -17,11 +17,11 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
 
+    protected final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
+
     public void setId(int id) {
         this.id = id;
     }
-
-    protected static final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
 
     /**
      * Метод для добавления подзадач в список
