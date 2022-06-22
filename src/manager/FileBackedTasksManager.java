@@ -157,7 +157,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 }
 
-                if (autosaveFileLine.matches(".*\\{.*}.*")) {
+                if (autosaveFileLine.matches("^\\d, \\d.*")) {
                     taskHistoryIds.addAll(fromStringToHistoryManager(autosaveFileLine));
                 }
 
@@ -214,26 +214,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод сохранения задачи в строку
      */
     private String taskToString(Task task) {
-        String type = String.valueOf(task.getClass()).replace("class task.", "").toUpperCase();
+        String type = String.valueOf(task.getClass()).replace("class task.", "");
         return String.format("%s, %s, %s, %s , %s,", task.getId(), type, task.getName(), task.getStatus()
                 , task.getDescription());
     }
 
     private String epicTaskToString(EpicTask epicTask) {
-        StringBuilder stringBuilderOfSubTaskId = new StringBuilder("[");
-        for (Integer id : epicTask.getListOfSubTaskId()) {
-            stringBuilderOfSubTaskId.append(id);
-            stringBuilderOfSubTaskId.append(" ");
-        }
-        stringBuilderOfSubTaskId.append("]");
-        String type = String.valueOf(epicTask.getClass()).replace("class task.", "").toUpperCase();
+        String type = String.valueOf(epicTask.getClass()).replace("class task.", "");
         return String.format("%s, %s, %s, %s , %s", epicTask.getId(), type, epicTask.getName()
                 , epicTask.getStatus(), epicTask.getDescription());
     }
 
     private String subTaskToString(EpicTask.SubTask subTask) {
-        String type = String.valueOf(subTask.getClass()).replace("class task.EpicTask$", "")
-                .toUpperCase();
+        String type = String.valueOf(subTask.getClass()).replace("class task.EpicTask$", "");
         return String.format("%s, %s, %s, %s , %s, %s", subTask.getId(), type, subTask.getName()
                 , subTask.getStatus(), subTask.getDescription(), subTask.getEpicTaskId());
     }
@@ -326,9 +319,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(autosaveFile, StandardCharsets.UTF_8
                 , false))) {
-            /*if(autosaveFile.delete()){
-                autosaveFile.createNewFile();
-            }*/
 
             bufferedWriter.write(tableHeader);
 
