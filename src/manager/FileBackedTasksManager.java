@@ -108,33 +108,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод для восстановления данных менеджера из файла
      */
     public FileBackedTasksManager loadFromFile(File file) throws ManagerSaveException {
-        FileBackedTasksManager manager = new FileBackedTasksManager(file);
+        FileBackedTasksManager localManager = new FileBackedTasksManager(file);
         List<Integer> taskHistoryIds = new ArrayList<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             String autosaveFileLine;
             while ((autosaveFileLine = bufferedReader.readLine()) != null) {
 
-                if ((autosaveFileLine.matches(".*, Task .*"))) {
+                if ((autosaveFileLine.matches(".* Task.*"))) {
                     Task restoredTask = fromString(autosaveFileLine);
-                    manager.updateTask(restoredTask);
-                    manager.setId(restoredTask.getId() + 1);
+                    localManager.updateTask(restoredTask);
+                    localManager.setId(restoredTask.getId() + 1);
                 }
 
-                if ((autosaveFileLine.matches(".*, EpicTask .*"))) {
+                if ((autosaveFileLine.matches(".* EpicTask.*"))) {
                     EpicTask restoredEpicTask = (EpicTask) fromString(autosaveFileLine);
-                    manager.updateEpicTask(restoredEpicTask);
-                    manager.setId(restoredEpicTask.getId() + 1);
+                    localManager.updateEpicTask(restoredEpicTask);
+                    localManager.setId(restoredEpicTask.getId() + 1);
                 }
 
-                if ((autosaveFileLine.matches(".*, SubTask .*"))) {
+                if ((autosaveFileLine.matches(".* SubTask.*"))) {
                     EpicTask.SubTask restoredSubTask = (EpicTask.SubTask) fromString(autosaveFileLine);
-                    EpicTask epicTaskForSubTask = manager.getEpicTaskById(restoredSubTask.getEpicTaskId());
+                    EpicTask epicTaskForSubTask = localManager.getEpicTaskById(restoredSubTask.getEpicTaskId());
                     List<Integer> listOfSubTaskId = epicTaskForSubTask.getListOfSubTaskId();
                     listOfSubTaskId.add(restoredSubTask.getId());
-                    manager.updateEpicTask(epicTaskForSubTask);
-                    manager.updateSubTask(restoredSubTask);
-                    manager.setId(restoredSubTask.getId() + 1);
+                    localManager.updateEpicTask(epicTaskForSubTask);
+                    localManager.updateSubTask(restoredSubTask);
+                    localManager.setId(restoredSubTask.getId() + 1);
 
                 }
 
@@ -148,9 +148,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         for (Integer id : taskHistoryIds) {
-            Task task = manager.getTaskById(id);
-            EpicTask epicTask = manager.getEpicTaskById(id);
-            EpicTask.SubTask subTask = manager.getSubTaskById(id);
+            Task task = localManager.getTaskById(id);
+            EpicTask epicTask = localManager.getEpicTaskById(id);
+            EpicTask.SubTask subTask = localManager.getSubTaskById(id);
 
             if (task != null) {
                 inMemoryHistoryManager.add(task);
@@ -164,7 +164,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 inMemoryHistoryManager.add(subTask);
             }
         }
-        return manager;
+        return localManager;
     }
 
     /**
