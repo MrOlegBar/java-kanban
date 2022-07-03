@@ -1,5 +1,6 @@
 package task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,8 +12,8 @@ public class EpicTask extends Task {
     private final List<Integer> listOfSubTaskId;
 
     public EpicTask(String epicTaskName, String epicTaskDescription, List<Integer> listOfSubTaskIdOfTheEpicTask
-            , Status epicTaskStatus) {
-        super(epicTaskName, epicTaskDescription, epicTaskStatus);
+            , Status epicTaskStatus, LocalDateTime startTime, long duration) {
+        super(epicTaskName, epicTaskDescription, epicTaskStatus, startTime, duration);
         this.listOfSubTaskId = new ArrayList<>(listOfSubTaskIdOfTheEpicTask);
     }
 
@@ -20,8 +21,9 @@ public class EpicTask extends Task {
      * Конструктор для обновления Epic задач
      */
     public EpicTask(int epicTaskId, String epicTaskName, String epicTaskDescription
-            , List<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus) {
-        super(epicTaskName, epicTaskDescription, epicTaskStatus);
+            , List<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus, LocalDateTime startTime
+            , long duration) {
+        super(epicTaskName, epicTaskDescription, epicTaskStatus, startTime, duration);
         this.setId(epicTaskId);
         this.listOfSubTaskId = listOfSubTaskIdOfTheEpicTask;
     }
@@ -61,8 +63,9 @@ public class EpicTask extends Task {
     public static class SubTask extends Task {
         private int epicTaskId;
 
-        public SubTask(int epicTaskId, String subTaskName, String subTaskDescription, Status subTaskStatus) {
-            super(subTaskName, subTaskDescription, subTaskStatus);
+        public SubTask(int epicTaskId, String subTaskName, String subTaskDescription, Status subTaskStatus
+                , LocalDateTime startTime, long duration) {
+            super(subTaskName, subTaskDescription, subTaskStatus, startTime, duration);
             this.epicTaskId = epicTaskId;
         }
 
@@ -70,8 +73,8 @@ public class EpicTask extends Task {
          * Конструктор внутреннего класса для обновления SubTask подзадач
          */
         public SubTask(int subTaskId, int epicTaskId, String subTaskName, String subTaskDescription
-                , Status subTaskStatus) {
-            super(subTaskName, subTaskDescription, subTaskStatus);
+                , Status subTaskStatus, LocalDateTime startTime, long duration) {
+            super(subTaskName, subTaskDescription, subTaskStatus, startTime, duration);
             this.setId(subTaskId);
             this.epicTaskId = epicTaskId;
         }

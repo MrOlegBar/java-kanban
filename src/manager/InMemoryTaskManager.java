@@ -3,6 +3,7 @@ package manager;
 import task.EpicTask;
 import task.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
 
-    protected final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
+    protected static final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
 
     public void setId(int id) {
         this.id = id;
@@ -158,17 +159,19 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Task createCopyOfTask(Task task) {
-        return new Task(task.getName(), task.getDescription(), task.getStatus());
+        return new Task(task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
     }
 
     @Override
     public EpicTask createCopyOfTask(EpicTask epicTask) {
-        return new EpicTask(epicTask.getName(), epicTask.getDescription(), epicTask.getListOfSubTaskId(), epicTask.getStatus());
+        return new EpicTask(epicTask.getName(), epicTask.getDescription(), epicTask.getListOfSubTaskId()
+                , epicTask.getStatus(), epicTask.getStartTime(), epicTask.getDuration());
     }
 
     @Override
     public EpicTask.SubTask createCopyOfTask(EpicTask.SubTask subTask) {
-        return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription(), subTask.getStatus());
+        return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription()
+                , subTask.getStatus(), subTask.getStartTime(), subTask.getDuration());
     }
 
     /**
@@ -180,7 +183,9 @@ public class InMemoryTaskManager implements TaskManager {
         String taskName = task.getName();
         String taskDescription = task.getDescription();
         Task.Status taskStatus = task.getStatus();
-        Task newTask = new Task(taskId, taskName, taskDescription, taskStatus);
+        LocalDateTime startTime = task.getStartTime();
+        long duration = task.getDuration();
+        Task newTask = new Task(taskId, taskName, taskDescription, taskStatus, startTime, duration);
         taskStorage.put(taskId, newTask);
     }
 
@@ -191,8 +196,10 @@ public class InMemoryTaskManager implements TaskManager {
         String epicTaskDescription = epicTask.getDescription();
         List<Integer> listOfSubTaskId = epicTask.getListOfSubTaskId();
         Task.Status epicTaskStatus = getEpicTaskStatus(listOfSubTaskId);
+        LocalDateTime startTime = epicTask.getStartTime();
+        long duration = epicTask.getDuration();
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
-                , listOfSubTaskId, epicTaskStatus);
+                , listOfSubTaskId, epicTaskStatus, startTime, duration);
 
         epicTask.setStatus(epicTaskStatus);
         epicTaskStorage.put(epicTaskId, newEpicTask);
@@ -205,8 +212,10 @@ public class InMemoryTaskManager implements TaskManager {
         String subTaskName = subTask.getName();
         String subTaskDescription = subTask.getDescription();
         Task.Status subTaskStatus = subTask.getStatus();
+        LocalDateTime startTime = subTask.getStartTime();
+        long duration = subTask.getDuration();
         EpicTask.SubTask newSubTask = new EpicTask.SubTask(subTaskId, epicTaskId, subTaskName, subTaskDescription
-                , subTaskStatus);
+                , subTaskStatus, startTime, duration);
         subTaskStorage.put(subTaskId, newSubTask);
 
         EpicTask epicTask = epicTaskStorage.get(epicTaskId);
@@ -312,6 +321,26 @@ public class InMemoryTaskManager implements TaskManager {
             statusEpicTask = Task.Status.IN_PROGRESS;
         }
         return statusEpicTask;
+    }
+
+    /**
+     * Метод для управления датой, когда предполагается приступить к выполнению задачи
+     */
+    public LocalDateTime getterEpicTaskStartTime() {
+        return getEpicTaskStartTime();
+    }
+    private LocalDateTime getEpicTaskStartTime() {
+        return ;
+    }
+
+    /**
+     * Метод для управления продолжительностью задачи, оценка того, сколько времени она займёт в минутах (число)
+     */
+    public long getterEpicTaskDuration() {
+        return getEpicTaskDuration();
+    }
+    private long getEpicTaskDuration() {
+        return ;
     }
 
     /**

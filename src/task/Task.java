@@ -1,5 +1,6 @@
 package task;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -10,21 +11,39 @@ public class Task {
     private final String description;
     private int id;
     private Status status;
+    private final LocalDateTime startTime;
+    private long duration;
 
-    public Task(String taskName, String taskDescription, Status taskStatus) {
+    public Task(String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime, long duration) {
         this.name = taskName;
         this.description = taskDescription;
         this.status = taskStatus;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     /**
      * Конструктор для обновления Task задач
      */
-    public Task(int taskId, String taskName, String taskDescription, Status taskStatus) {
+    public Task(int taskId, String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime
+            , long duration) {
         this.id = taskId;
         this.name = taskName;
         this.description = taskDescription;
         this.status = taskStatus;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    /**
+     * Метод для получения времени завершения задачи
+     */
+    public LocalDateTime getEndTime() {
+        return this.startTime.plusMinutes(this.duration);
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 
     public int getId() {
@@ -51,7 +70,13 @@ public class Task {
         this.status = status;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
 
+    public long getDuration() {
+        return duration;
+    }
 
     @Override
     public boolean equals(Object o) {
