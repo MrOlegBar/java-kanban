@@ -1,6 +1,7 @@
 package task;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,27 +34,24 @@ public class EpicTask extends Task {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        EpicTask epicTask = (EpicTask) o;
-        return listOfSubTaskId.equals(epicTask.listOfSubTaskId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), listOfSubTaskId);
-    }
-
-    @Override
     public String toString() {
+        String startTime = null;
+        String endTime = null;
+        if (getStartTime() != null) {
+            startTime = getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        }
+        if (getEndTime() != null) {
+            endTime = getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        }
         return "EpicTask{" +
                 "id='" + getId() + '\'' +
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
-                ", status='" + getStatus() + '\'' +
+                ", status=" + getStatus() +
+                ", startTime=" + startTime +
+                ", duration=" + getDuration() +
+                ", endTime=" + endTime +
                 "}\n";
     }
 
@@ -108,7 +106,10 @@ public class EpicTask extends Task {
                     ", epicTaskId='" + epicTaskId + '\'' +
                     ", name='" + getName() + '\'' +
                     ", description='" + getDescription() + '\'' +
-                    ", status='" + getStatus() + '\'' +
+                    ", status=" + getStatus() +
+                    ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                    ", duration=" + getDuration() +
+                    ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
                     "}\n";
         }
     }

@@ -15,7 +15,7 @@ import java.util.TreeMap;
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> taskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
-    private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
+    private Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
 
     protected static final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
@@ -196,12 +196,10 @@ public class InMemoryTaskManager implements TaskManager {
         String epicTaskDescription = epicTask.getDescription();
         List<Integer> listOfSubTaskId = epicTask.getListOfSubTaskId();
         Task.Status epicTaskStatus = getEpicTaskStatus(listOfSubTaskId);
-        LocalDateTime startTime = epicTask.getStartTime();
-        long duration = epicTask.getDuration();
+        LocalDateTime epicTaskStartTime = getEpicTaskStartTime(listOfSubTaskId);
+        long epicTaskDuration = getEpicTaskDuration(listOfSubTaskId);
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
-                , listOfSubTaskId, epicTaskStatus, startTime, duration);
-
-        epicTask.setStatus(epicTaskStatus);
+                , listOfSubTaskId, epicTaskStatus, epicTaskStartTime, epicTaskDuration);
         epicTaskStorage.put(epicTaskId, newEpicTask);
     }
 
@@ -326,21 +324,83 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Метод для управления датой, когда предполагается приступить к выполнению задачи
      */
-    public LocalDateTime getterEpicTaskStartTime() {
-        return getEpicTaskStartTime();
+    public LocalDateTime getterEpicTaskStartTime(List<Integer> listOfSubTaskId) {
+        return getEpicTaskStartTime(listOfSubTaskId);
     }
-    private LocalDateTime getEpicTaskStartTime() {
-        return ;
+
+    private LocalDateTime getEpicTaskStartTime(List<Integer> listOfSubTaskId) {
+        try {
+            EpicTask.SubTask subTaskForStartTimeMin;
+
+            LocalDateTime startTimeMin = null;
+            if (listOfSubTaskId.size() != 0) {
+                subTaskForStartTimeMin = subTaskStorage.get(listOfSubTaskId.get(0));
+                startTimeMin = subTaskForStartTimeMin.getStartTime();
+            }
+            for (int i = 1; i < listOfSubTaskId.size(); i++) {
+                EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(i));
+                if (subTask.getStartTime().isBefore(startTimeMin)) {
+                    startTimeMin = subTask.getStartTime();
+                }
+            }
+            return startTimeMin;
+        } catch (ClassCastException e) {
+            System.out.println(e.getMessage());
+            return null;
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     /**
      * Метод для управления продолжительностью задачи, оценка того, сколько времени она займёт в минутах (число)
      */
-    public long getterEpicTaskDuration() {
-        return getEpicTaskDuration();
+    public long getterEpicTaskDuration(List<Integer> listOfSubTaskId) {
+        return getEpicTaskDuration(listOfSubTaskId);
     }
-    private long getEpicTaskDuration() {
-        return ;
+
+    private long getEpicTaskDuration(List<Integer> listOfSubTaskId) {
+        long durationEpicTask = 0;
+        for (var id : listOfSubTaskId) {
+            EpicTask.SubTask subTask = subTaskStorage.get(id);
+            if (subTask != null) {
+                durationEpicTask += subTask.getDuration();
+            }
+        }
+        return durationEpicTask;
+    }
+
+    /**
+     * Метод для управления датой, когда предполагается закончить выполнение задачи
+     */
+    public LocalDateTime getterEpicTaskEndTime(List<Integer> listOfSubTaskId) {
+        return getEpicTaskEndTime(listOfSubTaskId);
+    }
+
+    private LocalDateTime getEpicTaskEndTime(List<Integer> listOfSubTaskId) {
+        try {
+            EpicTask.SubTask subTaskForStartTimeMax;
+
+            LocalDateTime startTimeMax = null;
+            if (listOfSubTaskId.size() != 0) {
+                subTaskForStartTimeMax = subTaskStorage.get(listOfSubTaskId.get(0));
+                startTimeMax = subTaskForStartTimeMax.getEndTime();
+            }
+            for (int i = 1; i < listOfSubTaskId.size(); i++) {
+                EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(i));
+                if (subTask.getEndTime().isAfter(startTimeMax)) {
+                    startTimeMax = subTask.getEndTime();
+                }
+            }
+            return startTimeMax;
+        } catch (ClassCastException e) {
+            System.out.println(e.getMessage());
+            return null;
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     /**
