@@ -1,6 +1,16 @@
 import exception.ManagerSaveException;
+import manager.Managers;
+import manager.TaskManager;
+import task.EpicTask;
+import task.Task;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static task.Task.Status.DONE;
+import static task.Task.Status.NEW;
 
 /**
  * «Трекер задач»
@@ -17,51 +27,92 @@ public class Main {
         /**
          * Создали 2е Task задачи
          */
-        /*Task firstTask = new Task("Поесть", "Принять пищу", NEW);
+        /*Task firstTask = manager.createTask(new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
+                , 30L));
+
         manager.saveTask(firstTask);
 
-        Task secondTask = new Task("Поспать", "Хорошенько выспаться", DONE);
-        manager.saveTask(secondTask);*/
+        Task secondTask = manager.createTask(new Task("Поспать", "Хорошенько выспаться", DONE, LocalDateTime.now().plusMinutes(30L)
+                , 600L));
+        manager.saveTask(secondTask);
+        System.out.println("    Создали 2е Task задачи:");
+        System.out.println(manager.getListOfTasks());*/
 
         /**
          * Создали 1у EpicTask задачу с 3мя SubTask подзадачами
          */
-        /*ArrayList<Integer> listOfSubtaskIdOfTheFirstEpicTask = new ArrayList<>();
+        /*List<Integer> listOfSubtaskIdOfTheFirstEpicTask = new ArrayList<>();
         Task.Status statusOfTheFirstEpicTask = manager.getterEpicTaskStatus(listOfSubtaskIdOfTheFirstEpicTask);
-        EpicTask firstEpicTask = new EpicTask("Закончить учебу",
-                "Получить сертификат обучения", listOfSubtaskIdOfTheFirstEpicTask
-                , statusOfTheFirstEpicTask);
+        LocalDateTime startTimeOfTheFirstEpicTask = manager.getterEpicTaskStartTime(listOfSubtaskIdOfTheFirstEpicTask);
+        long durationOfTheFirstEpicTask = manager.getterEpicTaskDuration(listOfSubtaskIdOfTheFirstEpicTask);
+
+        EpicTask firstEpicTask = manager.createTask(new EpicTask(
+                "Закончить учебу"
+                , "Получить сертификат обучения"
+                , listOfSubtaskIdOfTheFirstEpicTask
+                , statusOfTheFirstEpicTask
+                , startTimeOfTheFirstEpicTask
+                , durationOfTheFirstEpicTask
+        ));
+
         manager.saveEpicTask(firstEpicTask);
 
-        EpicTask.SubTask firstSubtaskOfTheFirstEpicTask = new EpicTask.SubTask(firstEpicTask.getId()
+        EpicTask.SubTask firstSubtaskOfTheFirstEpicTask = manager.createTask(new EpicTask.SubTask(
+                firstEpicTask.getId()
                 , "Сдать все спринты"
-                , "Вовремя выполнить ТЗ", NEW);
+                , "Вовремя выполнить ТЗ"
+                , NEW
+                , LocalDateTime.now().plusMinutes(630L)
+                , 150_000L
+        ));
+
         manager.saveSubTask(firstSubtaskOfTheFirstEpicTask);
 
-        EpicTask.SubTask secondSubtaskOfTheFirstEpicTask = new EpicTask.SubTask(firstEpicTask.getId()
+        EpicTask.SubTask secondSubtaskOfTheFirstEpicTask = manager.createTask(new EpicTask.SubTask(
+                firstEpicTask.getId()
                 , "Сдать дипломный проект"
-                , "Сделать дипломный проект", DONE);
+                , "Сделать дипломный проект"
+                , DONE
+                , LocalDateTime.now().plusMinutes(150_630L)
+                , 250_000L
+        ));
+
         manager.saveSubTask(secondSubtaskOfTheFirstEpicTask);
 
-        EpicTask.SubTask thirdSubtaskOfTheFirstEpicTask = new EpicTask.SubTask(firstEpicTask.getId()
+        EpicTask.SubTask thirdSubtaskOfTheFirstEpicTask = manager.createTask(new EpicTask.SubTask(
+                firstEpicTask.getId()
                 , "Сдать 5й спринт"
-                , "Сделать ТЗ", NEW);
+                , "Сделать ТЗ"
+                , NEW
+                , LocalDateTime.now().plusMinutes(400_630L)
+                , 4_320L
+        ));
+
         manager.saveSubTask(thirdSubtaskOfTheFirstEpicTask);
 
         manager.addSubtaskToEpicTask(firstSubtaskOfTheFirstEpicTask, firstEpicTask);
         manager.addSubtaskToEpicTask(secondSubtaskOfTheFirstEpicTask, firstEpicTask);
         manager.addSubtaskToEpicTask(thirdSubtaskOfTheFirstEpicTask, firstEpicTask);
-        manager.updateEpicTask(firstEpicTask);*/
+
+        manager.updateEpicTask(firstEpicTask);
+
+        System.out.println("    Создали 1у EpicTask задачу с 3мя SubTask подзадачами:");
+        System.out.println(manager.getListOfEpicTasks());*/
 
         /**
          * Создали 2ю EpicTask задачу без SubTask подзадач
          */
-        /*ArrayList<Integer> listOfSubtaskIdOfTheSecondEpicTask = new ArrayList<>();
+        /*List<Integer> listOfSubtaskIdOfTheSecondEpicTask = new ArrayList<>();
         Task.Status statusOfTheSecondEpicTask = manager.getterEpicTaskStatus(listOfSubtaskIdOfTheSecondEpicTask);
-        EpicTask secondEpicTask = new EpicTask("Сменить работу"
-                , "Начать работать Java разработчиком", listOfSubtaskIdOfTheSecondEpicTask
-                , statusOfTheSecondEpicTask);
-        manager.saveEpicTask(secondEpicTask);*/
+        LocalDateTime startTimeOfTheSecondEpicTask = manager.getterEpicTaskStartTime(listOfSubtaskIdOfTheSecondEpicTask);
+        long durationOfTheSecondEpicTask = manager.getterEpicTaskDuration(listOfSubtaskIdOfTheSecondEpicTask);
+        EpicTask secondEpicTask = manager.createTask(new EpicTask("Сменить работу", "Начать работать Java разработчиком"
+                , listOfSubtaskIdOfTheSecondEpicTask, statusOfTheSecondEpicTask, startTimeOfTheSecondEpicTask
+                , durationOfTheSecondEpicTask));
+        manager.saveEpicTask(secondEpicTask);
+
+        System.out.println("    Создали 2ю EpicTask задачу без SubTask подзадач:");
+        System.out.println(manager.getListOfEpicTasks());*/
 
         /**
          * Возможность хранить задачи всех типов
@@ -76,34 +127,14 @@ public class Main {
         /**
          * Получение по идентификатору
          * История просмотров задач
-         * Удаление задачи, которая есть в истории
-         * Удаление эпика с 3мя подзадачамии
          */
         /*System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getTaskById(1));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getTaskById(2));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(3));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(4));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(5));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getSubTaskById(6));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
-        System.out.println("\n    -Получение по идентификатору:");
         System.out.println(manager.getEpicTaskById(7));
         System.out.println("    -История просмотров задач:");
         System.out.println(manager.getHistory());*/
@@ -142,24 +173,24 @@ public class Main {
          * Создание. Сам объект должен передаваться в качестве параметра;
          */
         /*System.out.println("\n    Создание. Сам объект должен передаваться в качестве параметра:");
-        Task newFirstTask = manager.createCopyOfTask(firstTask);
+        Task newFirstTask = manager.createTask(firstTask);
         manager.saveTask(newFirstTask);
-        Task newSecondTask = manager.createCopyOfTask(secondTask);
+        Task newSecondTask = manager.createTask(secondTask);
         manager.saveTask(newSecondTask);
 
         System.out.println(newFirstTask);
         System.out.println(newSecondTask);
 
-        EpicTask newFirstEpicTask = manager.createCopyOfTask(firstEpicTask);
+        EpicTask newFirstEpicTask = manager.createTask(firstEpicTask);
         manager.saveEpicTask(newFirstEpicTask);
 
         EpicTask.SubTask newFirstSubtaskOfTheFirstEpicTask =
-                manager.createCopyOfTask(firstSubtaskOfTheFirstEpicTask);
+                manager.createTask(firstSubtaskOfTheFirstEpicTask);
         manager.saveSubTask(newFirstSubtaskOfTheFirstEpicTask);
         manager.addSubtaskToEpicTask(newFirstSubtaskOfTheFirstEpicTask, newFirstEpicTask);
 
         EpicTask.SubTask newSecondSubtaskOfTheFirstEpicTask =
-                manager.createCopyOfTask(secondSubtaskOfTheFirstEpicTask);
+                manager.createTask(secondSubtaskOfTheFirstEpicTask);
         manager.saveSubTask(newSecondSubtaskOfTheFirstEpicTask);
         manager.addSubtaskToEpicTask(newSecondSubtaskOfTheFirstEpicTask, newFirstEpicTask);
         manager.updateEpicTask(newFirstEpicTask);
@@ -168,11 +199,11 @@ public class Main {
         System.out.println(newFirstSubtaskOfTheFirstEpicTask);
         System.out.println(newSecondSubtaskOfTheFirstEpicTask);
 
-        EpicTask newSecondEpicTask = manager.createCopyOfTask(secondEpicTask);
+        EpicTask newSecondEpicTask = manager.createTask(secondEpicTask);
         manager.saveEpicTask(newSecondEpicTask);
 
         EpicTask.SubTask newFirstSubtaskOfTheSecondEpicTask =
-                manager.createCopyOfTask(firstSubtaskOfTheFirstEpicTask);
+                manager.createTask(firstSubtaskOfTheFirstEpicTask);
         manager.saveSubTask(newFirstSubtaskOfTheSecondEpicTask);
         manager.addSubtaskToEpicTask(newFirstSubtaskOfTheSecondEpicTask, newSecondEpicTask);
         manager.updateEpicTask(newSecondEpicTask);
@@ -224,5 +255,8 @@ public class Main {
         manager.removeEpicTaskById(13);
         System.out.println(manager.getHistory());
         System.out.println(manager.getListOfSubTasks());*/
+
+        /*System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
+        System.out.println(manager.getterPrioritizedTasks());*/
     }
 }

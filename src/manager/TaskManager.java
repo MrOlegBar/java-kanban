@@ -3,7 +3,9 @@ package manager;
 import task.EpicTask;
 import task.Task;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Интерфейс для объекта-менеджера
@@ -19,6 +21,21 @@ public interface TaskManager {
      * Метод для управления статусом для EpicTask задач
      */
     Task.Status getterEpicTaskStatus(List<Integer> listOfSubtaskIdOfTheFirstEpicTask);
+
+    /**
+     * Метод для управления датой, когда предполагается закончить выполнение задачи
+     */
+    LocalDateTime getterEpicTaskStartTime(List<Integer> listOfSubtaskIdOfTheFirstEpicTask);
+
+    /**
+     * Метод для управления продолжительностью задачи, оценка того, сколько времени она займёт в минутах (число)
+     */
+    long getterEpicTaskDuration(List<Integer> listOfSubtaskIdOfTheFirstEpicTask);
+
+    /**
+     * Метод для возвращения списка задач и подзадач в заданном порядке
+     */
+    Set<Task> getterPrioritizedTasks();
 
     /**
      * Метод для сохранения задач
@@ -59,11 +76,11 @@ public interface TaskManager {
     /**
      * Создание задачи
      */
-    Task createCopyOfTask(Task task);
+    Task createTask(Task task);
 
-    EpicTask createCopyOfTask(EpicTask epicTask);
+    EpicTask createTask(EpicTask epicTask);
 
-    EpicTask.SubTask createCopyOfTask(EpicTask.SubTask subTask);
+    EpicTask.SubTask createTask(EpicTask.SubTask subTask);
 
     /**
      * Обновление задачи

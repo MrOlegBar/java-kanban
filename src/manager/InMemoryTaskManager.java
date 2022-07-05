@@ -1,13 +1,11 @@
 package manager;
 
+import exception.ManagerCreateException;
 import task.EpicTask;
 import task.Task;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Класс для объекта-менеджера
@@ -15,7 +13,7 @@ import java.util.TreeMap;
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> taskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
-    private Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
+    private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
 
     protected static final HistoryManager<Task> inMemoryHistoryManager = Managers.getDefaultHistory();
@@ -155,21 +153,43 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Метод проверки проверки пересечения задач
+     */
+    public void taskIntersectionCheck(Task task) {
+        LocalDateTime startTimeTask = task.getStartTime();
+        LocalDateTime endTimeTask = task.getEndTime();
+        Set<Task> listOfSortedTasks = getPrioritizedTasks();
+
+        for (var taskFromTheList : listOfSortedTasks) {
+            if (taskFromTheList.getStartTime() != null) {
+                LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
+                LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
+                if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
+                        || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))) {
+                    throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
+                }
+            }
+        }
+    }
+
+    /**
      * Создание задачи
      */
     @Override
-    public Task createCopyOfTask(Task task) {
+    public Task createTask(Task task) {
+        taskIntersectionCheck(task);
         return new Task(task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
     }
 
     @Override
-    public EpicTask createCopyOfTask(EpicTask epicTask) {
+    public EpicTask createTask(EpicTask epicTask) {
         return new EpicTask(epicTask.getName(), epicTask.getDescription(), epicTask.getListOfSubTaskId()
                 , epicTask.getStatus(), epicTask.getStartTime(), epicTask.getDuration());
     }
 
     @Override
-    public EpicTask.SubTask createCopyOfTask(EpicTask.SubTask subTask) {
+    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) {
+        taskIntersectionCheck(subTask);
         return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription()
                 , subTask.getStatus(), subTask.getStartTime(), subTask.getDuration());
     }
@@ -179,6 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateTask(Task task) {
+        taskIntersectionCheck(task);
         int taskId = task.getId();
         String taskName = task.getName();
         String taskDescription = task.getDescription();
@@ -205,6 +226,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) {
+        taskIntersectionCheck(subTask);
         int subTaskId = subTask.getId();
         int epicTaskId = subTask.getEpicTaskId();
         String subTaskName = subTask.getName();
@@ -410,5 +432,32 @@ public class InMemoryTaskManager implements TaskManager {
         id += 1;
         task.setId(id);
         return id;
+    }
+
+    /**
+     * Метод для возвращения списка задач и подзадач в заданном порядке
+     */
+    public Set<Task> getterPrioritizedTasks() {
+        return getPrioritizedTasks();
+    }
+
+    private Set<Task> getPrioritizedTasks() {
+        Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
+            if (task1.getStartTime() != null && task2.getStartTime() != null) {
+                return task1.getStartTime().compareTo(task2.getStartTime());
+            } else if (task1.getStartTime() == null) {
+                return 1;
+            } else if (null == task2.getStartTime()) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+
+        listOfPrioritizedTasks.addAll(taskStorage.values());
+        listOfPrioritizedTasks.addAll(epicTaskStorage.values());
+        listOfPrioritizedTasks.addAll(subTaskStorage.values());
+
+        return listOfPrioritizedTasks;
     }
 }
