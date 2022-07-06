@@ -21,7 +21,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File autosaveFile;
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-    FileBackedTasksManager(File file) throws ManagerSaveException {
+    public FileBackedTasksManager(File file) throws ManagerSaveException {
         this.autosaveFile = fileExists(file);
     }
 
@@ -133,7 +133,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             System.out.println(manager.getSubTaskById(6));
             System.out.println(manager.getEpicTaskById(7));
             System.out.println("    -История просмотров задач:");
-            System.out.println(manager.getHistory());
+            System.out.println(manager.getTaskHistory());
 
             FileBackedTasksManager recoveryManager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
 
@@ -142,7 +142,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             System.out.println(recoveryManager.getListOfEpicTasks());
             System.out.println(recoveryManager.getListOfSubTasks());
             System.out.println("    Восстановленная История просмотров задач:");
-            System.out.println(recoveryManager.getHistory());
+            System.out.println(recoveryManager.getTaskHistory());
 
             System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
             System.out.println(manager.getterPrioritizedTasks());
@@ -201,15 +201,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             EpicTask.SubTask subTask = localManager.getSubTaskById(id);
 
             if (task != null) {
-                inMemoryHistoryManager.add(task);
+                inMemoryHistoryManager.addTaskToTaskHistory(task);
             }
 
             if (epicTask != null) {
-                inMemoryHistoryManager.add(epicTask);
+                inMemoryHistoryManager.addTaskToTaskHistory(epicTask);
             }
 
             if (subTask != null) {
-                inMemoryHistoryManager.add(subTask);
+                inMemoryHistoryManager.addTaskToTaskHistory(subTask);
             }
         }
         return localManager;
@@ -330,9 +330,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Метод для сохранения менеджера истории в CSV
      */
-    private static String historyManagerToString(HistoryManager<Task> manager) {
+    private static String historyManagerToString(HistoryManager manager) {
         List<Integer> listOfIdsFromHistory = new ArrayList<>();
-        List<Task> list = manager.getHistory();
+        List<Task> list = manager.getTaskHistory();
         for (Task task : list) {
             listOfIdsFromHistory.add(task.getId());
         }
@@ -566,13 +566,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * История просмотров задач
      */
     @Override
-    public List<Task> getHistory() {
-        return super.getHistory();
+    public List<Task> getTaskHistory() {
+        return super.getTaskHistory();
     }
 
     @Override
-    public void remove(int id) {
-        super.remove(id);
+    public void removeTaskFromTaskHistory(int id) {
+        super.removeTaskFromTaskHistory(id);
         save();
     }
 

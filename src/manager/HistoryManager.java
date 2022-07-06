@@ -4,20 +4,20 @@ import task.Task;
 
 import java.util.List;
 
-public interface HistoryManager<T extends Task> {
+public interface HistoryManager {
 
     /**
-     * Помечает задачи как просмотренные
+     * Добавляет задачи в коллекцию истории задач
      */
-    void add(T e);
+    void addTaskToTaskHistory(Task task);
 
     /**
-     * История просмотров задач
+     * Возвращает список истории задач
      */
-    List<T> getHistory();
+    List<Task> getTaskHistory();
 
     /**
-     * Удаляет задачи из просмотра
+     * Удаляет задачу по id из истории задач
      */
-    void remove(int id);
+    void removeTaskFromTaskHistory(int id);
 }

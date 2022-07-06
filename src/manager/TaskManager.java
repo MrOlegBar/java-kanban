@@ -1,4 +1,4 @@
-package manager.test;
+package manager;
 
 import task.EpicTask;
 import task.Task;
@@ -41,11 +41,6 @@ public interface TaskManager {
      * Возвращает дату и время конца самой поздней подзадачи Epic задачи
      */
     LocalDateTime getterEpicTaskEndTime(List<Integer> listOfSubTaskId);
-
-    /**
-     * Проверяет задачу на пересечение по времени выполнения с уже созданными задачами
-     */
-    void checkIntersectionByTaskTime(Task task);
 
     /**
      * Возвращает задачу Task после проверки на пересечение по времени выполнения с уже созданными задачами
@@ -155,12 +150,12 @@ public interface TaskManager {
     /**
      * Возвращает список истории задач
      */
-    List<Task> getHistory();
+    List<Task> getTaskHistory();
 
     /**
      * Удаляет по id задачу из просмотра
      */
-    void remove(int id);
+    void removeTaskFromTaskHistory(int id);
 
     /**
      * Геттер для метода, который возвращает список всех задач

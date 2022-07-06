@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Класс для истории просмотра задач
  */
-public class InMemoryHistoryManager implements HistoryManager<Task> {
+public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node> historyManagerMap = new HashMap<>();
     private Node first;
     private Node last;
@@ -28,32 +28,32 @@ public class InMemoryHistoryManager implements HistoryManager<Task> {
     }
 
     /**
-     * Помечает задачи как просмотренные
+     * Добавляет задачи в коллекцию истории задач
      */
     @Override
-    public void add(Task task) {
+    public void addTaskToTaskHistory(Task task) {
         int taskId = task.getId();
         boolean isContainsNode = historyManagerMap.containsKey(taskId);
         if (isContainsNode) {
-            remove(taskId);
+            removeTaskFromTaskHistory(taskId);
         }
         linkLast(task);
         historyManagerMap.put(taskId, last);
     }
 
     /**
-     * История просмотров задач
+     * Возвращает список истории задач
      */
     @Override
-    public List<Task> getHistory() {
+    public List<Task> getTaskHistory() {
         return getTasks();
     }
 
     /**
-     * Удаляет задачи из просмотра
+     * Удаляет задачу по id из истории задач
      */
     @Override
-    public void remove(int id) {
+    public void removeTaskFromTaskHistory(int id) {
         Node node = historyManagerMap.get(id);
         if (node != null) {
             removeNode(node);

@@ -1,6 +1,5 @@
 package manager;
 
-import manager.test.TaskManager;
 import task.Task;
 
 public class Managers {
@@ -9,7 +8,7 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static HistoryManager<Task> getDefaultHistory() {
+    public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 }
