@@ -12,8 +12,12 @@ import java.util.Objects;
 public class EpicTask extends Task {
     private final List<Integer> listOfSubTaskId;
 
-    public EpicTask(String epicTaskName, String epicTaskDescription, List<Integer> listOfSubTaskIdOfTheEpicTask
-            , Status epicTaskStatus, LocalDateTime startTime, long duration) {
+    public EpicTask(String epicTaskName
+            , String epicTaskDescription
+            , List<Integer> listOfSubTaskIdOfTheEpicTask
+            , Status epicTaskStatus
+            , LocalDateTime startTime
+            , long duration) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus, startTime, duration);
         this.listOfSubTaskId = new ArrayList<>(listOfSubTaskIdOfTheEpicTask);
     }
@@ -21,8 +25,11 @@ public class EpicTask extends Task {
     /**
      * Конструктор для обновления Epic задач
      */
-    public EpicTask(int epicTaskId, String epicTaskName, String epicTaskDescription
-            , List<Integer> listOfSubTaskIdOfTheEpicTask, Status epicTaskStatus, LocalDateTime startTime
+    public EpicTask(int epicTaskId
+            , String epicTaskName
+            , String epicTaskDescription
+            , List<Integer> listOfSubTaskIdOfTheEpicTask
+            , Status epicTaskStatus, LocalDateTime startTime
             , long duration) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus, startTime, duration);
         this.setId(epicTaskId);
@@ -31,6 +38,20 @@ public class EpicTask extends Task {
 
     public List<Integer> getListOfSubTaskId() {
         return listOfSubTaskId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EpicTask epicTask = (EpicTask) o;
+        return Objects.equals(listOfSubTaskId, epicTask.listOfSubTaskId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), listOfSubTaskId);
     }
 
     @Override
@@ -61,8 +82,12 @@ public class EpicTask extends Task {
     public static class SubTask extends Task {
         private int epicTaskId;
 
-        public SubTask(int epicTaskId, String subTaskName, String subTaskDescription, Status subTaskStatus
-                , LocalDateTime startTime, long duration) {
+        public SubTask(int epicTaskId
+                , String subTaskName
+                , String subTaskDescription
+                , Status subTaskStatus
+                , LocalDateTime startTime
+                , long duration) {
             super(subTaskName, subTaskDescription, subTaskStatus, startTime, duration);
             this.epicTaskId = epicTaskId;
         }
@@ -70,8 +95,13 @@ public class EpicTask extends Task {
         /**
          * Конструктор внутреннего класса для обновления SubTask подзадач
          */
-        public SubTask(int subTaskId, int epicTaskId, String subTaskName, String subTaskDescription
-                , Status subTaskStatus, LocalDateTime startTime, long duration) {
+        public SubTask(int subTaskId
+                , int epicTaskId
+                , String subTaskName
+                , String subTaskDescription
+                , Status subTaskStatus
+                , LocalDateTime startTime
+                , long duration) {
             super(subTaskName, subTaskDescription, subTaskStatus, startTime, duration);
             this.setId(subTaskId);
             this.epicTaskId = epicTaskId;

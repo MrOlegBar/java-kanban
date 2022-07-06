@@ -123,32 +123,38 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(manager.getListOfEpicTasks());
 
         System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getTaskById(1));
-        System.out.println(manager.getTaskById(2));
-        System.out.println(manager.getEpicTaskById(3));
-        System.out.println(manager.getSubTaskById(4));
-        System.out.println(manager.getSubTaskById(5));
-        System.out.println(manager.getSubTaskById(6));
-        System.out.println(manager.getEpicTaskById(7));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());
+        try {
+            System.out.println(manager.getTaskById(1));
+            System.out.println(manager.getTaskById(2));
 
-        FileBackedTasksManager recoveryManager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
-        System.out.println("    Восстановленный список всех задач:");
-        System.out.println(recoveryManager.getListOfTasks());
-        System.out.println(recoveryManager.getListOfEpicTasks());
-        System.out.println(recoveryManager.getListOfSubTasks());
-        System.out.println("    Восстановленная История просмотров задач:");
-        System.out.println(recoveryManager.getHistory());
+            System.out.println(manager.getEpicTaskById(3));
+            System.out.println(manager.getSubTaskById(4));
+            System.out.println(manager.getSubTaskById(5));
+            System.out.println(manager.getSubTaskById(6));
+            System.out.println(manager.getEpicTaskById(7));
+            System.out.println("    -История просмотров задач:");
+            System.out.println(manager.getHistory());
 
-        System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
-        System.out.println(manager.getterPrioritizedTasks());
+            FileBackedTasksManager recoveryManager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
+
+            System.out.println("    Восстановленный список всех задач:");
+            System.out.println(recoveryManager.getListOfTasks());
+            System.out.println(recoveryManager.getListOfEpicTasks());
+            System.out.println(recoveryManager.getListOfSubTasks());
+            System.out.println("    Восстановленная История просмотров задач:");
+            System.out.println(recoveryManager.getHistory());
+
+            System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
+            System.out.println(manager.getterPrioritizedTasks());
+        } catch (NullPointerException | ClassCastException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
      * Метод для восстановления данных менеджера из файла
      */
-    public static FileBackedTasksManager loadFromFile(File file) throws ManagerSaveException {
+    public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager localManager = new FileBackedTasksManager(file);
         List<Integer> taskHistoryIds = new ArrayList<>();
 
@@ -391,7 +397,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     /**
-     * Метод для добавления подзадач в список
+     * Добавляет id подзадачи в список id подзадач Epic задачи, а id Epic задачи в подзадачу
      */
     @Override
     public void addSubtaskToEpicTask(EpicTask.SubTask subTask, EpicTask epicTask) {

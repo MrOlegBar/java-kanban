@@ -12,9 +12,9 @@ public class Task {
     private final String description;
     private int id;
     private Status status;
-    private LocalDateTime startTime;
-    private long duration;
-    private LocalDateTime endTime;
+    private final LocalDateTime startTime;
+    private final long duration;
+    private final LocalDateTime endTime;
 
     public Task(String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime, long duration) {
         this.name = taskName;
@@ -37,17 +37,6 @@ public class Task {
         this.startTime = startTime;
         this.duration = duration;
         this.endTime = getEndTime();
-    }
-
-    /**
-     * Метод для получения времени завершения задачи
-     */
-    public LocalDateTime getEndTime() {
-        if (this.startTime != null) {
-            return this.startTime.plusMinutes(this.duration);
-        } else {
-            return null;
-        }
     }
 
     public int getId() {
@@ -82,17 +71,12 @@ public class Task {
         return duration;
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                ", duration=" + duration +
-                ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                "}\n";
+    public LocalDateTime getEndTime() {
+        if (this.startTime != null) {
+            return this.startTime.plusMinutes(this.duration);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -106,6 +90,19 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(name, description, id, status, startTime, duration, endTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                ", duration=" + duration +
+                ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                "}\n";
     }
 
     /**
