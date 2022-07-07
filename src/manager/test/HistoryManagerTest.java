@@ -19,34 +19,21 @@ import static task.Task.Status.NEW;
 public abstract class HistoryManagerTest {
     HistoryManager historyManager;
     TaskManager manager;
+    Task task1;
+    Task task2;
+    Task task3;
+    List<Task> history;
 
     @BeforeEach
     private void beforeEach() {
         historyManager = new InMemoryHistoryManager();
         manager = new InMemoryTaskManager();
-    }
 
-    @Test
-    public void add() {
-        Task task = new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
+        task1 = new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
                 , 30L);
-        historyManager.addTaskToTaskHistory(task);
-        historyManager.addTaskToTaskHistory(task);
-
-        final List<Task> history = historyManager.getTaskHistory();
-        //Проверка работы с пустой историей задач
-        assertNotNull(history, "Пустая история задач");
-        //Проверка работы с дублированием задач в истории задач
-        assertEquals(1, history.size(), "История задач дублируется");
-    }
-
-    @Test
-    public void getTaskHistory() {
-        Task task1 = new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
-                , 30L);
-        Task task2 = new Task("Поспать", "Хорошенько выспаться", DONE
+        task2 = new Task("Поспать", "Хорошенько выспаться", DONE
                 , LocalDateTime.now().plusMinutes(30L), 600L);
-        Task task3 = new Task("Сдать все спринты", "Вовремя выполнить ТЗ", NEW
+        task3 = new Task("Сдать все спринты", "Вовремя выполнить ТЗ", NEW
                 , LocalDateTime.now().plusMinutes(630L), 150_000L);
 
         manager.saveTask(task1);
@@ -56,13 +43,27 @@ public abstract class HistoryManagerTest {
         historyManager.addTaskToTaskHistory(task1);
         historyManager.addTaskToTaskHistory(task1);
         historyManager.addTaskToTaskHistory(task2);
-        historyManager.addTaskToTaskHistory(task2);
-        historyManager.addTaskToTaskHistory(task3);
         historyManager.addTaskToTaskHistory(task3);
 
-        List<Task> history = historyManager.getTaskHistory();
+        history = historyManager.getTaskHistory();
+    }
+
+    @Test
+    public void add() {
+
         //Проверка работы с пустой историей задач
         assertNotNull(history, "Пустая история задач");
+
+        //Проверка работы с дублированием задач в истории задач
+        assertEquals(3, history.size(), "История задач дублируется");
+    }
+
+    @Test
+    public void getTaskHistory() {
+
+        //Проверка работы с пустой историей задач
+        assertNotNull(history, "Пустая история задач");
+
         //Проверка работы с дублированием задач в истории задач
         assertEquals(3, history.size(), "История задач дублируется.");
 
@@ -71,33 +72,17 @@ public abstract class HistoryManagerTest {
         historyManager.removeTaskFromTaskHistory(task3.getId());
 
         history = historyManager.getTaskHistory();
+
         //Проверка работы с дублированием задач в истории задач
         assertEquals(0, history.size(), "Задачи не удаляются из истории задач");
     }
 
     @Test
     public void removeTaskFromTaskHistory() {
-        Task task1 = new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
-                , 30L);
-        Task task2 = new Task("Поспать", "Хорошенько выспаться", DONE
-                , LocalDateTime.now().plusMinutes(30L), 600L);
-        Task task3 = new Task("Сдать все спринты", "Вовремя выполнить ТЗ", NEW
-                , LocalDateTime.now().plusMinutes(630L), 150_000L);
 
-        manager.saveTask(task1);
-        manager.saveTask(task2);
-        manager.saveTask(task3);
-
-        historyManager.addTaskToTaskHistory(task1);
-        historyManager.addTaskToTaskHistory(task1);
-        historyManager.addTaskToTaskHistory(task2);
-        historyManager.addTaskToTaskHistory(task2);
-        historyManager.addTaskToTaskHistory(task3);
-        historyManager.addTaskToTaskHistory(task3);
-
-        List<Task> history = historyManager.getTaskHistory();
         //Проверка работы с пустой историей задач
         assertNotNull(history, "Пустая история задач");
+
         //Проверка работы с дублированием задач в истории задач
         assertEquals(3, history.size(), "История задач дублируется.");
 
@@ -106,6 +91,7 @@ public abstract class HistoryManagerTest {
         historyManager.removeTaskFromTaskHistory(task3.getId());
 
         history = historyManager.getTaskHistory();
+
         //Проверка работы с удалением из истории: начало, середина, конец.
         assertEquals(0, history.size(), "Задачи не удаляются из истории задач");
     }
