@@ -2,97 +2,152 @@ package manager.test;
 
 import manager.HistoryManager;
 import manager.InMemoryHistoryManager;
-import manager.InMemoryTaskManager;
 import manager.TaskManager;
+import manager.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import task.EpicTask;
 import task.Task;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static task.Task.Status.DONE;
 import static task.Task.Status.NEW;
 
-public abstract class HistoryManagerTest {
+abstract class HistoryManagerTest {
     HistoryManager historyManager;
     TaskManager manager;
     Task task1;
     Task task2;
-    Task task3;
     List<Task> history;
+    List<Integer> listOfSubtaskIdOfEpicTask1;
+    Task.Status statusOfEpicTask1;
+    LocalDateTime startTimeOFEpicTask1;
+    long durationOfEpicTask1;
+    EpicTask epicTask1;
+    EpicTask.SubTask subtask1;
 
     @BeforeEach
     private void beforeEach() {
         historyManager = new InMemoryHistoryManager();
         manager = new InMemoryTaskManager();
 
-        task1 = new Task("Поесть", "Принять пищу", NEW, LocalDateTime.now().minusMinutes(30L)
-                , 30L);
-        task2 = new Task("Поспать", "Хорошенько выспаться", DONE
-                , LocalDateTime.now().plusMinutes(30L), 600L);
-        task3 = new Task("Сдать все спринты", "Вовремя выполнить ТЗ", NEW
-                , LocalDateTime.now().plusMinutes(630L), 150_000L);
-
+        task1 = new Task(
+                "Поесть"
+                , "Принять пищу"
+                , NEW
+                , LocalDateTime.now().minusMinutes(30L)
+                , 30L
+        );
         manager.saveTask(task1);
+
+        task2 = new Task(
+                "Поспать"
+                , "Хорошенько выспаться"
+                , DONE
+                , LocalDateTime.now().plusMinutes(30L)
+                , 600L
+        );
         manager.saveTask(task2);
-        manager.saveTask(task3);
+
+        listOfSubtaskIdOfEpicTask1 = new ArrayList<>();
+        statusOfEpicTask1 = manager.getterEpicTaskStatus(listOfSubtaskIdOfEpicTask1);
+        startTimeOFEpicTask1 = manager.getterEpicTaskStartTime(listOfSubtaskIdOfEpicTask1);
+        durationOfEpicTask1 = manager.getterEpicTaskDuration(listOfSubtaskIdOfEpicTask1);
+
+        epicTask1 = manager.createTask(new EpicTask(
+                "Закончить учебу"
+                , "Получить сертификат обучения"
+                , listOfSubtaskIdOfEpicTask1
+                , statusOfEpicTask1
+                , startTimeOFEpicTask1
+                , durationOfEpicTask1
+        ));
+        manager.saveEpicTask(epicTask1);
+
+        subtask1 = manager.createTask(new EpicTask.SubTask(
+                epicTask1.getId()
+                , "Сдать все спринты"
+                , "Вовремя выполнить ТЗ"
+                , NEW
+                , LocalDateTime.now().plusMinutes(630L)
+                , 150_000L
+        ));
+        manager.saveSubTask(subtask1);
+
+        manager.addSubtaskToEpicTask(subtask1, epicTask1);
+        manager.updateEpicTask(epicTask1);
 
         historyManager.addTaskToTaskHistory(task1);
         historyManager.addTaskToTaskHistory(task1);
-        historyManager.addTaskToTaskHistory(task2);
-        historyManager.addTaskToTaskHistory(task3);
+        historyManager.addTaskToTaskHistory(epicTask1);
+        historyManager.addTaskToTaskHistory(subtask1);
 
         history = historyManager.getTaskHistory();
     }
-
+    /**
+     * Граничные условия:
+     * a. Пустая история задач.
+     * b. Дублирование.
+     * с. Удаление из истории: начало, середина, конец.
+     */
     @Test
-    public void add() {
+    void addTaskToTaskHistory() {
 
-        //Проверка работы с пустой историей задач
+        //a. Пустая история задач
         assertNotNull(history, "Пустая история задач");
 
-        //Проверка работы с дублированием задач в истории задач
-        assertEquals(3, history.size(), "История задач дублируется");
+        //b. Дублирование
+        int expected = 3;
+        int actual = history.size();
+
+        assertEquals(expected, actual, "История задач дублируется");
     }
 
     @Test
-    public void getTaskHistory() {
+    void getTaskHistory() {
 
-        //Проверка работы с пустой историей задач
+        //a. Пустая история задач
         assertNotNull(history, "Пустая история задач");
 
-        //Проверка работы с дублированием задач в истории задач
-        assertEquals(3, history.size(), "История задач дублируется.");
+        //b. Дублирование
+        int expected = 3;
+        int actual = history.size();
 
+        assertEquals(expected, actual, "История задач дублируется.");
+
+        //с. Удаление из истории: начало, середина, конец
         historyManager.removeTaskFromTaskHistory(task1.getId());
-        historyManager.removeTaskFromTaskHistory(task2.getId());
-        historyManager.removeTaskFromTaskHistory(task3.getId());
+        historyManager.removeTaskFromTaskHistory(epicTask1.getId());
+        historyManager.removeTaskFromTaskHistory(subtask1.getId());
 
         history = historyManager.getTaskHistory();
 
-        //Проверка работы с дублированием задач в истории задач
-        assertEquals(0, history.size(), "Задачи не удаляются из истории задач");
+        assertTrue(history.isEmpty(), "Задачи не удаляются из истории задач");
     }
 
     @Test
-    public void removeTaskFromTaskHistory() {
+    void removeTaskFromTaskHistory() {
 
-        //Проверка работы с пустой историей задач
+        //a. Пустая история задач
         assertNotNull(history, "Пустая история задач");
 
-        //Проверка работы с дублированием задач в истории задач
-        assertEquals(3, history.size(), "История задач дублируется.");
+        //b. Дублирование
+        int expected = 3;
+        int actual = history.size();
 
+        assertEquals(expected, actual, "История задач дублируется.");
+
+        //с. Удаление из истории: начало, середина, конец
         historyManager.removeTaskFromTaskHistory(task1.getId());
-        historyManager.removeTaskFromTaskHistory(task2.getId());
-        historyManager.removeTaskFromTaskHistory(task3.getId());
+        historyManager.removeTaskFromTaskHistory(epicTask1.getId());
+        historyManager.removeTaskFromTaskHistory(subtask1.getId());
 
         history = historyManager.getTaskHistory();
 
-        //Проверка работы с удалением из истории: начало, середина, конец.
-        assertEquals(0, history.size(), "Задачи не удаляются из истории задач");
+        assertTrue(history.isEmpty(), "Задачи не удаляются из истории задач");
     }
 }

@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Test;
 class InMemoryHistoryManagerTest extends HistoryManagerTest {
 
     @Test
-    public void add() {
-        super.add();
+    void addTaskToTaskHistory() {
+        super.addTaskToTaskHistory();
     }
 
     @Test
-    public void getTaskHistory() {
+    void getTaskHistory() {
         super.getTaskHistory();
     }
 
     @Test
-    public void removeTaskFromTaskHistory() {
+    void removeTaskFromTaskHistory() {
         super.removeTaskFromTaskHistory();
     }
 }

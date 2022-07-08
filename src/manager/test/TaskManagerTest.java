@@ -1,37 +1,64 @@
 package manager.test;
 
-import manager.FileBackedTasksManager;
 import manager.TaskManager;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import task.EpicTask;
 import task.Task;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static task.Task.Status.NEW;
+import static task.Task.Status.*;
 
-public abstract class TaskManagerTest {
-    TaskManager manager;
+abstract class TaskManagerTest<T extends TaskManager> {
+    T manager;
+    abstract T createManager();
+    Task firstTask;
+    Task secondTask;
+    List<Integer> listOfSubtaskIdOfTheFirstEpicTask;
+    Task.Status statusOfTheFirstEpicTask;
+    LocalDateTime startTimeOfTheFirstEpicTask;
+    long durationOfTheFirstEpicTask;
+    EpicTask epicTask1;
+    EpicTask.SubTask subtask1;
+    EpicTask.SubTask subtask2;
+    EpicTask.SubTask subtask3;
+    List<EpicTask.SubTask> listOfSubTaskByEpicTaskId;
 
     @BeforeEach
     private void BeforeEach() {
-        manager = new FileBackedTasksManager(new File("Autosave.csv"));
-    }
 
-    @Test
-    void addSubtaskToEpicTask() {
-        List<Integer> listOfSubtaskIdOfTheFirstEpicTask = new ArrayList<>();
-        Task.Status statusOfTheFirstEpicTask = manager.getterEpicTaskStatus(listOfSubtaskIdOfTheFirstEpicTask);
-        LocalDateTime startTimeOfTheFirstEpicTask = manager.getterEpicTaskStartTime(listOfSubtaskIdOfTheFirstEpicTask);
-        long durationOfTheFirstEpicTask = manager.getterEpicTaskDuration(listOfSubtaskIdOfTheFirstEpicTask);
+        manager = createManager();
 
-        EpicTask epicTask = manager.createTask(new EpicTask(
+        firstTask = manager.createTask(new Task(
+                "Поесть"
+                , "Принять пищу"
+                , NEW
+                , LocalDateTime.now().minusMinutes(30L)
+                , 30L
+        ));
+        manager.saveTask(firstTask);
+
+        secondTask = manager.createTask(new Task(
+                "Поспать"
+                , "Хорошенько выспаться"
+                , DONE
+                , LocalDateTime.now().plusMinutes(30L)
+                , 600L
+        ));
+        manager.saveTask(secondTask);
+
+        listOfSubtaskIdOfTheFirstEpicTask = new ArrayList<>();
+        statusOfTheFirstEpicTask = manager.getterEpicTaskStatus(listOfSubtaskIdOfTheFirstEpicTask);
+        startTimeOfTheFirstEpicTask = manager.getterEpicTaskStartTime(listOfSubtaskIdOfTheFirstEpicTask);
+        durationOfTheFirstEpicTask = manager.getterEpicTaskDuration(listOfSubtaskIdOfTheFirstEpicTask);
+
+        epicTask1 = manager.createTask(new EpicTask(
                 "Закончить учебу"
                 , "Получить сертификат обучения"
                 , listOfSubtaskIdOfTheFirstEpicTask
@@ -39,142 +66,121 @@ public abstract class TaskManagerTest {
                 , startTimeOfTheFirstEpicTask
                 , durationOfTheFirstEpicTask
         ));
+        manager.saveEpicTask(epicTask1);
 
-        EpicTask.SubTask subTask = manager.createTask(new EpicTask.SubTask(
-                epicTask.getId()
+        subtask1 = manager.createTask(new EpicTask.SubTask(
+                epicTask1.getId()
                 , "Сдать все спринты"
                 , "Вовремя выполнить ТЗ"
                 , NEW
                 , LocalDateTime.now().plusMinutes(630L)
                 , 150_000L
         ));
+        manager.saveSubTask(subtask1);
 
-        manager.saveEpicTask(epicTask);
-        manager.saveSubTask(subTask);
-        manager.addSubtaskToEpicTask(subTask, epicTask);
-        manager.updateEpicTask(epicTask);
+        subtask2 = manager.createTask(new EpicTask.SubTask(
+                epicTask1.getId()
+                , "Сдать дипломный проект"
+                , "Сделать дипломный проект"
+                , DONE
+                , LocalDateTime.now().plusMinutes(150_630L)
+                , 250_000L
+        ));
+        manager.saveSubTask(subtask2);
+
+        subtask3 = manager.createTask(new EpicTask.SubTask(
+                epicTask1.getId()
+                , "Сдать 5й спринт"
+                , "Сделать ТЗ"
+                , NEW
+                , LocalDateTime.now().plusMinutes(400_630L)
+                , 4_320L
+        ));
+        manager.saveSubTask(subtask3);
+
+        manager.addSubtaskToEpicTask(subtask1, epicTask1);
+        manager.addSubtaskToEpicTask(subtask2, epicTask1);
+        manager.addSubtaskToEpicTask(subtask3, epicTask1);
+
+        manager.updateEpicTask(epicTask1);
+    }
+
+    @Test
+    void addSubtaskToEpicTask() {
+
+        //Проверка работы со стандартым поведением
+        int expected = epicTask1.getId();
+        int actual = subtask1.getEpicTaskId();
+
+        assertEquals(expected, actual,"id Epic задачи не добавился в подзадачу");
+        assertNotNull(epicTask1.getListOfSubTaskId(), "id подзадачи не добавился в список id подзадач Epic задачи");
 
         //Проверка работы с несуществующем идентификатором
-        assertNotNull(manager.getEpicTaskById(epicTask.getId()), "id Epic задачи не существует");
-        assertNotNull(manager.getSubTaskById(subTask.getId()), "id подзадачи не существует");
-        //Проверка работы со стандартым поведением
-        assertNotNull(epicTask.getListOfSubTaskId(), "id подзадачи не добавился в список id подзадач Epic задачи");
-        assertEquals(epicTask.getId(), subTask.getEpicTaskId(), "id Epic задачи не добавился в подзадачу");
+        assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "id Epic задачи не существует");
+        assertNotNull(manager.getSubTaskById(subtask1.getId()), "id подзадачи не существует");
     }
 
-    /*@Test
+    @Test
     void getListOfSubTaskByEpicTaskId() {
+
+        //Проверка работы с пустым списком задач
+        listOfSubTaskByEpicTaskId = manager.getListOfSubTaskByEpicTaskId(epicTask1.getId());
+
+        assertNotNull(listOfSubTaskByEpicTaskId, "Список подзадач пуст");
+
+        //Проверка работы со стандартым поведением
+        int expected = 3;
+        int actual = listOfSubTaskByEpicTaskId.size();
+
+        assertEquals(expected, actual, "Подзадача не добавилась в список");
+
+
+        //Проверка работы с несуществующем идентификатором
+        assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "id Epic задачи не существует");
     }
 
+    /**
+     * Для расчёта статуса Epic. Граничные условия:
+     * a. Пустой список подзадач.
+     * b. Все подзадачи со статусом NEW.
+     * c. Все подзадачи со статусом DONE.
+     * d. Подзадачи со статусами NEW и DONE.
+     * e. Подзадачи со статусом IN_PROGRESS.
+     */
     @Test
     void getterEpicTaskStatus() {
-    }
 
-    @Test
-    void getterEpicTaskStartTime() {
-    }
+        //a. Проверка работы с пустым списком задач
+        listOfSubTaskByEpicTaskId = manager.getListOfSubTaskByEpicTaskId(epicTask1.getId());
 
-    @Test
-    void getterEpicTaskDuration() {
-    }
+        assertNotNull(listOfSubTaskByEpicTaskId, "Список подзадач пуст");
+        
+        //d. Подзадачи со статусами NEW и DONE
+        Task.Status actual1 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
-    @Test
-    void getterEpicTaskEndTime() {
-    }
+        assertEquals(IN_PROGRESS, actual1, "Статус Epic задачи IN_PROGRESS рассчитан не правильно");
 
-    @Test
-    void createTask() {
-    }
+        //b. Все подзадачи со статусом NEW.
+        subtask2.setStatus(NEW);
 
-    @Test
-    void testCreateTask() {
-    }
+        Task.Status actual2 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
-    @Test
-    void testCreateTask1() {
-    }
+        assertEquals(NEW, actual2, "Статус Epic задачи NEW рассчитан не правильно");
+        
+        //c. Все подзадачи со статусом DONE.
+        subtask1.setStatus(DONE);
+        subtask2.setStatus(DONE);
+        subtask3.setStatus(DONE);
+        Task.Status actual3 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
-    @Test
-    void saveTask() {
-    }
+        assertEquals(DONE, actual3, "Статус Epic задачи DONE рассчитан не правильно");
 
-    @Test
-    void saveEpicTask() {
-    }
+        //e. Подзадачи со статусом IN_PROGRESS
+        subtask1.setStatus(IN_PROGRESS);
+        subtask2.setStatus(IN_PROGRESS);
+        subtask3.setStatus(IN_PROGRESS);
+        Task.Status actual4 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
-    @Test
-    void saveSubTask() {
+        assertEquals(IN_PROGRESS, actual4, "Статус Epic задачи IN_PROGRESS рассчитан не правильно");
     }
-
-    @Test
-    void getTaskById() {
-    }
-
-    @Test
-    void getEpicTaskById() {
-    }
-
-    @Test
-    void getSubTaskById() {
-    }
-
-    @Test
-    void updateTask() {
-    }
-
-    @Test
-    void updateEpicTask() {
-    }
-
-    @Test
-    void updateSubTask() {
-    }
-
-    @Test
-    void getListOfTasks() {
-    }
-
-    @Test
-    void getListOfEpicTasks() {
-    }
-
-    @Test
-    void getListOfSubTasks() {
-    }
-
-    @Test
-    void removeTaskById() {
-    }
-
-    @Test
-    void removeEpicTaskById() {
-    }
-
-    @Test
-    void removeSubTaskById() {
-    }
-
-    @Test
-    void deleteAllTasks() {
-    }
-
-    @Test
-    void deleteAllEpicTasks() {
-    }
-
-    @Test
-    void deleteAllSubTasks() {
-    }
-
-    @Test
-    void getTaskHistory() {
-    }
-
-    @Test
-    void removeTaskFromTaskHistory() {
-    }
-
-    @Test
-    void getterPrioritizedTasks() {
-    }*/
 }
