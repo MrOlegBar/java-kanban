@@ -104,6 +104,7 @@ public interface TaskManager {
 
     /**
      * Возвращает из коллекции список всех задач
+     * @return
      */
     List<Task> getListOfTasks();
 

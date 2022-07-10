@@ -202,11 +202,18 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTask(Task task) {
         checkIntersectionByTaskTime(task);
         int taskId = task.getId();
+        task.setId(taskId);
         String taskName = task.getName();
+        task.setName(taskName);
         String taskDescription = task.getDescription();
+        task.setDescription(taskDescription);
         Task.Status taskStatus = task.getStatus();
+        task.setStatus(taskStatus);
         LocalDateTime startTime = task.getStartTime();
+        task.setStartTime(startTime);
         long duration = task.getDuration();
+        task.setDuration(duration);
+        task.setEndTime(task.getEndTime());
         Task newTask = new Task(taskId, taskName, taskDescription, taskStatus, startTime, duration);
         taskStorage.put(taskId, newTask);
     }
@@ -220,9 +227,14 @@ public class InMemoryTaskManager implements TaskManager {
         String epicTaskName = epicTask.getName();
         String epicTaskDescription = epicTask.getDescription();
         List<Integer> listOfSubTaskId = epicTask.getListOfSubTaskId();
+        epicTask.setListOfSubTaskId(listOfSubTaskId);
         Task.Status epicTaskStatus = getEpicTaskStatus(listOfSubTaskId);
+        epicTask.setStatus(epicTaskStatus);
         LocalDateTime epicTaskStartTime = getEpicTaskStartTime(listOfSubTaskId);
+        epicTask.setStartTime(epicTaskStartTime);
         long epicTaskDuration = getEpicTaskDuration(listOfSubTaskId);
+        epicTask.setDuration(epicTaskDuration);
+        epicTask.setEndTime(epicTask.getEndTime());
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
                 , listOfSubTaskId, epicTaskStatus, epicTaskStartTime, epicTaskDuration);
         epicTaskStorage.put(epicTaskId, newEpicTask);
@@ -235,12 +247,20 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubTask(EpicTask.SubTask subTask) {
         checkIntersectionByTaskTime(subTask);
         int subTaskId = subTask.getId();
+        subTask.setId(subTaskId);
         int epicTaskId = subTask.getEpicTaskId();
+        subTask.setEpicTaskId(epicTaskId);
         String subTaskName = subTask.getName();
+        subTask.setName(subTaskName);
         String subTaskDescription = subTask.getDescription();
+        subTask.setDescription(subTaskDescription);
         Task.Status subTaskStatus = subTask.getStatus();
+        subTask.setStatus(subTaskStatus);
         LocalDateTime startTime = subTask.getStartTime();
+        subTask.setStartTime(startTime);
         long duration = subTask.getDuration();
+        subTask.setDuration(duration);
+        subTask.setEndTime(subTask.getEndTime());
         EpicTask.SubTask newSubTask = new EpicTask.SubTask(subTaskId, epicTaskId, subTaskName, subTaskDescription
                 , subTaskStatus, startTime, duration);
         subTaskStorage.put(subTaskId, newSubTask);

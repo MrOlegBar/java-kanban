@@ -8,13 +8,14 @@ import java.util.Objects;
  * Класс для создания Task задач
  */
 public class Task {
-    private final String name;
-    private final String description;
+    private String name;
+    private String description;
     private int id;
     private Status status;
-    private final LocalDateTime startTime;
-    private final long duration;
-    private final LocalDateTime endTime;
+    private LocalDateTime startTime;
+    private long duration;
+
+    private LocalDateTime endTime;
 
     public Task(String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime, long duration) {
         this.name = taskName;
@@ -51,8 +52,16 @@ public class Task {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Status getStatus() {
@@ -67,8 +76,16 @@ public class Task {
         return startTime;
     }
 
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     public long getDuration() {
         return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 
     public LocalDateTime getEndTime() {
@@ -77,6 +94,10 @@ public class Task {
         } else {
             return null;
         }
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     @Override
