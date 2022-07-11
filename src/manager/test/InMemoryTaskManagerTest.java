@@ -61,4 +61,49 @@ class InMemoryTaskManagerTest extends TaskManagerTest {
     void saveSubTask() {
         super.saveSubTask();
     }
+
+    @Test
+    void getTaskById() {
+        super.getTaskById();
+    }
+
+    @Test
+    void getEpicTaskById() {
+        super.getEpicTaskById();
+    }
+
+    @Test
+    void getSubTaskById() {
+        super.getSubTaskById();
+    }
+
+    @Test
+    void updateTask() {
+        super.updateTask();
+    }
+
+    @Test
+    void updateEpicTask() {
+        super.updateEpicTask();
+    }
+
+    @Test
+    void updateSubTask() {
+        super.updateSubTask();
+    }
+
+    @Test
+    void getListOfTasks() {
+        super.getListOfTasks();
+    }
+
+    @Test
+    void getListOfEpicTasks() {
+        super.getListOfEpicTasks();
+    }
+
+    @Test
+    void getListOfSubTasks() {
+        super.getListOfSubTasks();
+    }
 }

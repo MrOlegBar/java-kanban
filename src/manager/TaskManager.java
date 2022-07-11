@@ -104,7 +104,6 @@ public interface TaskManager {
 
     /**
      * Возвращает из коллекции список всех задач
-     * @return
      */
     List<Task> getListOfTasks();
 
@@ -117,6 +116,12 @@ public interface TaskManager {
      * Возвращает из коллекции список всех подзадач
      */
     List<EpicTask.SubTask> getListOfSubTasks();
+
+    /**
+     * Геттер для метода, который возвращает список всех задач
+     * , отсортированный по дате и времени начала самой ранней задачи
+     */
+    Set<Task> getterPrioritizedTasks();
 
     /**
      * Удаляет по id задачу из коллекции и истории задач
@@ -157,10 +162,4 @@ public interface TaskManager {
      * Удаляет по id задачу из просмотра
      */
     void removeTaskFromTaskHistory(int id);
-
-    /**
-     * Геттер для метода, который возвращает список всех задач
-     * , отсортированный по дате и времени начала самой ранней задачи
-     */
-    Set<Task> getterPrioritizedTasks();
 }

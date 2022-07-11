@@ -97,7 +97,9 @@ public class InMemoryTaskManager implements TaskManager {
                 LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
                 LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
                 if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
-                        || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))) {
+                        || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))
+                        || startTimeTaskFromList.isAfter(startTimeTask) && endTimeTaskFromList.isBefore(endTimeTask)
+                        || startTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList)) {
                     throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
                 }
             }
@@ -523,7 +525,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     private Set<Task> getPrioritizedTasks() {
         Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() != null && task2.getStartTime() != null) {
+            if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
                 return task1.getStartTime().compareTo(task2.getStartTime());
             } else if (task1.getStartTime() == null) {
                 return 1;
