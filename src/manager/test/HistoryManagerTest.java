@@ -1,7 +1,6 @@
 package manager.test;
 
 import manager.HistoryManager;
-import manager.InMemoryHistoryManager;
 import manager.TaskManager;
 import manager.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static task.Task.Status.DONE;
 import static task.Task.Status.NEW;
 
-abstract class HistoryManagerTest {
-    HistoryManager historyManager;
+abstract class HistoryManagerTest<T extends HistoryManager> {
+    T historyManager;
+    abstract T createManager();
     TaskManager manager;
     Task task1;
     Task task2;
@@ -32,8 +32,8 @@ abstract class HistoryManagerTest {
 
     @BeforeEach
     private void beforeEach() {
-        historyManager = new InMemoryHistoryManager();
         manager = new InMemoryTaskManager();
+        historyManager = createManager();
 
         task1 = new Task(
                 "Поесть"
@@ -88,12 +88,7 @@ abstract class HistoryManagerTest {
 
         history = historyManager.getTaskHistory();
     }
-    /**
-     * Граничные условия:
-     * a. Пустая история задач.
-     * b. Дублирование.
-     * с. Удаление из истории: начало, середина, конец.
-     */
+
     @Test
     void addTaskToTaskHistory() {
 

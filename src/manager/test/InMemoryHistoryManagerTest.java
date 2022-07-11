@@ -1,21 +1,13 @@
 package manager.test;
 
-import org.junit.jupiter.api.Test;
+import manager.HistoryManager;
+import manager.InMemoryHistoryManager;
 
 class InMemoryHistoryManagerTest extends HistoryManagerTest {
+    HistoryManager historyManager = new InMemoryHistoryManager();;
 
-    @Test
-    void addTaskToTaskHistory() {
-        super.addTaskToTaskHistory();
-    }
-
-    @Test
-    void getTaskHistory() {
-        super.getTaskHistory();
-    }
-
-    @Test
-    void removeTaskFromTaskHistory() {
-        super.removeTaskFromTaskHistory();
+    @Override
+    HistoryManager createManager() {
+        return historyManager;
     }
 }

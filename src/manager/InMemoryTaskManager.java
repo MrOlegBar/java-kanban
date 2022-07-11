@@ -531,13 +531,12 @@ public class InMemoryTaskManager implements TaskManager {
                 return 1;
             } else if (null == task2.getStartTime()) {
                 return -1;
-            } else {
+            }else {
                 return 0;
             }
         });
 
         listOfPrioritizedTasks.addAll(taskStorage.values());
-        listOfPrioritizedTasks.addAll(epicTaskStorage.values());
         listOfPrioritizedTasks.addAll(subTaskStorage.values());
 
         return listOfPrioritizedTasks;
