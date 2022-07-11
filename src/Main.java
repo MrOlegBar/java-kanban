@@ -1,4 +1,15 @@
 import exception.ManagerSaveException;
+import manager.FileBackedTasksManager;
+import task.EpicTask;
+import task.Task;
+
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static task.Task.Status.DONE;
+import static task.Task.Status.NEW;
 
 /**
  * «Трекер задач»
@@ -103,29 +114,27 @@ public class Main {
         System.out.println(manager.getListOfEpicTasks());*/
 
         /**
-         * Возможность хранить задачи всех типов
-         * Получение списка всех задач
-         */
-        /*System.out.println("\n    Возможность хранить задачи всех типов:");
-        System.out.println("    Получение списка всех задач:");
-        System.out.println(manager.getListOfTasks());
-        System.out.println(manager.getListOfEpicTasks());
-        System.out.println(manager.getListOfSubTasks());*/
-
-        /**
          * Получение по идентификатору
-         * История просмотров задач
+         * Метод для возвращения списка задач и подзадач в заданном порядке
          */
         /*System.out.println("\n    -Получение по идентификатору:");
-        System.out.println(manager.getTaskById(1));
-        System.out.println(manager.getTaskById(2));
-        System.out.println(manager.getEpicTaskById(3));
-        System.out.println(manager.getSubTaskById(4));
-        System.out.println(manager.getSubTaskById(5));
-        System.out.println(manager.getSubTaskById(6));
-        System.out.println(manager.getEpicTaskById(7));
-        System.out.println("    -История просмотров задач:");
-        System.out.println(manager.getHistory());*/
+        try {
+            System.out.println(manager.getTaskById(1));
+            System.out.println(manager.getTaskById(2));
+
+            System.out.println(manager.getEpicTaskById(3));
+            System.out.println(manager.getSubTaskById(4));
+            System.out.println(manager.getSubTaskById(5));
+            System.out.println(manager.getSubTaskById(6));
+            System.out.println(manager.getEpicTaskById(7));
+            System.out.println("    -История просмотров задач:");
+            System.out.println(manager.getTaskHistory());
+
+            System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
+            System.out.println(manager.getterPrioritizedTasks());
+        } catch (NullPointerException | ClassCastException e) {
+            System.out.println(e.getMessage());
+        }*/
 
         /**
          * Удаление задачи, которая есть в истории;
@@ -244,6 +253,9 @@ public class Main {
         System.out.println(manager.getHistory());
         System.out.println(manager.getListOfSubTasks());*/
 
+        /**
+         * Метод для возвращения списка задач и подзадач в заданном порядке.
+         */
         /*System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
         System.out.println(manager.getterPrioritizedTasks());*/
     }

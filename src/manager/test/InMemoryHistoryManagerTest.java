@@ -4,7 +4,7 @@ import manager.HistoryManager;
 import manager.InMemoryHistoryManager;
 
 class InMemoryHistoryManagerTest extends HistoryManagerTest {
-    HistoryManager historyManager = new InMemoryHistoryManager();;
+    HistoryManager historyManager = new InMemoryHistoryManager();
 
     @Override
     HistoryManager createManager() {

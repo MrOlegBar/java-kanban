@@ -122,6 +122,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("    Создали 2ю EpicTask задачу без SubTask подзадач:");
         System.out.println(manager.getListOfEpicTasks());
 
+        /**
+         * Получение по идентификатору
+         * Восстановленный список всех задач
+         * Восстановленная История просмотров задач
+         * Метод для возвращения списка задач и подзадач в заданном порядке
+         */
         System.out.println("\n    -Получение по идентификатору:");
         try {
             System.out.println(manager.getTaskById(1));
@@ -427,7 +433,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     /**
      * Получение списка всех задач
-     * @return
      */
     @Override
     public List<Task> getListOfTasks() {

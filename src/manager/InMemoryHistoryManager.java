@@ -15,7 +15,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     /**
      * Класс для узла двусвязного списка
      */
-    private class Node {
+    private static class Node {
         Task item;
         Node next;
         Node prev;
