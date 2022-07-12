@@ -15,8 +15,19 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
+    Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
+        if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
+            return task1.getStartTime().compareTo(task2.getStartTime());
+        } else if (task1.getStartTime() == null) {
+            return 1;
+        } else if (null == task2.getStartTime()) {
+            return -1;
+        }else {
+            return 0;
+        }
+    });
 
-    protected static final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    public HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     public void setId(int id) {
         this.id = id;
@@ -139,8 +150,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveTask(Task task) {
+        checkIntersectionByTaskTime(task);
         int taskId = idGeneration(task);
         taskStorage.put(taskId, task);
+        listOfPrioritizedTasks.add(task);
     }
 
     /**
@@ -157,8 +170,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) {
+        checkIntersectionByTaskTime(subTask);
         int subTaskId = idGeneration(subTask);
         subTaskStorage.put(subTaskId, subTask);
+        listOfPrioritizedTasks.add(subTask);
     }
 
     /**
@@ -218,6 +233,7 @@ public class InMemoryTaskManager implements TaskManager {
         task.setEndTime(task.getEndTime());
         Task newTask = new Task(taskId, taskName, taskDescription, taskStatus, startTime, duration);
         taskStorage.put(taskId, newTask);
+        listOfPrioritizedTasks.add(task);
     }
 
     /**
@@ -240,6 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
                 , listOfSubTaskId, epicTaskStatus, epicTaskStartTime, epicTaskDuration);
         epicTaskStorage.put(epicTaskId, newEpicTask);
+        listOfPrioritizedTasks.add(epicTask);
     }
 
     /**
@@ -266,6 +283,7 @@ public class InMemoryTaskManager implements TaskManager {
         EpicTask.SubTask newSubTask = new EpicTask.SubTask(subTaskId, epicTaskId, subTaskName, subTaskDescription
                 , subTaskStatus, startTime, duration);
         subTaskStorage.put(subTaskId, newSubTask);
+        listOfPrioritizedTasks.add(subTask);
 
         EpicTask epicTask = epicTaskStorage.get(epicTaskId);
         if (epicTask != null) {
@@ -407,7 +425,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает список истории задач
      */
     @Override
-    public List<Task> getTaskHistory() {
+    public List<Task> getListOfTaskHistory() {
         return inMemoryHistoryManager.getTaskHistory();
     }
 
@@ -524,21 +542,6 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает список задач, отсортированный по дате и времени начала самой ранней задачи
      */
     private Set<Task> getPrioritizedTasks() {
-        Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
-            if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
-                return task1.getStartTime().compareTo(task2.getStartTime());
-            } else if (task1.getStartTime() == null) {
-                return 1;
-            } else if (null == task2.getStartTime()) {
-                return -1;
-            }else {
-                return 0;
-            }
-        });
-
-        listOfPrioritizedTasks.addAll(taskStorage.values());
-        listOfPrioritizedTasks.addAll(subTaskStorage.values());
-
         return listOfPrioritizedTasks;
     }
 }

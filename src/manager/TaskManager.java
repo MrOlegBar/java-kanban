@@ -156,7 +156,7 @@ public interface TaskManager {
     /**
      * Возвращает список истории задач
      */
-    List<Task> getTaskHistory();
+    List<Task> getListOfTaskHistory();
 
     /**
      * Удаляет по id задачу из просмотра

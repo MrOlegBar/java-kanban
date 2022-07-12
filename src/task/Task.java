@@ -105,7 +105,9 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && duration == task.duration && name.equals(task.name) && description.equals(task.description) && status == task.status && Objects.equals(startTime, task.startTime) && Objects.equals(endTime, task.endTime);
+        return id == task.id && duration == task.duration && name.equals(task.name)
+                && description.equals(task.description) && status == task.status
+                && Objects.equals(startTime, task.startTime) && Objects.equals(endTime, task.endTime);
     }
 
     /**
@@ -122,15 +124,21 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                ", duration=" + duration +
-                ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                "}\n";
+        String returnString = null;
+        try {
+             returnString = "Task{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", description='" + description + '\'' +
+                    ", status=" + status +
+                    ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                    ", duration=" + duration +
+                    ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                    "}\n";
+        } catch (NullPointerException e) {
+            System.out.println("Ошибка формата объектов LocalDateTime: " + e.getMessage());
+        }
+        return returnString;
     }
 
     /**

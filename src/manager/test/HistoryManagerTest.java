@@ -1,7 +1,7 @@
 package manager.test;
 
 import manager.HistoryManager;
-import manager.TaskManager;
+import manager.InMemoryHistoryManager;
 import manager.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static task.Task.Status.DONE;
 import static task.Task.Status.NEW;
 
-abstract class HistoryManagerTest<T extends HistoryManager> {
-    T historyManager;
-    abstract T createManager();
-    TaskManager manager;
+class HistoryManagerTest extends InMemoryTaskManager {
+    HistoryManager historyManager;
     Task task1;
     Task task2;
     List<Task> history;
@@ -32,8 +30,7 @@ abstract class HistoryManagerTest<T extends HistoryManager> {
 
     @BeforeEach
     private void beforeEach() {
-        manager = new InMemoryTaskManager();
-        historyManager = createManager();
+        historyManager = new InMemoryHistoryManager();
 
         task1 = new Task(
                 "Поесть"
@@ -42,7 +39,7 @@ abstract class HistoryManagerTest<T extends HistoryManager> {
                 , LocalDateTime.now().minusMinutes(30L)
                 , 30L
         );
-        manager.saveTask(task1);
+        saveTask(task1);
 
         task2 = new Task(
                 "Поспать"
@@ -51,14 +48,14 @@ abstract class HistoryManagerTest<T extends HistoryManager> {
                 , LocalDateTime.now().plusMinutes(30L)
                 , 600L
         );
-        manager.saveTask(task2);
+        saveTask(task2);
 
         listOfSubtaskIdOfEpicTask1 = new ArrayList<>();
-        statusOfEpicTask1 = manager.getterEpicTaskStatus(listOfSubtaskIdOfEpicTask1);
-        startTimeOFEpicTask1 = manager.getterEpicTaskStartTime(listOfSubtaskIdOfEpicTask1);
-        durationOfEpicTask1 = manager.getterEpicTaskDuration(listOfSubtaskIdOfEpicTask1);
+        statusOfEpicTask1 = getterEpicTaskStatus(listOfSubtaskIdOfEpicTask1);
+        startTimeOFEpicTask1 = getterEpicTaskStartTime(listOfSubtaskIdOfEpicTask1);
+        durationOfEpicTask1 = getterEpicTaskDuration(listOfSubtaskIdOfEpicTask1);
 
-        epicTask1 = manager.createTask(new EpicTask(
+        epicTask1 = createTask(new EpicTask(
                 "Закончить учебу"
                 , "Получить сертификат обучения"
                 , listOfSubtaskIdOfEpicTask1
@@ -66,9 +63,9 @@ abstract class HistoryManagerTest<T extends HistoryManager> {
                 , startTimeOFEpicTask1
                 , durationOfEpicTask1
         ));
-        manager.saveEpicTask(epicTask1);
+        saveEpicTask(epicTask1);
 
-        subtask1 = manager.createTask(new EpicTask.SubTask(
+        subtask1 = createTask(new EpicTask.SubTask(
                 epicTask1.getId()
                 , "Сдать все спринты"
                 , "Вовремя выполнить ТЗ"
@@ -76,10 +73,10 @@ abstract class HistoryManagerTest<T extends HistoryManager> {
                 , LocalDateTime.now().plusMinutes(630L)
                 , 150_000L
         ));
-        manager.saveSubTask(subtask1);
+        saveSubTask(subtask1);
 
-        manager.addSubtaskToEpicTask(subtask1, epicTask1);
-        manager.updateEpicTask(epicTask1);
+        addSubtaskToEpicTask(subtask1, epicTask1);
+        updateEpicTask(epicTask1);
 
         historyManager.addTaskToTaskHistory(task1);
         historyManager.addTaskToTaskHistory(task1);

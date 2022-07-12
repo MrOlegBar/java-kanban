@@ -139,7 +139,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             System.out.println(manager.getSubTaskById(6));
             System.out.println(manager.getEpicTaskById(7));
             System.out.println("    -История просмотров задач:");
-            System.out.println(manager.getTaskHistory());
+            System.out.println(manager.getListOfTaskHistory());
 
             FileBackedTasksManager recoveryManager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
 
@@ -148,7 +148,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             System.out.println(recoveryManager.getListOfEpicTasks());
             System.out.println(recoveryManager.getListOfSubTasks());
             System.out.println("    Восстановленная История просмотров задач:");
-            System.out.println(recoveryManager.getTaskHistory());
+            System.out.println(recoveryManager.getListOfTaskHistory());
 
             System.out.println("    Метод для возвращения списка задач и подзадач в заданном порядке:");
             System.out.println(manager.getterPrioritizedTasks());
@@ -202,21 +202,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         for (Integer id : taskHistoryIds) {
-            Task task = localManager.getTaskById(id);
-            EpicTask epicTask = localManager.getEpicTaskById(id);
-            EpicTask.SubTask subTask = localManager.getSubTaskById(id);
-
-            if (task != null) {
-                inMemoryHistoryManager.addTaskToTaskHistory(task);
-            }
-
-            if (epicTask != null) {
-                inMemoryHistoryManager.addTaskToTaskHistory(epicTask);
-            }
-
-            if (subTask != null) {
-                inMemoryHistoryManager.addTaskToTaskHistory(subTask);
-            }
+            localManager.getTaskById(id);
+            localManager.getEpicTaskById(id);
+            localManager.getSubTaskById(id);
         }
         return localManager;
     }
@@ -572,8 +560,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * История просмотров задач
      */
     @Override
-    public List<Task> getTaskHistory() {
-        return super.getTaskHistory();
+    public List<Task> getListOfTaskHistory() {
+        return super.getListOfTaskHistory();
     }
 
     @Override
