@@ -15,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
     private int id = 0;
-    Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
+    private final Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
         if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
             return task1.getStartTime().compareTo(task2.getStartTime());
         } else if (task1.getStartTime() == null) {
@@ -27,7 +27,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     });
 
-    public HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     public void setId(int id) {
         this.id = id;
@@ -331,6 +331,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(int id) {
         inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+        Task task = taskStorage.get(id);
+        if (task != null) {
+            listOfPrioritizedTasks.remove(task);
+        }
         taskStorage.remove(id);
 
     }
@@ -344,6 +348,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (epicTask != null) {
             for (int subTaskId : epicTask.getListOfSubTaskId()) {
                 inMemoryHistoryManager.removeTaskFromTaskHistory(subTaskId);
+                EpicTask.SubTask subTask = subTaskStorage.get(id);
+                if (subTask != null) {
+                    listOfPrioritizedTasks.remove(subTask);
+                }
                 subTaskStorage.remove(subTaskId);
             }
             inMemoryHistoryManager.removeTaskFromTaskHistory(id);
@@ -363,6 +371,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (epicTask != null) {
                 epicTask.getListOfSubTaskId().remove((Integer) id);
                 inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+                listOfPrioritizedTasks.remove(subTask);
                 subTaskStorage.remove(id);
                 updateEpicTask(epicTask);
             }
