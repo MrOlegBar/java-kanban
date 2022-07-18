@@ -103,15 +103,17 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime endTimeTask = task.getEndTime();
         Set<Task> listOfSortedTasks = getPrioritizedTasks();
 
-        for (var taskFromTheList : listOfSortedTasks) {
-            if (taskFromTheList.getStartTime() != null) {
-                LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
-                LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
-                if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
-                        || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))
-                        || startTimeTaskFromList.isAfter(startTimeTask) && endTimeTaskFromList.isBefore(endTimeTask)
-                        || startTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList)) {
-                    throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
+        if (startTimeTask != null) {
+            for (var taskFromTheList : listOfSortedTasks) {
+                if (taskFromTheList.getStartTime() != null) {
+                    LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
+                    LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
+                    if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
+                            || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))
+                            || startTimeTaskFromList.isAfter(startTimeTask) && endTimeTaskFromList.isBefore(endTimeTask)
+                            || startTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList)) {
+                        throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
+                    }
                 }
             }
         }

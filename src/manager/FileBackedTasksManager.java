@@ -237,9 +237,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод сохранения задачи в строку
      */
     private String taskToString(Task task) {
+        String startTime = "null";
+        String endTime = "null";
         String type = String.valueOf(task.getClass()).replace("class task.", "");
-        String startTime = task.getStartTime().format(formatter);
-        String endTime = task.getEndTime().format(formatter);
+        if (task.getStartTime() != null) {
+            startTime = task.getStartTime().format(formatter);
+            endTime = task.getEndTime().format(formatter);
+        }
         return String.format("%s, %s, %s, %s, %s, -, %s, %s, %s", task.getId(), type, task.getName(), task.getStatus()
                 , task.getDescription(), startTime, task.getDuration(), endTime);
     }
@@ -266,7 +270,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     /**
-     * Метод создания задачи из строки
+     * Создает задачу из строки
      */
     private static Task fromString(String value) {
         Task result = null;
@@ -319,6 +323,51 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             ,startTime, duration);
         }
         return result;
+    }
+
+    private static List fromTheRequestBody(String body) {
+        String[] keyValueArray;
+        String name = null;
+        String description = null;
+        Task.Status status = null;
+        LocalDateTime startTime = null;
+        long duration = 0;
+
+        String[] stringArray = body
+                .replaceFirst("\\{", "")
+                .replaceAll("\\s", "")
+                .replaceAll("\"", "")
+                .replaceFirst("}", "")
+                .split(",");
+
+        for (String string : stringArray) {
+            keyValueArray = string.split(":");
+            String key = keyValueArray[0];
+            String value = keyValueArray[1];
+
+            switch (key) {
+                case "name":
+                    name = value;
+                    continue;
+                case "description":
+                    description = value;
+                    continue;
+                case "status":
+                    status = Task.Status.valueOf(value);
+                    continue;
+                case "startTime":
+                    if (!value.equals("null")) {
+                        startTime = LocalDateTime.parse(value);
+                    }
+                    continue;
+                case "duration":
+                    duration = Long.parseLong(value);
+                    continue;
+                default:
+                    break;
+            }
+        }
+        return new ArrayList(List.of(name, description, status, startTime, duration));
     }
 
     /**
@@ -608,5 +657,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Set<Task> getterPrioritizedTasks() {
         return super.getterPrioritizedTasks();
+    }
+
+    public static List getterFromTheRequestBody(String body) {
+        return fromTheRequestBody(body);
     }
 }

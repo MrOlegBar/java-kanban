@@ -8,9 +8,9 @@ import java.util.Objects;
  * Класс для создания Task задач
  */
 public class Task {
+    private int id;
     private String name;
     private String description;
-    private int id;
     private Status status;
     private LocalDateTime startTime;
     private long duration;
@@ -126,15 +126,27 @@ public class Task {
     public String toString() {
         String returnString = null;
         try {
-             returnString = "Task{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    ", description='" + description + '\'' +
-                    ", status=" + status +
-                    ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                    ", duration=" + duration +
-                    ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                    "}\n";
+            if (startTime != null) {
+                 returnString = "Task{" +
+                        "id=" + id +
+                        ", name='" + name + '\'' +
+                        ", description='" + description + '\'' +
+                        ", status=" + status +
+                        ", startTime=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                        ", duration=" + duration +
+                        ", endTime=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                        "}\n";
+            } else {
+                returnString = "Task{" +
+                        "id=" + id +
+                        ", name='" + name + '\'' +
+                        ", description='" + description + '\'' +
+                        ", status=" + status +
+                        ", startTime=" + null +
+                        ", duration=" + duration +
+                        ", endTime=" + null +
+                        "}\n";
+            }
         } catch (NullPointerException e) {
             System.out.println("Ошибка формата объектов LocalDateTime: " + e.getMessage());
         }
