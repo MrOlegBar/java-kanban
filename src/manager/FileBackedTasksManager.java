@@ -325,7 +325,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return result;
     }
 
-    private static List fromTheRequestBody(String body) {
+    private static Task fromTheRequestBody(String body) {
+
         String[] keyValueArray;
         String name = null;
         String description = null;
@@ -367,7 +368,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
             }
         }
-        return new ArrayList(List.of(name, description, status, startTime, duration));
+        return new Task(name, description, status, startTime, duration);
     }
 
     /**
@@ -659,7 +660,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return super.getterPrioritizedTasks();
     }
 
-    public static List getterFromTheRequestBody(String body) {
+    public static Task getterFromTheRequestBody(String body) {
         return fromTheRequestBody(body);
     }
 }
