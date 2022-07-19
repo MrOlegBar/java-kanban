@@ -108,10 +108,16 @@ public class InMemoryTaskManager implements TaskManager {
                 if (taskFromTheList.getStartTime() != null) {
                     LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
                     LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
-                    if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
-                            || (endTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList))
-                            || startTimeTaskFromList.isAfter(startTimeTask) && endTimeTaskFromList.isBefore(endTimeTask)
-                            || startTimeTask.isAfter(startTimeTaskFromList) && endTimeTask.isBefore(endTimeTaskFromList)) {
+                    if ((startTimeTask.isAfter(startTimeTaskFromList)
+                            && startTimeTask.isBefore(endTimeTaskFromList))
+                            || (endTimeTask.isAfter(startTimeTaskFromList)
+                            && endTimeTask.isBefore(endTimeTaskFromList))
+                            || (startTimeTaskFromList.isAfter(startTimeTask)
+                            && endTimeTaskFromList.isBefore(endTimeTask))
+                            || (startTimeTask.isAfter(startTimeTaskFromList)
+                            && endTimeTask.isBefore(endTimeTaskFromList))
+                            || (startTimeTask.equals(startTimeTaskFromList))
+                            || (endTimeTask.equals(endTimeTaskFromList))) {
                         throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
                     }
                 }
@@ -129,7 +135,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Возвращает задачу EpicTask после проверки на пересечение по времени выполнения
+     * Возвращает задачу EpicTask
      */
     @Override
     public EpicTask createTask(EpicTask epicTask) {
@@ -152,7 +158,6 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveTask(Task task) {
-        checkIntersectionByTaskTime(task);
         int taskId = idGeneration(task);
         taskStorage.put(taskId, task);
         listOfPrioritizedTasks.add(task);
@@ -172,7 +177,6 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) {
-        checkIntersectionByTaskTime(subTask);
         int subTaskId = idGeneration(subTask);
         subTaskStorage.put(subTaskId, subTask);
         listOfPrioritizedTasks.add(subTask);
@@ -452,9 +456,8 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает id для новой задачи
      */
     private int idGeneration(Task task) {
-        id += 1;
-        task.setId(id);
-        return id;
+        task.setId(++id);
+        return task.getId();
     }
 
     /**

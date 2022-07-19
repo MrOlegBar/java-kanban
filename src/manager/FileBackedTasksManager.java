@@ -171,13 +171,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 if ((autosaveFileLine.matches(".* Task.*"))) {
                     Task restoredTask = fromString(autosaveFileLine);
                     localManager.updateTask(restoredTask);
-                    localManager.setId(restoredTask.getId() + 1);
+                    localManager.setId(restoredTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* EpicTask.*"))) {
                     EpicTask restoredEpicTask = (EpicTask) fromString(autosaveFileLine);
                     localManager.updateEpicTask(restoredEpicTask);
-                    localManager.setId(restoredEpicTask.getId() + 1);
+                    localManager.setId(restoredEpicTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* SubTask.*"))) {
@@ -188,7 +188,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                     localManager.updateSubTask(restoredSubTask);
                     localManager.updateEpicTask(epicTaskForSubTask);
-                    localManager.setId(restoredSubTask.getId() + 1);
+                    localManager.setId(restoredSubTask.getId());
 
                 }
 
@@ -240,6 +240,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String startTime = "null";
         String endTime = "null";
         String type = String.valueOf(task.getClass()).replace("class task.", "");
+
         if (task.getStartTime() != null) {
             startTime = task.getStartTime().format(formatter);
             endTime = task.getEndTime().format(formatter);
@@ -249,21 +250,29 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private String epicTaskToString(EpicTask epicTask) {
+        String startTime = "null";
+        String endTime = "null";
         String type = String.valueOf(epicTask.getClass()).replace("class task.", "");
-        String startTime = null;
-        String endTime = null;
+
         if (epicTask.getStartTime() != null) {
             startTime = epicTask.getStartTime().format(formatter);
-            endTime = getterEpicTaskEndTime(epicTask.getListOfSubTaskId()).format(formatter);
+            if (epicTask.getEndTime() == null) {
+                endTime = getterEpicTaskEndTime(epicTask.getListOfSubTaskId()).format(formatter);
+            }
         }
+
         return String.format("%s, %s, %s, %s, %s, -, %s, %s, %s", epicTask.getId(), type, epicTask.getName()
                 , epicTask.getStatus(), epicTask.getDescription(), startTime, epicTask.getDuration(), endTime);
     }
 
     private String subTaskToString(EpicTask.SubTask subTask) {
+        String startTime = "null";
+        String endTime = "null";
         String type = String.valueOf(subTask.getClass()).replace("class task.EpicTask$", "");
-        String startTime = subTask.getStartTime().format(formatter);
-        String endTime = subTask.getEndTime().format(formatter);
+        if (subTask.getStartTime() != null) {
+            startTime = subTask.getStartTime().format(formatter);
+            endTime = subTask.getEndTime().format(formatter);
+        }
         return String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s", subTask.getId(), type, subTask.getName()
                 , subTask.getStatus(), subTask.getDescription(), subTask.getEpicTaskId(), startTime
                 , subTask.getDuration(), endTime);
@@ -325,7 +334,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return result;
     }
 
-    private static Task fromTheRequestBody(String body) {
+    private Task taskFromRequest(String body) {
 
         String[] keyValueArray;
         String name = null;
@@ -336,13 +345,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         String[] stringArray = body
                 .replaceFirst("\\{", "")
-                .replaceAll("\\s", "")
+                .replaceAll("\n\t\t", "")
                 .replaceAll("\"", "")
-                .replaceFirst("}", "")
+                .replaceFirst("\\s*}", "")
                 .split(",");
 
         for (String string : stringArray) {
-            keyValueArray = string.split(":");
+            keyValueArray = string.split(": ");
             String key = keyValueArray[0];
             String value = keyValueArray[1];
 
@@ -358,7 +367,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     continue;
                 case "startTime":
                     if (!value.equals("null")) {
-                        startTime = LocalDateTime.parse(value);
+                        startTime = LocalDateTime.parse(value, formatter);
                     }
                     continue;
                 case "duration":
@@ -370,6 +379,111 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         return new Task(name, description, status, startTime, duration);
     }
+
+    private EpicTask epictaskFromRequest(String body) {
+        List<Integer> listOfSubTaskId = new ArrayList<>();
+        String[] keyValueArray;
+        String name = null;
+        String description = null;
+        Task.Status status = null;
+        LocalDateTime startTime = null;
+        long duration = 0;
+        System.out.println(body);
+        String[] stringArrayBody = body
+                .replaceFirst("\\{\\s*\"", "")
+                .replaceFirst("\\[\\s*", "")
+                .replaceFirst("\\s*]", "")
+                .replaceFirst("\"\\s*}", "")
+                .split(",\\s*\"");
+
+        for (String string : stringArrayBody) {
+            keyValueArray = string.split(": ");
+            String key = keyValueArray[0]
+                    .replaceAll("\"", "");
+            String value = keyValueArray[1]
+                    .trim()
+                    .replaceAll("\"", "");
+
+            switch (key) {
+                case "listOfSubTaskId":
+                    String[] stringArrayValue = value
+                            .split(",\\s*");
+                    for (String id : stringArrayValue) {
+                        listOfSubTaskId.add(Integer.valueOf(id));
+                    }
+                    continue;
+                case "name":
+                    name = value;
+                    continue;
+                case "description":
+                    description = value;
+                    continue;
+                case "status":
+                    status = Task.Status.valueOf(value);
+                    continue;
+                case "startTime":
+                    if (!value.equals("null")) {
+                        startTime = LocalDateTime.parse(value, formatter);
+                    }
+                    continue;
+                case "duration":
+                    duration = Long.parseLong(value);
+                    continue;
+                default:
+                    break;
+            }
+        }
+        return new EpicTask(name, description, listOfSubTaskId, status, startTime, duration);
+    }
+
+    /*private EpicTask.SubTask subtaskFromRequest(String body) {
+        int epicTaskId = 0;
+        String[] keyValueArray;
+        String name = null;
+        String description = null;
+        Task.Status status = null;
+        LocalDateTime startTime = null;
+        long duration = 0;
+
+        String[] stringArray = body
+                .replaceFirst("\\{", "")
+                .replaceAll("\n\t\t", "")
+                .replaceAll("\"", "")
+                .replaceFirst("\\s*}", "")
+                .split(",");
+
+        for (String string : stringArray) {
+            keyValueArray = string.split(": ");
+            String key = keyValueArray[0];
+            String value = keyValueArray[1];
+
+            switch (key) {
+                case "epicTaskId":
+                    epicTaskId = Integer.parseInt(value);
+                    continue;
+                case "name":
+                    name = value;
+                    continue;
+                case "description":
+                    description = value;
+                    continue;
+                case "status":
+                    status = Task.Status.valueOf(value);
+                    continue;
+                case "startTime":
+                    if (!value.equals("null")) {
+                        startTime = LocalDateTime.parse(value, formatter);
+                    }
+                    continue;
+                case "duration":
+                    duration = Long.parseLong(value);
+                    continue;
+                default:
+                    break;
+            }
+        }
+        return new EpicTask.SubTask(epicTaskId, name, description, status, startTime, duration);
+    }*/
 
     /**
      * Метод для сохранения менеджера истории в CSV
@@ -402,7 +516,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Метод автосохранения менеджера задач
      */
-    private void save() {
+    private void saveToCSV() {
         String firstColumn = "id";
         String secondColumn = "type";
         String thirdColumn = "name";
@@ -454,19 +568,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void saveTask(Task task) {
         super.saveTask(task);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void saveEpicTask(EpicTask epicTask) {
         super.saveEpicTask(epicTask);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) {
         super.saveSubTask(subTask);
-        save();
+        saveToCSV();
     }
 
     /**
@@ -493,19 +607,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteAllTasks() {
         super.deleteAllTasks();
-        save();
+        saveToCSV();
     }
 
     @Override
     public void deleteAllEpicTasks() {
         super.deleteAllEpicTasks();
-        save();
+        saveToCSV();
     }
 
     @Override
     public void deleteAllSubTasks() {
         super.deleteAllSubTasks();
-        save();
+        saveToCSV();
     }
 
     /**
@@ -514,21 +628,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Task getTaskById(int id) {
         Task task = super.getTaskById(id);
-        save();
+        saveToCSV();
         return task;
     }
 
     @Override
     public EpicTask getEpicTaskById(int id) {
         EpicTask epicTask = super.getEpicTaskById(id);
-        save();
+        saveToCSV();
         return epicTask;
     }
 
     @Override
     public EpicTask.SubTask getSubTaskById(int id) {
         EpicTask.SubTask subTask = super.getSubTaskById(id);
-        save();
+        saveToCSV();
         return subTask;
     }
 
@@ -538,21 +652,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Task createTask(Task task) {
         Task newTask = super.createTask(task);
-        save();
+        saveTask(newTask);
         return newTask;
     }
 
     @Override
     public EpicTask createTask(EpicTask epicTask) {
         EpicTask newEpicTask = super.createTask(epicTask);
-        save();
+        saveEpicTask(newEpicTask);
         return newEpicTask;
     }
 
     @Override
     public EpicTask.SubTask createTask(EpicTask.SubTask subTask) {
         EpicTask.SubTask newSubTask = super.createTask(subTask);
-        save();
+        saveSubTask(newSubTask);
         return newSubTask;
     }
 
@@ -562,19 +676,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void updateTask(Task task) {
         super.updateTask(task);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void updateEpicTask(EpicTask epicTask) {
         super.updateEpicTask(epicTask);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) {
         super.updateSubTask(subTask);
-        save();
+        saveToCSV();
     }
 
     /**
@@ -583,19 +697,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void removeTaskById(int id) {
         super.removeTaskById(id);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void removeEpicTaskById(int id) {
         super.removeEpicTaskById(id);
-        save();
+        saveToCSV();
     }
 
     @Override
     public void removeSubTaskById(int id) {
         super.removeSubTaskById(id);
-        save();
+        saveToCSV();
     }
 
     /**
@@ -617,7 +731,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void removeTaskFromTaskHistory(int id) {
         super.removeTaskFromTaskHistory(id);
-        save();
+        saveToCSV();
     }
 
     /**
@@ -660,7 +774,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return super.getterPrioritizedTasks();
     }
 
-    public static Task getterFromTheRequestBody(String body) {
-        return fromTheRequestBody(body);
+    public Task getterTaskFromRequest(String body) {
+        return taskFromRequest(body);
     }
+
+    public EpicTask getterEpicTaskFromRequest(String body) {
+        return epictaskFromRequest(body);
+    }
+
+    /*public EpicTask.SubTask getterSubTaskFromRequest(String body) {
+        return subtaskFromRequest(body);
+    }*/
 }

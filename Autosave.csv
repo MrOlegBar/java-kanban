@@ -1,4 +1,3 @@
 id, type, name, status , description, epic, startTime, duration, endTime,
-1, Task, Поесть, NEW, Принять пищу, -, 26.02.2022 22:22, 30, 26.02.2022 22:52
-2, Task, Поспать, DONE, Хорошенько выспаться, -, 11.07.2022 11:11, 600, 11.07.2022 21:11
+1, EpicTask, Закончить учебу, NEW, Получить сертификат обучения, -, null, 0, null
 
