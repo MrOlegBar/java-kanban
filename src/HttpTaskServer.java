@@ -7,6 +7,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import exception.ManagerCreateException;
 import exception.ManagerSaveException;
 import manager.FileBackedTasksManager;
 import task.EpicTask;
@@ -24,7 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class HttpTaskServer {
-    private static final int PORT = 8080;
+    private static final int PORT = 8081;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
@@ -76,7 +77,7 @@ public class HttpTaskServer {
 
     static class HelloHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange httpExchange) throws IOException {
+        public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException {
             FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
             Headers requestHeaders = httpExchange.getRequestHeaders();
             List<String> contentTypeValues = requestHeaders.get("Content-type");
@@ -188,16 +189,25 @@ public class HttpTaskServer {
                             httpExchange.close();
                             return;
                         } else if (path.endsWith("/tasks/subtask")) {
+                            try {
+                                try (InputStream is = httpExchange.getRequestBody()) {
+                                    body = new String(is.readAllBytes(), DEFAULT_CHARSET);
+                                }
+                                EpicTask.SubTask subTask = manager.getterSubTaskFromRequest(body);
+                                manager.createTask(subTask);
 
-                            try (InputStream is = httpExchange.getRequestBody()) {
-                                body = new String(is.readAllBytes(), DEFAULT_CHARSET);
+                                httpExchange.sendResponseHeaders(201, 0);
+                                httpExchange.close();
+                                return;
+                            } catch (ManagerCreateException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                                httpExchange.close();
                             }
-                            EpicTask.SubTask subTask = manager.getterSubTaskFromRequest(body);
-                            manager.createTask(subTask);
-
-                            httpExchange.sendResponseHeaders(201, 0);
-                            httpExchange.close();
-                            return;
                         } else if (path.startsWith("/tasks/task?id=")) {
 
                             int id = Integer.parseInt(path.split("=")[1]);

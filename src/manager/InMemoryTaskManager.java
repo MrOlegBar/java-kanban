@@ -147,10 +147,14 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу SubTask после проверки на пересечение по времени выполнения
      */
     @Override
-    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) {
-        checkIntersectionByTaskTime(subTask);
-        return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription()
-                , subTask.getStatus(), subTask.getStartTime(), subTask.getDuration());
+    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) throws ManagerCreateException {
+        if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
+            checkIntersectionByTaskTime(subTask);
+            return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription()
+                    , subTask.getStatus(), subTask.getStartTime(), subTask.getDuration());
+        } else {
+            throw new ManagerCreateException("Не существует Epic задачи для данной подзадачи");
+        }
     }
 
     /**
@@ -185,11 +189,11 @@ public class InMemoryTaskManager implements TaskManager {
         int subTaskId = idGeneration(subTask);
         if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
             addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
+            subTaskStorage.put(subTaskId, subTask);
+            listOfPrioritizedTasks.add(subTask);
         } else {
             new ManagerSaveException("Не существует Epic задачи для данной подзадачи");
         }
-        subTaskStorage.put(subTaskId, subTask);
-        listOfPrioritizedTasks.add(subTask);
     }
 
     /**

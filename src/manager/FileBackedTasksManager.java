@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerCreateException;
 import task.EpicTask;
 import task.Task;
 import exception.ManagerSaveException;
@@ -170,13 +171,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 if ((autosaveFileLine.matches(".* Task.*"))) {
                     Task restoredTask = fromString(autosaveFileLine);
-                    localManager.updateTask(restoredTask);
+                    localManager.updateTaskFromString(restoredTask);
                     localManager.setId(restoredTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* EpicTask.*"))) {
                     EpicTask restoredEpicTask = (EpicTask) fromString(autosaveFileLine);
-                    localManager.updateEpicTask(restoredEpicTask);
+
+                    localManager.updateEpicTaskFromString(restoredEpicTask);
                     localManager.setId(restoredEpicTask.getId());
                 }
 
@@ -188,12 +190,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         if (epicTask.getId() == restoredSubTask.getEpicTaskId()) {
                             listOfSubTaskId = epicTask.getListOfSubTaskId();
                             listOfSubTaskId.add(restoredSubTask.getId());
-                            localManager.updateEpicTask(epicTask);
+                            localManager.updateSubTaskFromString(restoredSubTask);
+                            localManager.setId(restoredSubTask.getId());
                         }
                     }
-
-                    localManager.updateSubTask(restoredSubTask);
-                    localManager.setId(restoredSubTask.getId());
                 }
 
                 if (autosaveFileLine.matches("^\\d, \\d.*")) {
@@ -673,7 +673,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) {
+    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) throws ManagerCreateException {
         EpicTask.SubTask newSubTask = super.createTask(subTask);
         saveSubTask(newSubTask);
         return newSubTask;
@@ -688,16 +688,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         saveToCSV();
     }
 
+    public void updateTaskFromString(Task task) {
+        super.updateTask(task);
+    }
+
     @Override
     public void updateEpicTask(EpicTask epicTask) {
         super.updateEpicTask(epicTask);
         saveToCSV();
     }
 
+    public void updateEpicTaskFromString(EpicTask epicTask) {
+        super.updateEpicTask(epicTask);
+    }
+
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) {
         super.updateSubTask(subTask);
         saveToCSV();
+    }
+
+    public void updateSubTaskFromString(EpicTask.SubTask subTask) {
+        super.updateSubTask(subTask);
     }
 
     /**
