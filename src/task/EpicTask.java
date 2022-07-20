@@ -29,7 +29,8 @@ public class EpicTask extends Task {
             , String epicTaskName
             , String epicTaskDescription
             , List<Integer> listOfSubTaskIdOfTheEpicTask
-            , Status epicTaskStatus, LocalDateTime startTime
+            , Status epicTaskStatus
+            , LocalDateTime startTime
             , long duration) {
         super(epicTaskName, epicTaskDescription, epicTaskStatus, startTime, duration);
         this.setId(epicTaskId);
@@ -60,24 +61,35 @@ public class EpicTask extends Task {
 
     @Override
     public String toString() {
-        String startTime = null;
-        String endTime = null;
-        if (getStartTime() != null) {
-            startTime = getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        String returnString = null;
+        try {
+            if (getStartTime() != null) {
+                returnString = "EpicTask{" +
+                        "id='" + getId() + '\'' +
+                        ", name='" + getName() + '\'' +
+                        ", description='" + getDescription() + '\'' +
+                        ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
+                        ", status=" + getStatus() +
+                        ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                        ", duration=" + getDuration() +
+                        ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                        "}\n";
+            } else {
+                returnString = "EpicTask{" +
+                        "id='" + getId() + '\'' +
+                        ", name='" + getName() + '\'' +
+                        ", description='" + getDescription() + '\'' +
+                        ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
+                        ", status=" + getStatus() +
+                        ", startTime=" + null +
+                        ", duration=" + getDuration() +
+                        ", endTime=" + null +
+                        "}\n";
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Ошибка формата объектов LocalDateTime: " + e.getMessage());
         }
-        if (getEndTime() != null) {
-            endTime = getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        }
-        return "EpicTask{" +
-                "id='" + getId() + '\'' +
-                ", name='" + getName() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
-                ", status=" + getStatus() +
-                ", startTime=" + startTime +
-                ", duration=" + getDuration() +
-                ", endTime=" + endTime +
-                "}\n";
+        return returnString;
     }
 
     /**
@@ -135,16 +147,35 @@ public class EpicTask extends Task {
 
         @Override
         public String toString() {
-            return "SubTask{" +
-                    "id='" + getId() + '\'' +
-                    ", epicTaskId='" + epicTaskId + '\'' +
-                    ", name='" + getName() + '\'' +
-                    ", description='" + getDescription() + '\'' +
-                    ", status=" + getStatus() +
-                    ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                    ", duration=" + getDuration() +
-                    ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                    "}\n";
+            String returnString = null;
+            try {
+                if (getStartTime() != null) {
+                    returnString = "SubTask{" +
+                            "id='" + getId() + '\'' +
+                            ", epicTaskId='" + epicTaskId + '\'' +
+                            ", name='" + getName() + '\'' +
+                            ", description='" + getDescription() + '\'' +
+                            ", status=" + getStatus() +
+                            ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                            ", duration=" + getDuration() +
+                            ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                            "}\n";
+                } else {
+                    returnString = "SubTask{" +
+                            "id='" + getId() + '\'' +
+                            ", epicTaskId='" + epicTaskId + '\'' +
+                            ", name='" + getName() + '\'' +
+                            ", description='" + getDescription() + '\'' +
+                            ", status=" + getStatus() +
+                            ", startTime=" + null +
+                            ", duration=" + getDuration() +
+                            ", endTime=" + null +
+                            "}\n";
+                }
+            } catch (NullPointerException e) {
+                System.out.println("Ошибка формата объектов LocalDateTime: " + e.getMessage());
+            }
+            return returnString;
         }
     }
 }

@@ -52,7 +52,6 @@ public class HttpTaskServer {
         httpServer.createContext("/tasks", new HelloHandler());
         httpServer.start();
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
-        //new KVServer().start();
     }
 
     static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
@@ -171,9 +170,7 @@ public class HttpTaskServer {
                             }
 
                             Task task = manager.getterTaskFromRequest(body);
-                            System.out.println(task);
                             manager.createTask(task);
-                            System.out.println(task);
 
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -185,9 +182,18 @@ public class HttpTaskServer {
                             }
 
                             EpicTask epicTask = manager.getterEpicTaskFromRequest(body);
-                            System.out.println(epicTask);
                             manager.createTask(epicTask);
-                            System.out.println(epicTask);
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.endsWith("/tasks/subtask")) {
+
+                            try (InputStream is = httpExchange.getRequestBody()) {
+                                body = new String(is.readAllBytes(), DEFAULT_CHARSET);
+                            }
+                            EpicTask.SubTask subTask = manager.getterSubTaskFromRequest(body);
+                            manager.createTask(subTask);
 
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -213,25 +219,26 @@ public class HttpTaskServer {
                             httpExchange.close();
                             return;
                         } else if (path.startsWith("/tasks/epictask?id=")) {
-
-                            /*try (InputStream is = httpExchange.getRequestBody()) {
+                            
+                            int id = Integer.parseInt(path.split("=")[1]);
+                            try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
-                            Task task = manager.getterSubTaskFromRequest(body);
-                            manager.createTask(task);
-                            httpExchange.sendResponseHeaders(201, 0);
-                            httpExchange.close();
-                            return;*/
-                        } else if (path.endsWith("/tasks/subtask")) {
 
-                            /*try (InputStream is = httpExchange.getRequestBody()) {
-                                body = new String(is.readAllBytes(), DEFAULT_CHARSET);
-                            }
-                            EpicTask.SubTask subTask = manager.getterSubTaskFromRequest(body);
-                            manager.createTask(subTask);
+                            EpicTask epictaskData = manager.getterEpicTaskFromRequest(body);
+                            EpicTask epicTask = new EpicTask(
+                                    id
+                                    , epictaskData.getName()
+                                    , epictaskData.getDescription()
+                                    , epictaskData.getListOfSubTaskId()
+                                    , epictaskData.getStatus()
+                                    , epictaskData.getStartTime()
+                                    , epictaskData.getDuration());
+                            manager.updateEpicTask(epicTask);
+                            
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
-                            return;*/
+                            return;
                         } else if (path.startsWith("/tasks/subtask?id=")) {
 
                             /*try (InputStream is = httpExchange.getRequestBody()) {

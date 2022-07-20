@@ -14,7 +14,6 @@ public class Task {
     private Status status;
     private LocalDateTime startTime;
     private long duration;
-
     private LocalDateTime endTime;
 
     public Task(String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime, long duration) {

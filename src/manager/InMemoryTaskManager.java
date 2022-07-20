@@ -1,6 +1,7 @@
 package manager;
 
 import exception.ManagerCreateException;
+import exception.ManagerSaveException;
 import task.EpicTask;
 import task.Task;
 
@@ -108,14 +109,10 @@ public class InMemoryTaskManager implements TaskManager {
                 if (taskFromTheList.getStartTime() != null) {
                     LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
                     LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
-                    if ((startTimeTask.isAfter(startTimeTaskFromList)
-                            && startTimeTask.isBefore(endTimeTaskFromList))
-                            || (endTimeTask.isAfter(startTimeTaskFromList)
-                            && endTimeTask.isBefore(endTimeTaskFromList))
-                            || (startTimeTaskFromList.isAfter(startTimeTask)
-                            && endTimeTaskFromList.isBefore(endTimeTask))
-                            || (startTimeTask.isAfter(startTimeTaskFromList)
-                            && endTimeTask.isBefore(endTimeTaskFromList))
+                    if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
+                            || (endTimeTask.isAfter(startTimeTaskFromList)  && endTimeTask.isBefore(endTimeTaskFromList))
+                            || (startTimeTaskFromList.isAfter(startTimeTask)  && endTimeTaskFromList.isBefore(endTimeTask))
+                            || (startTimeTask.isAfter(startTimeTaskFromList)  && endTimeTask.isBefore(endTimeTaskFromList))
                             || (startTimeTask.equals(startTimeTaskFromList))
                             || (endTimeTask.equals(endTimeTaskFromList))) {
                         throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
@@ -139,8 +136,11 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public EpicTask createTask(EpicTask epicTask) {
+        Task.Status status = getterEpicTaskStatus(epicTask.getListOfSubTaskId());
+        LocalDateTime startTime = getEpicTaskStartTime(epicTask.getListOfSubTaskId());
+        long duration = getEpicTaskDuration(epicTask.getListOfSubTaskId());
         return new EpicTask(epicTask.getName(), epicTask.getDescription(), epicTask.getListOfSubTaskId()
-                , epicTask.getStatus(), epicTask.getStartTime(), epicTask.getDuration());
+                , status, startTime, duration);
     }
 
     /**
@@ -168,7 +168,12 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveEpicTask(EpicTask epicTask) {
-        int epicTaskId = idGeneration(epicTask);
+        int epicTaskId;
+        if (epicTask.getId() == 0) {
+            epicTaskId = idGeneration(epicTask);
+        } else {
+            epicTaskId = epicTask.getId();
+        }
         epicTaskStorage.put(epicTaskId, epicTask);
     }
 
@@ -178,6 +183,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) {
         int subTaskId = idGeneration(subTask);
+        if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
+            addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
+        } else {
+            new ManagerSaveException("Не существует Epic задачи для данной подзадачи");
+        }
         subTaskStorage.put(subTaskId, subTask);
         listOfPrioritizedTasks.add(subTask);
     }
@@ -254,15 +264,28 @@ public class InMemoryTaskManager implements TaskManager {
         epicTask.setListOfSubTaskId(listOfSubTaskId);
         Task.Status epicTaskStatus = getEpicTaskStatus(listOfSubTaskId);
         epicTask.setStatus(epicTaskStatus);
-        LocalDateTime epicTaskStartTime = getEpicTaskStartTime(listOfSubTaskId);
+        LocalDateTime epicTaskStartTime;
+        if (epicTask.getStartTime() == null) {
+            epicTaskStartTime = getEpicTaskStartTime(listOfSubTaskId);
+        } else {
+            epicTaskStartTime = epicTask.getStartTime();
+        }
         epicTask.setStartTime(epicTaskStartTime);
-        long epicTaskDuration = getEpicTaskDuration(listOfSubTaskId);
+        if (epicTask.getEndTime() == null) {
+            epicTask.setEndTime(getEpicTaskEndTime(listOfSubTaskId));
+        } else {
+            epicTask.setEndTime(epicTask.getEndTime());
+        }
+        long epicTaskDuration;
+        if (epicTask.getDuration() == 0) {
+            epicTaskDuration = getEpicTaskDuration(listOfSubTaskId);
+        } else {
+            epicTaskDuration = epicTask.getDuration();
+        }
         epicTask.setDuration(epicTaskDuration);
-        epicTask.setEndTime(epicTask.getEndTime());
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
                 , listOfSubTaskId, epicTaskStatus, epicTaskStartTime, epicTaskDuration);
         epicTaskStorage.put(epicTaskId, newEpicTask);
-        listOfPrioritizedTasks.add(epicTask);
     }
 
     /**
