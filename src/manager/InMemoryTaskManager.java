@@ -99,10 +99,15 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Проверяет задачу на пересечение по времени выполнения с уже созданными задачами
      */
-    public void checkIntersectionByTaskTime(Task task) {
+    public void checkIntersectionByTaskTime(Task task) throws ManagerCreateException {
         LocalDateTime startTimeTask = task.getStartTime();
         LocalDateTime endTimeTask = task.getEndTime();
         Set<Task> listOfSortedTasks = getPrioritizedTasks();
+        for (var sortedTask : listOfSortedTasks) {
+            if (task.getId() == sortedTask.getId()) {
+                listOfSortedTasks.remove(sortedTask);
+            }
+        }
 
         if (startTimeTask != null) {
             for (var taskFromTheList : listOfSortedTasks) {
@@ -115,7 +120,7 @@ public class InMemoryTaskManager implements TaskManager {
                             || (startTimeTask.isAfter(startTimeTaskFromList)  && endTimeTask.isBefore(endTimeTaskFromList))
                             || (startTimeTask.equals(startTimeTaskFromList))
                             || (endTimeTask.equals(endTimeTaskFromList))) {
-                        throw new ManagerCreateException("Задачи и подзадачи пересекаются по времени выполнения");
+                        throw new ManagerCreateException("Задачи пересекаются по времени выполнения");
                     }
                 }
             }
@@ -126,7 +131,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу Task после проверки на пересечение по времени выполнения
      */
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws ManagerCreateException {
         checkIntersectionByTaskTime(task);
         return new Task(task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
     }
@@ -236,7 +241,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновляет задачу после проверки на пересечение по времени выполнения
      */
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ManagerCreateException {
         checkIntersectionByTaskTime(task);
         int taskId = task.getId();
         task.setId(taskId);
@@ -260,7 +265,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновляет Epic задачу после проверки на пересечение по времени выполнения
      */
     @Override
-    public void updateEpicTask(EpicTask epicTask) {
+    public void updateEpicTask(EpicTask epicTask) throws ManagerCreateException {
         int epicTaskId = epicTask.getId();
         String epicTaskName = epicTask.getName();
         String epicTaskDescription = epicTask.getDescription();
@@ -296,7 +301,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновляет подзадачу после проверки на пересечение по времени выполнения
      */
     @Override
-    public void updateSubTask(EpicTask.SubTask subTask) {
+    public void updateSubTask(EpicTask.SubTask subTask) throws ManagerCreateException {
         checkIntersectionByTaskTime(subTask);
         int subTaskId = subTask.getId();
         subTask.setId(subTaskId);

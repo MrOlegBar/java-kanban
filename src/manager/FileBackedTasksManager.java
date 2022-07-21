@@ -159,7 +159,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     /**
-     * Метод для восстановления данных менеджера из файла
+     * Восстановливает данные менеджера из файла
      */
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager localManager = new FileBackedTasksManager(file);
@@ -196,25 +196,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
 
-                if (autosaveFileLine.matches("^\\d, \\d.*")) {
+                if (autosaveFileLine.matches("^\\d+$") || autosaveFileLine.matches("^\\d+, \\d+.*")) {
                     taskHistoryIds.addAll(fromStringToHistoryManager(autosaveFileLine));
+                    for (Integer id : taskHistoryIds) {
+                        localManager.getTaskByIdFromString(id);
+                        localManager.getEpicTaskByIdFromString(id);
+                        localManager.getSubTaskByIdFromString(id);
+                    }
                 }
-
             }
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
-        }
-
-        for (Integer id : taskHistoryIds) {
-            localManager.getTaskById(id);
-            localManager.getEpicTaskById(id);
-            localManager.getSubTaskById(id);
         }
         return localManager;
     }
 
     /**
-     * Метод для проверки файла для автосохранения
+     * Проверяет доступность файла для автосохранения
      */
     private File fileExists(File file) throws ManagerSaveException {
         if (file.exists()) {
@@ -238,7 +236,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     /**
-     * Метод сохранения задачи в строку
+     * Сохраняет задачу в строку
      */
     private String taskToString(Task task) {
         String startTime = "null";
@@ -495,7 +493,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     /**
-     * Метод для сохранения менеджера истории в CSV
+     * Сохраняет менеджер истории в CSV
      */
     private static String historyManagerToString(HistoryManager manager) {
         List<Integer> listOfIdsFromHistory = new ArrayList<>();
@@ -504,8 +502,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             listOfIdsFromHistory.add(task.getId());
         }
 
-        return listOfIdsFromHistory.toString().replaceFirst("\\[", "").replaceFirst("]"
-                , "");
+        return listOfIdsFromHistory
+                .toString()
+                .replaceFirst("\\[", "")
+                .replaceFirst("]", "");
     }
 
     /**
@@ -513,7 +513,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      */
     private static List<Integer> fromStringToHistoryManager(String value) {
         List<Integer> listOfIdsFromHistory = new ArrayList<>();
-        if (value.matches("^\\d, \\d.*")) {
+        if (value.matches("^\\d+$")) {
+            listOfIdsFromHistory.add(Integer.parseInt(value));
+        } else if (value.matches("^\\d+, \\d+.*")) {
             String[] taskHistoryArray = value.split(", ");
             for (String elem : taskHistoryArray) {
                 listOfIdsFromHistory.add(Integer.parseInt(elem));
@@ -655,11 +657,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return subTask;
     }
 
+    public Task getTaskByIdFromString(int id) {
+        return super.getTaskById(id);
+    }
+
+    public EpicTask getEpicTaskByIdFromString(int id) {
+        return super.getEpicTaskById(id);
+    }
+
+    public EpicTask.SubTask getSubTaskByIdFromString(int id) {
+        return super.getSubTaskById(id);
+    }
+
     /**
      * Создание задачи
      */
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws ManagerCreateException {
         Task newTask = super.createTask(task);
         saveTask(newTask);
         return newTask;
@@ -683,32 +697,32 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление задачи
      */
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ManagerCreateException {
         super.updateTask(task);
         saveToCSV();
     }
 
-    public void updateTaskFromString(Task task) {
-        super.updateTask(task);
-    }
-
     @Override
-    public void updateEpicTask(EpicTask epicTask) {
+    public void updateEpicTask(EpicTask epicTask) throws ManagerCreateException {
         super.updateEpicTask(epicTask);
         saveToCSV();
     }
 
-    public void updateEpicTaskFromString(EpicTask epicTask) {
-        super.updateEpicTask(epicTask);
-    }
-
     @Override
-    public void updateSubTask(EpicTask.SubTask subTask) {
+    public void updateSubTask(EpicTask.SubTask subTask) throws ManagerCreateException {
         super.updateSubTask(subTask);
         saveToCSV();
     }
 
-    public void updateSubTaskFromString(EpicTask.SubTask subTask) {
+    public void updateTaskFromString(Task task) throws ManagerCreateException {
+        super.updateTask(task);
+    }
+
+    public void updateEpicTaskFromString(EpicTask epicTask) throws ManagerCreateException {
+        super.updateEpicTask(epicTask);
+    }
+
+    public void updateSubTaskFromString(EpicTask.SubTask subTask) throws ManagerCreateException {
         super.updateSubTask(subTask);
     }
 
