@@ -31,14 +31,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     /**
      * Добавляет id подзадачи в список id подзадач Epic задачи, а id Epic задачи в подзадачу
      */
@@ -199,13 +191,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) throws ManagerSaveException {
-
         int subTaskId = idGeneration(subTask);
-        if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
-            addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
-            subTaskStorage.put(subTaskId, subTask);
-            listOfPrioritizedTasks.add(subTask);
-        }
+        addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
+        subTaskStorage.put(subTaskId, subTask);
+        listOfPrioritizedTasks.add(subTask);
     }
 
     /**
@@ -485,16 +474,24 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает id для новой задачи
      */
     private int idGeneration(Task task) {
+        int newID = task.getId();
+
         if (task.getId() == 0) {
             id += 1;
-            while ((taskStorage.keySet().contains(id) == true)
-                    && (epicTaskStorage.keySet().contains(id) == true)
-                    && (subTaskStorage.keySet().contains(id) == true)) {
-                id += 1;
+
+            while (taskStorage.containsKey(id)) {
+                id++;
             }
-            task.setId(id);
+            while (epicTaskStorage.containsKey(id)) {
+                id++;
+            }
+            while (subTaskStorage.containsKey(id)) {
+                id++;
+            }
+
+            newID = id;
         }
-        return task.getId();
+        return newID;
     }
 
     /**

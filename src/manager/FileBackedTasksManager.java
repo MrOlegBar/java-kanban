@@ -29,7 +29,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         /**
          * Тестирование
          */
-        FileBackedTasksManager manager = new FileBackedTasksManager(new File("Autosave.csv"));
+        //FileBackedTasksManager manager = new FileBackedTasksManager(new File("Autosave.csv"));
 
         /**
          * Создали 2е Task задачи
@@ -179,15 +179,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 if ((autosaveFileLine.matches(".* SubTask.*"))) {
                     EpicTask.SubTask restoredSubTask = (EpicTask.SubTask) fromString(autosaveFileLine);
-
-                    List<Integer> listOfSubTaskId;
-                    for (EpicTask epicTask : localManager.getListOfEpicTasks()) {
-                        if (epicTask.getId() == restoredSubTask.getEpicTaskId()) {
-                            listOfSubTaskId = epicTask.getListOfSubTaskId();
-                            listOfSubTaskId.add(restoredSubTask.getId());
-                            localManager.updateSubTaskFromString(restoredSubTask);
-                        }
-                    }
+                    localManager.createSubTaskFromString(restoredSubTask);
                 }
 
                 if (autosaveFileLine.matches("^\\d+$") || autosaveFileLine.matches("^\\d+, \\d+.*")) {
@@ -718,7 +710,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.saveEpicTask(epicTask);
     }
 
-    public void updateSubTaskFromString(EpicTask.SubTask subTask) throws ManagerCreateException {
+    public void createSubTaskFromString(EpicTask.SubTask subTask) throws ManagerCreateException {
         super.createTask(subTask);
         super.saveSubTask(subTask);
     }
