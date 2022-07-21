@@ -170,14 +170,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 if ((autosaveFileLine.matches(".* Task.*"))) {
                     Task restoredTask = fromString(autosaveFileLine);
                     localManager.createTaskFromString(restoredTask);
-                    localManager.setId(restoredTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* EpicTask.*"))) {
                     EpicTask restoredEpicTask = (EpicTask) fromString(autosaveFileLine);
-
                     localManager.createEpicTaskFromString(restoredEpicTask);
-                    localManager.setId(restoredEpicTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* SubTask.*"))) {
@@ -189,7 +186,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                             listOfSubTaskId = epicTask.getListOfSubTaskId();
                             listOfSubTaskId.add(restoredSubTask.getId());
                             localManager.updateSubTaskFromString(restoredSubTask);
-                            localManager.setId(restoredSubTask.getId());
                         }
                     }
                 }

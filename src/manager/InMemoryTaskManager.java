@@ -190,12 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveEpicTask(EpicTask epicTask) {
-        int epicTaskId;
-        if (epicTask.getId() == 0) {
-            epicTaskId = idGeneration(epicTask);
-        } else {
-            epicTaskId = epicTask.getId();
-        }
+        int epicTaskId = idGeneration(epicTask);
         epicTaskStorage.put(epicTaskId, epicTask);
     }
 
@@ -204,6 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) throws ManagerSaveException {
+
         int subTaskId = idGeneration(subTask);
         if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
             addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
@@ -489,11 +485,15 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает id для новой задачи
      */
     private int idGeneration(Task task) {
-        id += 1;
-        if (taskStorage.keySet().contains(id)) {
+        if (task.getId() == 0) {
             id += 1;
+            while ((taskStorage.keySet().contains(id) == true)
+                    && (epicTaskStorage.keySet().contains(id) == true)
+                    && (subTaskStorage.keySet().contains(id) == true)) {
+                id += 1;
+            }
+            task.setId(id);
         }
-        task.setId(++id);
         return task.getId();
     }
 
