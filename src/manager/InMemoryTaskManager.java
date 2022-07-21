@@ -15,6 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> taskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
+
     private int id = 0;
     private final Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
         if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
@@ -29,6 +30,10 @@ public class InMemoryTaskManager implements TaskManager {
     });
 
     protected HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+
+    public int getId() {
+        return id;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -103,17 +108,16 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime startTimeTask = task.getStartTime();
         LocalDateTime endTimeTask = task.getEndTime();
         Set<Task> listOfSortedTasks = getPrioritizedTasks();
-        for (var sortedTask : listOfSortedTasks) {
-            if (task.getId() == sortedTask.getId()) {
-                listOfSortedTasks.remove(sortedTask);
-            }
-        }
 
         if (startTimeTask != null) {
-            for (var taskFromTheList : listOfSortedTasks) {
-                if (taskFromTheList.getStartTime() != null) {
-                    LocalDateTime startTimeTaskFromList = taskFromTheList.getStartTime();
-                    LocalDateTime endTimeTaskFromList = taskFromTheList.getEndTime();
+            for (var sortedTask : listOfSortedTasks) {
+                if (task.getId() == sortedTask.getId()) {
+                    continue;
+                }
+
+                if (sortedTask.getStartTime() != null) {
+                    LocalDateTime startTimeTaskFromList = sortedTask.getStartTime();
+                    LocalDateTime endTimeTaskFromList = sortedTask.getEndTime();
                     if ((startTimeTask.isAfter(startTimeTaskFromList) && startTimeTask.isBefore(endTimeTaskFromList))
                             || (endTimeTask.isAfter(startTimeTaskFromList)  && endTimeTask.isBefore(endTimeTaskFromList))
                             || (startTimeTaskFromList.isAfter(startTimeTask)  && endTimeTaskFromList.isBefore(endTimeTask))
@@ -133,6 +137,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task createTask(Task task) throws ManagerCreateException {
         checkIntersectionByTaskTime(task);
+        if (task.getId() != 0) {
+            return new Task(task.getId(), task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
+        }
         return new Task(task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
     }
 
@@ -141,6 +148,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public EpicTask createTask(EpicTask epicTask) {
+        if (epicTask.getId() != 0) {
+            return new EpicTask(epicTask.getId(), epicTask.getName(), epicTask.getDescription(), epicTask.getListOfSubTaskId(), epicTask.getStatus(), epicTask.getStartTime(), epicTask.getDuration());
+        }
         Task.Status status = getterEpicTaskStatus(epicTask.getListOfSubTaskId());
         LocalDateTime startTime = getEpicTaskStartTime(epicTask.getListOfSubTaskId());
         long duration = getEpicTaskDuration(epicTask.getListOfSubTaskId());
@@ -153,6 +163,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public EpicTask.SubTask createTask(EpicTask.SubTask subTask) throws ManagerCreateException {
+        if (subTask.getId() != 0) {
+            return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getId(), subTask.getName(), subTask.getDescription(), subTask.getStatus(), subTask.getStartTime(), subTask.getDuration());
+        }
         if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
             checkIntersectionByTaskTime(subTask);
             return new EpicTask.SubTask(subTask.getEpicTaskId(), subTask.getName(), subTask.getDescription()
@@ -190,14 +203,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Сохраняет подзадачу в коллекцию
      */
     @Override
-    public void saveSubTask(EpicTask.SubTask subTask) {
+    public void saveSubTask(EpicTask.SubTask subTask) throws ManagerSaveException {
         int subTaskId = idGeneration(subTask);
         if (epicTaskStorage.get(subTask.getEpicTaskId()) != null) {
             addSubtaskToEpicTask(subTask, epicTaskStorage.get(subTask.getEpicTaskId()));
             subTaskStorage.put(subTaskId, subTask);
             listOfPrioritizedTasks.add(subTask);
-        } else {
-            new ManagerSaveException("Не существует Epic задачи для данной подзадачи");
         }
     }
 
@@ -243,19 +254,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) throws ManagerCreateException {
         checkIntersectionByTaskTime(task);
+        if (taskStorage.containsValue(task)) {
+            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        }
         int taskId = task.getId();
-        task.setId(taskId);
         String taskName = task.getName();
-        task.setName(taskName);
         String taskDescription = task.getDescription();
-        task.setDescription(taskDescription);
         Task.Status taskStatus = task.getStatus();
-        task.setStatus(taskStatus);
         LocalDateTime startTime = task.getStartTime();
-        task.setStartTime(startTime);
         long duration = task.getDuration();
-        task.setDuration(duration);
-        task.setEndTime(task.getEndTime());
         Task newTask = new Task(taskId, taskName, taskDescription, taskStatus, startTime, duration);
         taskStorage.put(taskId, newTask);
         listOfPrioritizedTasks.add(task);
@@ -266,20 +273,20 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateEpicTask(EpicTask epicTask) throws ManagerCreateException {
+        if (epicTaskStorage.containsValue(epicTask)) {
+            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        }
         int epicTaskId = epicTask.getId();
         String epicTaskName = epicTask.getName();
         String epicTaskDescription = epicTask.getDescription();
         List<Integer> listOfSubTaskId = epicTask.getListOfSubTaskId();
-        epicTask.setListOfSubTaskId(listOfSubTaskId);
         Task.Status epicTaskStatus = getEpicTaskStatus(listOfSubTaskId);
-        epicTask.setStatus(epicTaskStatus);
         LocalDateTime epicTaskStartTime;
         if (epicTask.getStartTime() == null) {
             epicTaskStartTime = getEpicTaskStartTime(listOfSubTaskId);
         } else {
             epicTaskStartTime = epicTask.getStartTime();
         }
-        epicTask.setStartTime(epicTaskStartTime);
         if (epicTask.getEndTime() == null) {
             epicTask.setEndTime(getEpicTaskEndTime(listOfSubTaskId));
         } else {
@@ -291,7 +298,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epicTaskDuration = epicTask.getDuration();
         }
-        epicTask.setDuration(epicTaskDuration);
         EpicTask newEpicTask = new EpicTask(epicTaskId, epicTaskName, epicTaskDescription
                 , listOfSubTaskId, epicTaskStatus, epicTaskStartTime, epicTaskDuration);
         epicTaskStorage.put(epicTaskId, newEpicTask);
@@ -303,21 +309,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) throws ManagerCreateException {
         checkIntersectionByTaskTime(subTask);
+        if (subTaskStorage.containsValue(subTask)) {
+            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        }
         int subTaskId = subTask.getId();
-        subTask.setId(subTaskId);
         int epicTaskId = subTask.getEpicTaskId();
-        subTask.setEpicTaskId(epicTaskId);
         String subTaskName = subTask.getName();
-        subTask.setName(subTaskName);
         String subTaskDescription = subTask.getDescription();
-        subTask.setDescription(subTaskDescription);
         Task.Status subTaskStatus = subTask.getStatus();
-        subTask.setStatus(subTaskStatus);
         LocalDateTime startTime = subTask.getStartTime();
-        subTask.setStartTime(startTime);
         long duration = subTask.getDuration();
-        subTask.setDuration(duration);
-        subTask.setEndTime(subTask.getEndTime());
         EpicTask.SubTask newSubTask = new EpicTask.SubTask(subTaskId, epicTaskId, subTaskName, subTaskDescription
                 , subTaskStatus, startTime, duration);
         subTaskStorage.put(subTaskId, newSubTask);
@@ -488,6 +489,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает id для новой задачи
      */
     private int idGeneration(Task task) {
+        id += 1;
+        if (taskStorage.keySet().contains(id)) {
+            id += 1;
+        }
         task.setId(++id);
         return task.getId();
     }

@@ -186,7 +186,6 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-
                         } else if (path.endsWith("/tasks/epictask")) {
 
                             try (InputStream is = httpExchange.getRequestBody()) {
@@ -209,7 +208,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(subTask);
-                            } catch (ManagerCreateException e) {
+                            } catch (ManagerCreateException | ManagerSaveException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -307,7 +306,24 @@ public class HttpTaskServer {
                         }
                         break;
                     case "DELETE":
-                        response = "Вы использовали метод DELETE!";
+                        if (path.endsWith("/tasks/task")) {
+                            if (manager.getListOfTasks().size() == 0) {
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = "Задачи для удаления отсутствуют";
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
+
+                            manager.deleteAllTasks();
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else {
+                            httpExchange.sendResponseHeaders(404, 0);
+                            httpExchange.close();
+                        }
                         break;
                     default:
                         response = "Вы использовали какой-то другой метод!";

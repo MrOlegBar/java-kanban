@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static task.Task.Status.DONE;
-import static task.Task.Status.NEW;
 import static task.Task.Type.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -171,14 +169,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 if ((autosaveFileLine.matches(".* Task.*"))) {
                     Task restoredTask = fromString(autosaveFileLine);
-                    localManager.updateTaskFromString(restoredTask);
+                    localManager.createTaskFromString(restoredTask);
                     localManager.setId(restoredTask.getId());
                 }
 
                 if ((autosaveFileLine.matches(".* EpicTask.*"))) {
                     EpicTask restoredEpicTask = (EpicTask) fromString(autosaveFileLine);
 
-                    localManager.updateEpicTaskFromString(restoredEpicTask);
+                    localManager.createEpicTaskFromString(restoredEpicTask);
                     localManager.setId(restoredEpicTask.getId());
                 }
 
@@ -589,7 +587,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void saveSubTask(EpicTask.SubTask subTask) {
+    public void saveSubTask(EpicTask.SubTask subTask) throws ManagerSaveException {
         super.saveSubTask(subTask);
         saveToCSV();
     }
@@ -687,7 +685,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) throws ManagerCreateException {
+    public EpicTask.SubTask createTask(EpicTask.SubTask subTask) throws ManagerCreateException, ManagerSaveException {
         EpicTask.SubTask newSubTask = super.createTask(subTask);
         saveSubTask(newSubTask);
         return newSubTask;
@@ -714,16 +712,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         saveToCSV();
     }
 
-    public void updateTaskFromString(Task task) throws ManagerCreateException {
-        super.updateTask(task);
+    public void createTaskFromString(Task task) throws ManagerCreateException {
+        super.createTask(task);
+        super.saveTask(task);
     }
 
-    public void updateEpicTaskFromString(EpicTask epicTask) throws ManagerCreateException {
-        super.updateEpicTask(epicTask);
+    public void createEpicTaskFromString(EpicTask epicTask) throws ManagerCreateException {
+        super.createTask(epicTask);
+        super.saveEpicTask(epicTask);
     }
 
     public void updateSubTaskFromString(EpicTask.SubTask subTask) throws ManagerCreateException {
-        super.updateSubTask(subTask);
+        super.createTask(subTask);
+        super.saveSubTask(subTask);
     }
 
     /**
