@@ -8,6 +8,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import exception.ManagerCreateException;
+import exception.ManagerDeleteException;
+import exception.ManagerGetException;
 import exception.ManagerSaveException;
 import manager.FileBackedTasksManager;
 import task.EpicTask;
@@ -22,6 +24,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HttpTaskServer {
@@ -94,24 +97,48 @@ public class HttpTaskServer {
                         if (path.endsWith("/tasks/task")) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getListOfTasks());
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getListOfTasks());
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
                         } else if (path.endsWith("/tasks/epictask")) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getListOfEpicTasks());
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getListOfEpicTasks());
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
                         }  else if (path.endsWith("/tasks/subtask")) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getListOfSubTasks());
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getListOfSubTasks());
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
@@ -119,8 +146,16 @@ public class HttpTaskServer {
 
                             int id = Integer.parseInt(path.split("=")[1]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getTaskById(id));
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getTaskById(id));
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
@@ -128,8 +163,16 @@ public class HttpTaskServer {
 
                             int id = Integer.parseInt(path.split("=")[1]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getEpicTaskById(id));
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getEpicTaskById(id));
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
@@ -137,24 +180,73 @@ public class HttpTaskServer {
 
                             int id = Integer.parseInt(path.split("=")[1]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getSubTaskById(id));
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getSubTaskById(id));
+                                os.write(response.getBytes(DEFAULT_CHARSET));
+                                return;
+                            }
+                        } else if (path.startsWith("/tasks/subtask/epictask?id=")) {
+
+                            int id = Integer.parseInt(path.split("=")[1]);
+                            try (OutputStream os = httpExchange.getResponseBody()) {
+                                List<EpicTask.SubTask> listOfSubtask = new ArrayList<>();
+
+                                try {
+                                    for (Integer subTaskId : manager.getEpicTaskById(id).getListOfSubTaskId()) {
+                                        for (EpicTask.SubTask subTask : manager.getListOfSubTasks()) {
+                                            if (subTaskId == subTask.getId()) {
+                                                listOfSubtask.add(subTask);
+                                            }
+                                        }
+                                    }
+                                    response = gson.toJson(listOfSubtask);
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
+                                httpExchange.sendResponseHeaders(200, 0);
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
                         } else if (path.endsWith("/tasks")) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getterPrioritizedTasks());
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getterPrioritizedTasks());
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
                         } else if (path.endsWith("/tasks/history")) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
+
+                                try {
+                                    response = gson.toJson(manager.getListOfTaskHistory());
+                                } catch (ManagerGetException e) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+
                                 httpExchange.sendResponseHeaders(200, 0);
-                                response = gson.toJson(manager.getListOfTaskHistory());
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
@@ -265,7 +357,16 @@ public class HttpTaskServer {
                                     , epictaskData.getStatus()
                                     , epictaskData.getStartTime()
                                     , epictaskData.getDuration());
-                            manager.updateEpicTask(epicTask);
+                            try {
+                                manager.updateEpicTask(epicTask);
+                            } catch (ManagerCreateException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
                             
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -307,15 +408,100 @@ public class HttpTaskServer {
                         break;
                     case "DELETE":
                         if (path.endsWith("/tasks/task")) {
-                            if (manager.getListOfTasks().size() == 0) {
+
+                            try {
+                                manager.deleteAllTasks();
+                            } catch (ManagerDeleteException e) {
+
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
-                                    response = "Задачи для удаления отсутствуют";
+                                    response = e.getMessage();
                                     os.write(response.getBytes(DEFAULT_CHARSET));
                                 }
                             }
 
-                            manager.deleteAllTasks();
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.endsWith("/tasks/epictask")) {
+
+                            try {
+                                manager.deleteAllEpicTasks();
+                            } catch (ManagerDeleteException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.endsWith("/tasks/subtask")) {
+
+                            try {
+                                manager.deleteAllSubTasks();
+                            } catch (ManagerDeleteException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.startsWith("/tasks/task?id=")) {
+
+                            int id = Integer.parseInt(path.split("=")[1]);
+                            try {
+                                manager.removeTaskById(id);
+                            } catch (ManagerDeleteException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.startsWith("/tasks/epictask?id=")) {
+
+                            int id = Integer.parseInt(path.split("=")[1]);
+                            try {
+                                manager.removeEpicTaskById(id);
+                            } catch (ManagerDeleteException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
+
+                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.close();
+                            return;
+                        } else if (path.startsWith("/tasks/subtask?id=")) {
+
+                            int id = Integer.parseInt(path.split("=")[1]);
+                            try {
+                                manager.removeSubTaskById(id);
+                            } catch (ManagerDeleteException e) {
+
+                                try (OutputStream os = httpExchange.getResponseBody()) {
+                                    httpExchange.sendResponseHeaders(404, 0);
+                                    response = e.getMessage();
+                                    os.write(response.getBytes(DEFAULT_CHARSET));
+                                }
+                            }
 
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -326,7 +512,11 @@ public class HttpTaskServer {
                         }
                         break;
                     default:
-                        response = "Вы использовали какой-то другой метод!";
+                        try (OutputStream os = httpExchange.getResponseBody()) {
+                            httpExchange.sendResponseHeaders(404, 0);
+                            response = "Используйте следующие методы: GET | PUT | DELETE";
+                            os.write(response.getBytes(DEFAULT_CHARSET));
+                        }
                 }
             }
         }

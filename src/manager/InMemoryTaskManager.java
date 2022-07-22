@@ -1,6 +1,8 @@
 package manager;
 
 import exception.ManagerCreateException;
+import exception.ManagerDeleteException;
+import exception.ManagerGetException;
 import exception.ManagerSaveException;
 import task.EpicTask;
 import task.Task;
@@ -16,7 +18,6 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, EpicTask> epicTaskStorage = new TreeMap<>();
     private final Map<Integer, EpicTask.SubTask> subTaskStorage = new TreeMap<>();
 
-    private int id = 0;
     private final Set<Task> listOfPrioritizedTasks = new TreeSet<>((task1, task2) -> {
         if ((task1.getStartTime() != null) && (task2.getStartTime() != null)) {
             return task1.getStartTime().compareTo(task2.getStartTime());
@@ -99,7 +100,12 @@ public class InMemoryTaskManager implements TaskManager {
     public void checkIntersectionByTaskTime(Task task) throws ManagerCreateException {
         LocalDateTime startTimeTask = task.getStartTime();
         LocalDateTime endTimeTask = task.getEndTime();
-        Set<Task> listOfSortedTasks = getPrioritizedTasks();
+        Set<Task> listOfSortedTasks;
+        try {
+            listOfSortedTasks = getPrioritizedTasks();
+        } catch (ManagerGetException e) {
+            return;
+        }
 
         if (startTimeTask != null) {
             for (var sortedTask : listOfSortedTasks) {
@@ -201,10 +207,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу по id и добавляет ее в историю задач
      */
     @Override
-    public Task getTaskById(int id) {
+    public Task getTaskById(int id) throws ManagerGetException {
         Task task = taskStorage.get(id);
         if (task != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(task);
+        } else {
+            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return task;
     }
@@ -213,10 +221,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает Epic задачу по id и добавляет ее в историю задач
      */
     @Override
-    public EpicTask getEpicTaskById(int id) {
+    public EpicTask getEpicTaskById(int id) throws ManagerGetException {
         EpicTask epicTask = epicTaskStorage.get(id);
         if (epicTask != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(epicTask);
+        } else {
+            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return epicTask;
     }
@@ -225,10 +235,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает подзадачу по id и добавляет ее в историю задач
      */
     @Override
-    public EpicTask.SubTask getSubTaskById(int id) {
+    public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
         EpicTask.SubTask subTask = subTaskStorage.get(id);
         if (subTask != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(subTask);
+        } else {
+            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return subTask;
     }
@@ -238,10 +250,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateTask(Task task) throws ManagerCreateException {
-        checkIntersectionByTaskTime(task);
-        if (taskStorage.containsValue(task)) {
-            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        if (taskStorage.containsValue(task) || taskStorage.isEmpty()) {
+            throw new ManagerCreateException("Задача с таким ID не может быть обновлена");
         }
+        checkIntersectionByTaskTime(task);
         int taskId = task.getId();
         String taskName = task.getName();
         String taskDescription = task.getDescription();
@@ -258,8 +270,8 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateEpicTask(EpicTask epicTask) throws ManagerCreateException {
-        if (epicTaskStorage.containsValue(epicTask)) {
-            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        if (epicTaskStorage.isEmpty()) {
+            throw new ManagerCreateException("Задача с таким ID не может быть обновлена");
         }
         int epicTaskId = epicTask.getId();
         String epicTaskName = epicTask.getName();
@@ -293,10 +305,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) throws ManagerCreateException {
-        checkIntersectionByTaskTime(subTask);
-        if (subTaskStorage.containsValue(subTask)) {
-            throw new ManagerCreateException("В вашей задаче отсутствуют изменения");
+        if (subTaskStorage.containsValue(subTask) || subTaskStorage.isEmpty()) {
+            throw new ManagerCreateException("Задача с таким ID не может быть обновлена");
         }
+        checkIntersectionByTaskTime(subTask);
         int subTaskId = subTask.getId();
         int epicTaskId = subTask.getEpicTaskId();
         String subTaskName = subTask.getName();
@@ -321,31 +333,49 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает из коллекции список всех задач
      */
     @Override
-    public List<Task> getListOfTasks() {
-        return new ArrayList<>(taskStorage.values());
+    public List<Task> getListOfTasks() throws ManagerGetException {
+        List<Task> listOfTasks;
+        if (!taskStorage.isEmpty()) {
+            listOfTasks = new ArrayList<>(taskStorage.values());
+        } else {
+            throw new ManagerGetException("Задачи отсутсвуют");
+        }
+        return listOfTasks;
     }
 
     /**
      * Возвращает из коллекции список всех Epic задач
      */
     @Override
-    public List<EpicTask> getListOfEpicTasks() {
-        return new ArrayList<>(epicTaskStorage.values());
+    public List<EpicTask> getListOfEpicTasks() throws ManagerGetException {
+        List<EpicTask> listOfEpicTasks;
+        if (!epicTaskStorage.isEmpty()) {
+            listOfEpicTasks = new ArrayList<>(epicTaskStorage.values());
+        } else {
+            throw new ManagerGetException("Задачи отсутсвуют");
+        }
+        return listOfEpicTasks;
     }
 
     /**
      * Возвращает из коллекции список всех подзадач
      */
     @Override
-    public List<EpicTask.SubTask> getListOfSubTasks() {
-        return new ArrayList<>(subTaskStorage.values());
+    public List<EpicTask.SubTask> getListOfSubTasks() throws ManagerGetException {
+        List<EpicTask.SubTask> listOfSubTasks;
+        if (!subTaskStorage.isEmpty()) {
+            listOfSubTasks = new ArrayList<>(subTaskStorage.values());
+        } else {
+            throw new ManagerGetException("Задачи отсутсвуют");
+        }
+        return listOfSubTasks;
     }
 
     /**
      * Геттер для метода, который возвращает список всех задач
      * , отсортированный по дате и времени начала самой ранней задачи
      */
-    public Set<Task> getterPrioritizedTasks() {
+    public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
         return getPrioritizedTasks();
     }
 
@@ -353,12 +383,15 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет по id задачу из коллекции и истории задач
      */
     @Override
-    public void removeTaskById(int id) {
-        inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+    public void removeTaskById(int id) throws ManagerDeleteException {
         Task task = taskStorage.get(id);
         if (task != null) {
             listOfPrioritizedTasks.remove(task);
+        } else {
+            throw new ManagerDeleteException("Задача с таким ID отсутвует");
         }
+
+        inMemoryHistoryManager.removeTaskFromTaskHistory(id);
         taskStorage.remove(id);
 
     }
@@ -367,19 +400,24 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет по id  Epic задачу из коллекции и истории задач
      */
     @Override
-    public void removeEpicTaskById(int id) {
+    public void removeEpicTaskById(int id) throws ManagerDeleteException {
         EpicTask epicTask = epicTaskStorage.get(id);
         if (epicTask != null) {
             for (int subTaskId : epicTask.getListOfSubTaskId()) {
                 inMemoryHistoryManager.removeTaskFromTaskHistory(subTaskId);
+
                 EpicTask.SubTask subTask = subTaskStorage.get(id);
                 if (subTask != null) {
                     listOfPrioritizedTasks.remove(subTask);
                 }
+
                 subTaskStorage.remove(subTaskId);
             }
+
             inMemoryHistoryManager.removeTaskFromTaskHistory(id);
             epicTaskStorage.remove(id);
+        } else {
+            throw new ManagerDeleteException("Задача с таким ID отсутвует");
         }
     }
 
@@ -387,18 +425,21 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет по id подзадачу из коллекции и истории задач
      */
     @Override
-    public void removeSubTaskById(int id) {
+    public void removeSubTaskById(int id) throws ManagerDeleteException {
         EpicTask.SubTask subTask = subTaskStorage.get(id);
         if (subTask != null) {
             int epicTaskId = subTask.getEpicTaskId();
             EpicTask epicTask = epicTaskStorage.get(epicTaskId);
+            List listOfSubTaskId = epicTask.getListOfSubTaskId();
             if (epicTask != null) {
-                epicTask.getListOfSubTaskId().remove((Integer) id);
+                listOfSubTaskId.remove((Integer) id);
                 inMemoryHistoryManager.removeTaskFromTaskHistory(id);
                 listOfPrioritizedTasks.remove(subTask);
                 subTaskStorage.remove(id);
                 updateEpicTask(epicTask);
             }
+        } else {
+            throw new ManagerDeleteException("Задача с таким ID отсутвует");
         }
     }
 
@@ -406,9 +447,13 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет все задачи из коллекции и истории задач
      */
     @Override
-    public void deleteAllTasks() {
-        for (var key : taskStorage.keySet()) {
-            inMemoryHistoryManager.removeTaskFromTaskHistory(key);
+    public void deleteAllTasks() throws ManagerDeleteException {
+        if (taskStorage.isEmpty()) {
+            throw new ManagerDeleteException("Нет задач для удаления");
+        }
+        for (Integer id : taskStorage.keySet()) {
+            inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+            listOfPrioritizedTasks.remove(taskStorage.get(id));
         }
         taskStorage.clear();
     }
@@ -417,19 +462,18 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет все Epic задачи и связанные с ними подзадачи из коллекции и истории задач
      */
     @Override
-    public void deleteAllEpicTasks() {
-        for (var key : epicTaskStorage.keySet()) {
-            inMemoryHistoryManager.removeTaskFromTaskHistory(key);
-            EpicTask epicTask = epicTaskStorage.get(key);
-            if (epicTask != null) {
-                List<Integer> listOfSubTaskId = epicTask.getListOfSubTaskId();
-                listOfSubTaskId.clear();
-            }
+    public void deleteAllEpicTasks() throws ManagerDeleteException {
+        if (epicTaskStorage.isEmpty()) {
+            throw new ManagerDeleteException("Нет задач для удаления");
+        }
+
+        for (Integer id : epicTaskStorage.keySet()) {
+            inMemoryHistoryManager.removeTaskFromTaskHistory(id);
         }
         epicTaskStorage.clear();
 
-        for (var key : subTaskStorage.keySet()) {
-            inMemoryHistoryManager.removeTaskFromTaskHistory(key);
+        for (Integer id : subTaskStorage.keySet()) {
+            inMemoryHistoryManager.removeTaskFromTaskHistory(id);
         }
         subTaskStorage.clear();
     }
@@ -438,10 +482,16 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаляет все подзадачи из коллекции и истории задач
      */
     @Override
-    public void deleteAllSubTasks() {
-        for (var key : subTaskStorage.keySet()) {
-            inMemoryHistoryManager.removeTaskFromTaskHistory(key);
-            EpicTask.SubTask subTask = subTaskStorage.get(key);
+    public void deleteAllSubTasks() throws ManagerDeleteException {
+        if (subTaskStorage.isEmpty()) {
+            throw new ManagerDeleteException("Нет задач для удаления");
+        }
+
+        for (Integer id : subTaskStorage.keySet()) {
+            inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+            listOfPrioritizedTasks.remove(subTaskStorage.get(id));
+
+            EpicTask.SubTask subTask = subTaskStorage.get(id);
             if (subTask != null) {
                 EpicTask epicTask = epicTaskStorage.get(subTask.getEpicTaskId());
                 if (epicTask != null) {
@@ -458,7 +508,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает список истории задач
      */
     @Override
-    public List<Task> getListOfTaskHistory() {
+    public List<Task> getListOfTaskHistory() throws ManagerGetException {
         return inMemoryHistoryManager.getTaskHistory();
     }
 
@@ -474,9 +524,8 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает id для новой задачи
      */
     private int idGeneration(Task task) {
-        int newID = task.getId();
-
-        if (task.getId() == 0) {
+        int id = task.getId();
+        if (id == 0) {
             id += 1;
 
             while (taskStorage.containsKey(id)) {
@@ -488,10 +537,9 @@ public class InMemoryTaskManager implements TaskManager {
             while (subTaskStorage.containsKey(id)) {
                 id++;
             }
-
-            newID = id;
+            task.setId(id);
         }
-        return newID;
+        return id;
     }
 
     /**
@@ -589,7 +637,10 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Возвращает список задач, отсортированный по дате и времени начала самой ранней задачи
      */
-    private Set<Task> getPrioritizedTasks() {
+    private Set<Task> getPrioritizedTasks() throws ManagerGetException {
+        if (listOfPrioritizedTasks.isEmpty()) {
+            throw new ManagerGetException("Задачи отсутсвуют");
+        }
         return listOfPrioritizedTasks;
     }
 }

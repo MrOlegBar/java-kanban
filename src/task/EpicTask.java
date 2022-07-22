@@ -46,20 +46,6 @@ public class EpicTask extends Task {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        EpicTask epicTask = (EpicTask) o;
-        return Objects.equals(listOfSubTaskId, epicTask.listOfSubTaskId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), listOfSubTaskId);
-    }
-
-    @Override
     public String toString() {
         String returnString = null;
         try {
@@ -90,6 +76,20 @@ public class EpicTask extends Task {
             System.out.println("Ошибка формата объектов LocalDateTime: " + e.getMessage());
         }
         return returnString;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EpicTask epicTask = (EpicTask) o;
+        return Objects.equals(listOfSubTaskId, epicTask.listOfSubTaskId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), listOfSubTaskId);
     }
 
     /**

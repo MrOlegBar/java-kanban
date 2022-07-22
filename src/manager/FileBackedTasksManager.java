@@ -1,6 +1,8 @@
 package manager;
 
 import exception.ManagerCreateException;
+import exception.ManagerDeleteException;
+import exception.ManagerGetException;
 import task.EpicTask;
 import task.Task;
 import exception.ManagerSaveException;
@@ -185,9 +187,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 if (autosaveFileLine.matches("^\\d+$") || autosaveFileLine.matches("^\\d+, \\d+.*")) {
                     taskHistoryIds.addAll(fromStringToHistoryManager(autosaveFileLine));
                     for (Integer id : taskHistoryIds) {
-                        localManager.getTaskByIdFromString(id);
-                        localManager.getEpicTaskByIdFromString(id);
-                        localManager.getSubTaskByIdFromString(id);
+                        try {
+                            localManager.createTaskHistoryFromString(id);
+                        } catch (ManagerGetException e) {
+                            try {
+                                localManager.createEpicTaskHistoryFromString(id);
+                            } catch (ManagerGetException ex) {
+                                localManager.createSubTaskHistoryFromString(id);
+                            }
+                        }
                     }
                 }
             }
@@ -531,21 +539,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             bufferedWriter.write(tableHeader);
 
-            for (Task task : getListOfTasks()) {
-                bufferedWriter.write(taskToString(task) + "\n");
+            if (!getListOfTasks().isEmpty()) {
+                for (Task task : getListOfTasks()) {
+                    bufferedWriter.write(taskToString(task) + "\n");
+                }
             }
 
-            for (EpicTask epicTask : getListOfEpicTasks()) {
-                bufferedWriter.write(epicTaskToString(epicTask) + "\n");
+            if (!getListOfEpicTasks().isEmpty()) {
+                for (EpicTask epicTask : getListOfEpicTasks()) {
+                    bufferedWriter.write(epicTaskToString(epicTask) + "\n");
+                }
             }
 
-            for (EpicTask.SubTask subTask : getListOfSubTasks()) {
-                bufferedWriter.write(subTaskToString(subTask) + "\n");
+            if (!getListOfSubTasks().isEmpty()) {
+                for (EpicTask.SubTask subTask : getListOfSubTasks()) {
+                    bufferedWriter.write(subTaskToString(subTask) + "\n");
+                }
             }
 
             bufferedWriter.write("\n");
 
-            bufferedWriter.write(historyManagerToString(inMemoryHistoryManager));
+            try {
+                if (!inMemoryHistoryManager.getTaskHistory().isEmpty()) {
+                    bufferedWriter.write(historyManagerToString(inMemoryHistoryManager));
+                }
+            } catch (ManagerGetException e) {
+                bufferedWriter.close();
+            }
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
@@ -584,37 +604,56 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Получение списка всех задач
      */
     @Override
-    public List<Task> getListOfTasks() {
-        return super.getListOfTasks();
+    public List<Task> getListOfTasks() throws ManagerGetException {
+        List<Task> listOfTasks = new ArrayList<>();
+        try {
+            listOfTasks = super.getListOfTasks();
+        } catch (ManagerGetException e) {
+            return listOfTasks;
+        }
+        return listOfTasks;
     }
 
     @Override
-    public List<EpicTask> getListOfEpicTasks() {
-        return super.getListOfEpicTasks();
+    public List<EpicTask> getListOfEpicTasks() throws ManagerGetException {
+        List<EpicTask> listOfEpicTasks = new ArrayList<>();
+        try {
+            listOfEpicTasks = super.getListOfEpicTasks();
+        } catch (ManagerGetException e) {
+            return listOfEpicTasks;
+        }
+        return listOfEpicTasks;
     }
 
     @Override
-    public List<EpicTask.SubTask> getListOfSubTasks() {
-        return super.getListOfSubTasks();
+    public List<EpicTask.SubTask> getListOfSubTasks() throws ManagerGetException {
+        List<EpicTask.SubTask> listOfSubTasks = new ArrayList<>();
+        try {
+            listOfSubTasks = super.getListOfSubTasks();
+        } catch (ManagerGetException e) {
+            return listOfSubTasks;
+        }
+        return listOfSubTasks;
     }
 
     /**
      * Удаление всех задач
      */
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTasks() throws ManagerDeleteException {
         super.deleteAllTasks();
+
         saveToCSV();
     }
 
     @Override
-    public void deleteAllEpicTasks() {
+    public void deleteAllEpicTasks() throws ManagerDeleteException {
         super.deleteAllEpicTasks();
         saveToCSV();
     }
 
     @Override
-    public void deleteAllSubTasks() {
+    public void deleteAllSubTasks() throws ManagerDeleteException {
         super.deleteAllSubTasks();
         saveToCSV();
     }
@@ -623,36 +662,36 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Получение задачи по идентификатору
      */
     @Override
-    public Task getTaskById(int id) {
+    public Task getTaskById(int id) throws ManagerGetException {
         Task task = super.getTaskById(id);
         saveToCSV();
         return task;
     }
 
     @Override
-    public EpicTask getEpicTaskById(int id) {
+    public EpicTask getEpicTaskById(int id) throws ManagerGetException {
         EpicTask epicTask = super.getEpicTaskById(id);
         saveToCSV();
         return epicTask;
     }
 
     @Override
-    public EpicTask.SubTask getSubTaskById(int id) {
+    public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
         EpicTask.SubTask subTask = super.getSubTaskById(id);
         saveToCSV();
         return subTask;
     }
 
-    public Task getTaskByIdFromString(int id) {
-        return super.getTaskById(id);
+    public void createTaskHistoryFromString(int id) {
+        super.getTaskById(id);
     }
 
-    public EpicTask getEpicTaskByIdFromString(int id) {
-        return super.getEpicTaskById(id);
+    public void createEpicTaskHistoryFromString(int id) {
+        super.getEpicTaskById(id);
     }
 
-    public EpicTask.SubTask getSubTaskByIdFromString(int id) {
-        return super.getSubTaskById(id);
+    public void createSubTaskHistoryFromString(int id) {
+        super.getSubTaskById(id);
     }
 
     /**
@@ -719,19 +758,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление задачи
      */
     @Override
-    public void removeTaskById(int id) {
+    public void removeTaskById(int id) throws ManagerDeleteException {
         super.removeTaskById(id);
         saveToCSV();
     }
 
     @Override
-    public void removeEpicTaskById(int id) {
+    public void removeEpicTaskById(int id) throws ManagerDeleteException {
         super.removeEpicTaskById(id);
         saveToCSV();
     }
 
     @Override
-    public void removeSubTaskById(int id) {
+    public void removeSubTaskById(int id) throws ManagerDeleteException {
         super.removeSubTaskById(id);
         saveToCSV();
     }
@@ -748,7 +787,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * История просмотров задач
      */
     @Override
-    public List<Task> getListOfTaskHistory() {
+    public List<Task> getListOfTaskHistory() throws ManagerGetException {
         return super.getListOfTaskHistory();
     }
 
@@ -794,7 +833,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод для возвращения списка задач и подзадач в заданном порядке
      */
     @Override
-    public Set<Task> getterPrioritizedTasks() {
+    public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
         return super.getterPrioritizedTasks();
     }
 
