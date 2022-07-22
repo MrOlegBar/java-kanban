@@ -51,16 +51,8 @@ public class Task {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Status getStatus() {
@@ -75,16 +67,8 @@ public class Task {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
     public long getDuration() {
         return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
     }
 
     public LocalDateTime getEndTime() {

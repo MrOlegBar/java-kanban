@@ -430,8 +430,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (subTask != null) {
             int epicTaskId = subTask.getEpicTaskId();
             EpicTask epicTask = epicTaskStorage.get(epicTaskId);
-            List listOfSubTaskId = epicTask.getListOfSubTaskId();
+            List<Integer> listOfSubTaskId;
             if (epicTask != null) {
+                listOfSubTaskId = epicTask.getListOfSubTaskId();
                 listOfSubTaskId.remove((Integer) id);
                 inMemoryHistoryManager.removeTaskFromTaskHistory(id);
                 listOfPrioritizedTasks.remove(subTask);

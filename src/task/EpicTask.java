@@ -10,7 +10,7 @@ import java.util.Objects;
  * Класс для создания Epic задач
  */
 public class EpicTask extends Task {
-    private List<Integer> listOfSubTaskId;
+    private final List<Integer> listOfSubTaskId;
 
     public EpicTask(String epicTaskName
             , String epicTaskDescription
@@ -39,10 +39,6 @@ public class EpicTask extends Task {
 
     public List<Integer> getListOfSubTaskId() {
         return listOfSubTaskId;
-    }
-
-    public void setListOfSubTaskId(List<Integer> listOfSubTaskId) {
-        this.listOfSubTaskId = listOfSubTaskId;
     }
 
     @Override
