@@ -1,3 +1,5 @@
+package server;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
@@ -12,7 +14,7 @@ import com.sun.net.httpserver.HttpServer;
  * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
  */
 public class KVServer {
-    public static final int PORT = 8080;
+    public static final int PORT = 8081;
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
