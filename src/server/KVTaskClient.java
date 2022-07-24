@@ -14,7 +14,7 @@ public class KVTaskClient {
 
     //URI url = URI.create("http://localhost:8081/register");
 
-    KVTaskClient(URI url) throws IOException, InterruptedException {
+    public KVTaskClient(URI url) throws IOException, InterruptedException {
         this.url = url;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()

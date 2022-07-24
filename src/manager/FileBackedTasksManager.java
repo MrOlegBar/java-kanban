@@ -19,7 +19,7 @@ import static task.Task.Type.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final File autosaveFile;
+    private File autosaveFile;
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public FileBackedTasksManager(File file) throws ManagerSaveException {
