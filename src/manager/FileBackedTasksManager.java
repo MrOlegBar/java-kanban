@@ -26,6 +26,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.autosaveFile = fileExists(file);
     }
 
+    public FileBackedTasksManager() {
+    }
+
     public static void main(String[] args) throws ManagerSaveException {
 
         /**
