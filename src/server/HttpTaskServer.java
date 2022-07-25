@@ -282,7 +282,8 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(task);
-                                manager.managerToJson();
+                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+
                             } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {

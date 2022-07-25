@@ -24,7 +24,6 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
     }
 
     private final KVTaskClient kVTaskClient;
-    private String managerToJson;
 
     public HTTPTaskManager(URI uri) throws IOException, InterruptedException {
         kVTaskClient = new KVTaskClient(uri);
@@ -37,14 +36,32 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
             .create();
 
     public String managerToJson() {
-        managerToJson = gson.toJson(getListOfTasks());
-        System.out.println(managerToJson);
-        managerToJson += gson.toJson(getListOfEpicTasks());
-        System.out.println(managerToJson);
-        managerToJson += gson.toJson(getListOfSubTasks());
-        System.out.println(managerToJson);
-        managerToJson += gson.toJson(getListOfTaskHistory());
-        System.out.println(managerToJson);
+        String managerToJson = "";
+        if (getListOfTasks().size() != 0) {
+            System.out.println(getListOfTasks());
+            managerToJson += gson.toJson(getListOfTasks());
+            System.out.println(managerToJson);
+        }
+
+        if (getListOfEpicTasks().size() != 0) {
+            System.out.println(getListOfEpicTasks());
+            managerToJson += gson.toJson(getListOfEpicTasks());
+            System.out.println(managerToJson);
+        }
+
+        if (getListOfSubTasks().size() != 0) {
+            System.out.println(getListOfSubTasks());
+            managerToJson += gson.toJson(getListOfSubTasks());
+            System.out.println(managerToJson);
+        }
+
+        try {
+            System.out.println(getListOfTaskHistory());
+            managerToJson += "|" + gson.toJson(getListOfTaskHistory());
+            System.out.println(managerToJson);
+        } catch (ManagerGetException e) {
+            return managerToJson;
+        }
         return managerToJson;
     }
 
