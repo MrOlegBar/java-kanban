@@ -3,6 +3,7 @@ package manager;
 import task.EpicTask;
 import task.Task;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +46,7 @@ public interface TaskManager {
     /**
      * Возвращает задачу Task после проверки на пересечение по времени выполнения с уже созданными задачами
      */
-    Task createTask(Task task);
+    Task createTask(Task task) throws IOException, InterruptedException;
 
     /**
      * Возвращает задачу EpicTask после проверки на пересечение по времени выполнения
@@ -60,7 +61,7 @@ public interface TaskManager {
     /**
      * Сохраняет задачу в коллекцию
      */
-    void saveTask(Task task);
+    void saveTask(Task task) throws IOException, InterruptedException;
 
     /**
      * Сохраняет Epic задачу в коллекцию

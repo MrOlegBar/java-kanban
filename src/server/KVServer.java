@@ -25,6 +25,55 @@ public class KVServer {
         server.createContext("/register", this::register);
         server.createContext("/save", this::save);
         server.createContext("/load", this::load);
+        System.out.println("KVServer-сервер запущен на " + PORT + " порту!");
+    }
+
+    private void register(HttpExchange httpExchange) throws IOException {
+        try {
+            System.out.println("\n/register");
+            if ("GET".equals(httpExchange.getRequestMethod())) {
+                sendText(httpExchange, apiToken);
+            } else {
+                System.out.println("/register ждёт GET-запрос, а получил " + httpExchange.getRequestMethod());
+                httpExchange.sendResponseHeaders(405, 0);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void save(HttpExchange httpExchange) throws IOException {
+        try {
+            System.out.println("\n/save");
+            if (!hasAuth(httpExchange)) {
+                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                httpExchange.sendResponseHeaders(403, 0);
+                return;
+            }
+            if ("POST".equals(httpExchange.getRequestMethod())) {
+                String key = httpExchange.getRequestURI().getPath().substring("/save/".length());
+                if (key.isEmpty()) {
+                    System.out.println("Key для сохранения пустой. key указывается в пути: /save/{key}");
+                    httpExchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                String value = readText(httpExchange);
+                if (value.isEmpty()) {
+
+                    System.out.println("Value для сохранения пустой. value указывается в теле запроса");
+                    httpExchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                storage.put(key, value);
+                System.out.println("Значение для ключа " + key + " успешно обновлено!");
+                httpExchange.sendResponseHeaders(200, 0);
+            } else {
+                System.out.println("/save ждёт POST-запрос, а получил: " + httpExchange.getRequestMethod());
+                httpExchange.sendResponseHeaders(405, 0);
+            }
+        } finally {
+            httpExchange.close();
+        }
     }
 
     private void load(HttpExchange httpExchange) throws IOException {
@@ -66,56 +115,7 @@ public class KVServer {
         }
     }
 
-    private void save(HttpExchange httpExchange) throws IOException {
-        try {
-            System.out.println("\n/save");
-            if (!hasAuth(httpExchange)) {
-                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
-                httpExchange.sendResponseHeaders(403, 0);
-                return;
-            }
-            if ("POST".equals(httpExchange.getRequestMethod())) {
-                String key = httpExchange.getRequestURI().getPath().substring("/save/".length());
-                if (key.isEmpty()) {
-                    System.out.println("Key для сохранения пустой. key указывается в пути: /save/{key}");
-                    httpExchange.sendResponseHeaders(400, 0);
-                    return;
-                }
-                String value = readText(httpExchange);
-                if (value.isEmpty()) {
-                    System.out.println("Value для сохранения пустой. value указывается в теле запроса");
-                    httpExchange.sendResponseHeaders(400, 0);
-                    return;
-                }
-                storage.put(key, value);
-                System.out.println("Значение для ключа " + key + " успешно обновлено!");
-                httpExchange.sendResponseHeaders(200, 0);
-            } else {
-                System.out.println("/save ждёт POST-запрос, а получил: " + httpExchange.getRequestMethod());
-                httpExchange.sendResponseHeaders(405, 0);
-            }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
-    private void register(HttpExchange httpExchange) throws IOException {
-        try {
-            System.out.println("\n/register");
-            if ("GET".equals(httpExchange.getRequestMethod())) {
-                sendText(httpExchange, apiToken);
-            } else {
-                System.out.println("/register ждёт GET-запрос, а получил " + httpExchange.getRequestMethod());
-                httpExchange.sendResponseHeaders(405, 0);
-            }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
     public void start() {
-        System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         System.out.println("API_TOKEN: " + apiToken);
         server.start();
     }

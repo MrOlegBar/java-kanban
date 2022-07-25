@@ -13,15 +13,15 @@ import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
 import exception.ManagerGetException;
 import exception.ManagerSaveException;
-import manager.FileBackedTasksManager;
+import manager.HTTPTaskManager;
 import task.EpicTask;
 import task.Task;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -30,17 +30,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HttpTaskServer {
-    private static final int PORT = 8081;
+    private static final int PORT = 8080;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
+    private final HttpServer httpServer;
 
-    public static void main(String[] args) throws ManagerSaveException, IOException {
 
-        HttpServer httpServer = HttpServer.create();
+    public HttpTaskServer() throws IOException {
+        httpServer = HttpServer.create();
         httpServer.bind(new InetSocketAddress(PORT), 0);
 
         httpServer.createContext("/tasks/task", new HelloHandler());
@@ -56,11 +57,14 @@ public class HttpTaskServer {
 
         httpServer.createContext("/tasks/history", new HelloHandler());
         httpServer.createContext("/tasks", new HelloHandler());
-        httpServer.start();
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }
 
-    static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+    public void start() {
+        httpServer.start();
+    }
+
+    public static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
         private final DateTimeFormatter formatterReader = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -83,7 +87,13 @@ public class HttpTaskServer {
     static class HelloHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException {
-            FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
+            HTTPTaskManager manager = null;
+            try {
+                manager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
             Headers requestHeaders = httpExchange.getRequestHeaders();
             List<String> contentTypeValues = requestHeaders.get("Content-type");
             String method = httpExchange.getRequestMethod();
@@ -151,7 +161,9 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getTaskById(id));
-                                } catch (ManagerGetException e) {
+                                    //manager.saveToCSV();
+                                    manager.getKVTaskClient().put("key1", gson.toJson(this));
+                                } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
                                     os.write(response.getBytes(DEFAULT_CHARSET));
@@ -168,6 +180,7 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getEpicTaskById(id));
+                                    manager.saveToCSV();
                                 } catch (ManagerGetException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -185,6 +198,7 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getSubTaskById(id));
+                                    manager.saveToCSV();
                                 } catch (ManagerGetException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -268,7 +282,8 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(task);
-                            } catch (ManagerCreateException e) {
+                                manager.managerToJson();
+                            } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -277,7 +292,7 @@ public class HttpTaskServer {
                                 }
                             }
 
-                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.sendResponseHeaders(manager.getKVTaskClient().response.statusCode(), 0);
                             httpExchange.close();
                             return;
                         } else if (path.endsWith("/tasks/epictask")) {
@@ -288,6 +303,7 @@ public class HttpTaskServer {
 
                             EpicTask epicTask = manager.getterEpicTaskFromRequest(body);
                             manager.createTask(epicTask);
+                            System.out.println(manager.managerToJson());
 
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -302,6 +318,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(subTask);
+                                System.out.println(manager.managerToJson());
                             } catch (ManagerCreateException | ManagerSaveException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -331,6 +348,7 @@ public class HttpTaskServer {
                                     , taskData.getDuration());
                             try {
                                 manager.updateTask(task);
+                                manager.saveToCSV();
                             } catch (ManagerCreateException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -361,6 +379,7 @@ public class HttpTaskServer {
                                     , epictaskData.getDuration());
                             try {
                                 manager.updateEpicTask(epicTask);
+                                manager.saveToCSV();
                             } catch (ManagerCreateException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -391,6 +410,7 @@ public class HttpTaskServer {
                                     , subtaskData.getDuration());
                             try {
                                 manager.updateSubTask(subTask);
+                                manager.saveToCSV();
                             } catch (ManagerCreateException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -413,6 +433,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllTasks();
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -429,6 +450,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllEpicTasks();
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -445,6 +467,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllSubTasks();
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -462,6 +485,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[1]);
                             try {
                                 manager.removeTaskById(id);
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -479,6 +503,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[1]);
                             try {
                                 manager.removeEpicTaskById(id);
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -496,6 +521,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[1]);
                             try {
                                 manager.removeSubTaskById(id);
+                                manager.saveToCSV();
                             } catch (ManagerDeleteException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {

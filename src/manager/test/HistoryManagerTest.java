@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import task.EpicTask;
 import task.Task;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ class HistoryManagerTest extends InMemoryTaskManager {
     EpicTask.SubTask subtask1;
 
     @BeforeEach
-    private void beforeEach() {
+    private void beforeEach() throws IOException, InterruptedException {
         historyManager = new InMemoryHistoryManager();
 
         task1 = new Task(

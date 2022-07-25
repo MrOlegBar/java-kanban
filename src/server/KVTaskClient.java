@@ -8,42 +8,42 @@ import java.net.http.HttpResponse;
 
 public class KVTaskClient {
     private final String apiToken;
+    URI uri;
     HttpClient client = HttpClient.newHttpClient();
-    URI url;
-    KVServer kVServer = new KVServer();
+    HttpResponse<String> response;
 
-    //URI url = URI.create("http://localhost:8081/register");
+    public KVTaskClient(URI uri) throws IOException, InterruptedException {
+        this.uri = uri;
+        this.apiToken = register();
+    }
 
-    public KVTaskClient(URI url) throws IOException, InterruptedException {
-        this.url = url;
+    public String register() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(url)
+                .uri(URI.create(this.uri + "register"))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        this.apiToken = response.body();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return response.body();
     }
 
-    public String getApiToken() {
-        return apiToken;
-    }
-
-    void put(String key, String json) { //POST /save/<ключ>?API_TOKEN=
-        URI url = URI.create(this.url.getHost() + "/save/" + key + "?API_TOKEN=" + apiToken);
+    public void put(String key, String json) throws IOException, InterruptedException {
+        URI uri = URI.create(this.uri + "save/" + key + "?API_TOKEN=" + apiToken);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(body)
-                .uri(url)
+                .uri(uri)
                 .build();
+
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    String load(String key) throws IOException, InterruptedException { //GET /load/<ключ>?API_TOKEN=.
-        URI url = URI.create(this.url.getHost() + "/load/" + key + "?API_TOKEN=" + apiToken);
+    public String load(String key) throws IOException, InterruptedException {
+        URI url = URI.create(this.uri + "load/" + key + "?API_TOKEN=" + apiToken);
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return response.body();
     }
 }

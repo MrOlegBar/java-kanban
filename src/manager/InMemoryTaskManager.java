@@ -7,6 +7,7 @@ import exception.ManagerSaveException;
 import task.EpicTask;
 import task.Task;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -133,7 +134,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу Task после проверки на пересечение по времени выполнения
      */
     @Override
-    public Task createTask(Task task) throws ManagerCreateException {
+    public Task createTask(Task task) throws ManagerCreateException, IOException, InterruptedException {
         checkIntersectionByTaskTime(task);
         if (task.getId() != 0) {
             return new Task(task.getId(), task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
@@ -177,7 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Сохраняет задачу в коллекцию
      */
     @Override
-    public void saveTask(Task task) {
+    public void saveTask(Task task) throws IOException, InterruptedException {
         int taskId = idGeneration(task);
         taskStorage.put(taskId, task);
         listOfPrioritizedTasks.add(task);

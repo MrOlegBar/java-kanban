@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import task.EpicTask;
 import task.Task;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     List<EpicTask.SubTask> listOfSubTasks;
 
     @BeforeEach
-    private void BeforeEach() {
+    private void BeforeEach() throws IOException, InterruptedException {
 
         manager = createManager();
 

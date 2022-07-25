@@ -202,7 +202,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 }
             }
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             System.out.println(ex.getMessage());
         }
         return localManager;
@@ -524,7 +524,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Метод автосохранения менеджера задач
      */
-    private void saveToCSV() {
+    public void saveToCSV() {
         String firstColumn = "id";
         String secondColumn = "type";
         String thirdColumn = "name";
@@ -586,21 +586,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод для сохранения задач
      */
     @Override
-    public void saveTask(Task task) {
+    public void saveTask(Task task) throws IOException, InterruptedException {
         super.saveTask(task);
-        saveToCSV();
     }
 
     @Override
     public void saveEpicTask(EpicTask epicTask) {
         super.saveEpicTask(epicTask);
-        saveToCSV();
     }
 
     @Override
     public void saveSubTask(EpicTask.SubTask subTask) throws ManagerSaveException {
         super.saveSubTask(subTask);
-        saveToCSV();
     }
 
     /**
@@ -645,20 +642,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteAllTasks() throws ManagerDeleteException {
         super.deleteAllTasks();
-
-        saveToCSV();
     }
 
     @Override
     public void deleteAllEpicTasks() throws ManagerDeleteException {
         super.deleteAllEpicTasks();
-        saveToCSV();
     }
 
     @Override
     public void deleteAllSubTasks() throws ManagerDeleteException {
         super.deleteAllSubTasks();
-        saveToCSV();
     }
 
     /**
@@ -666,23 +659,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      */
     @Override
     public Task getTaskById(int id) throws ManagerGetException {
-        Task task = super.getTaskById(id);
-        saveToCSV();
-        return task;
+        return super.getTaskById(id);
     }
 
     @Override
     public EpicTask getEpicTaskById(int id) throws ManagerGetException {
-        EpicTask epicTask = super.getEpicTaskById(id);
-        saveToCSV();
-        return epicTask;
+        return super.getEpicTaskById(id);
     }
 
     @Override
     public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
-        EpicTask.SubTask subTask = super.getSubTaskById(id);
-        saveToCSV();
-        return subTask;
+        return super.getSubTaskById(id);
     }
 
     public void createTaskHistoryFromString(int id) {
@@ -701,7 +688,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Создание задачи
      */
     @Override
-    public Task createTask(Task task) throws ManagerCreateException {
+    public Task createTask(Task task) throws ManagerCreateException, IOException, InterruptedException {
         Task newTask = super.createTask(task);
         saveTask(newTask);
         return newTask;
@@ -727,22 +714,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void updateTask(Task task) throws ManagerCreateException {
         super.updateTask(task);
-        saveToCSV();
     }
 
     @Override
     public void updateEpicTask(EpicTask epicTask) throws ManagerCreateException {
         super.updateEpicTask(epicTask);
-        saveToCSV();
     }
 
     @Override
     public void updateSubTask(EpicTask.SubTask subTask) throws ManagerCreateException {
         super.updateSubTask(subTask);
-        saveToCSV();
     }
 
-    public void createTaskFromString(Task task) throws ManagerCreateException {
+    public void createTaskFromString(Task task) throws ManagerCreateException, IOException, InterruptedException {
         super.createTask(task);
         super.saveTask(task);
     }
@@ -763,19 +747,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void removeTaskById(int id) throws ManagerDeleteException {
         super.removeTaskById(id);
-        saveToCSV();
     }
 
     @Override
     public void removeEpicTaskById(int id) throws ManagerDeleteException {
         super.removeEpicTaskById(id);
-        saveToCSV();
     }
 
     @Override
     public void removeSubTaskById(int id) throws ManagerDeleteException {
         super.removeSubTaskById(id);
-        saveToCSV();
     }
 
     /**
@@ -792,12 +773,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public List<Task> getListOfTaskHistory() throws ManagerGetException {
         return super.getListOfTaskHistory();
-    }
-
-    @Override
-    public void removeTaskFromTaskHistory(int id) {
-        super.removeTaskFromTaskHistory(id);
-        saveToCSV();
     }
 
     /**
