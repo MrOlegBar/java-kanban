@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -65,11 +66,25 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         return managerToJson;
     }
 
-    public HTTPTaskManager managerFromJson(String manager) {
-        HTTPTaskManager hTTPTaskManager = null;
-        String[] arrayManager = manager.split("|");
-        System.out.println(arrayManager);
-        System.out.println(arrayManager);
+    public static HTTPTaskManager managerFromJson(String manager) throws IOException, InterruptedException {
+        HTTPTaskManager hTTPTaskManager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
+        String[] arrayManager = manager.split("\\|");
+        System.out.println(Arrays.toString(arrayManager));
+        for (String list : arrayManager) {
+            System.out.println(list);
+            if (list.matches(".*listOfSubTaskId.*"))  {
+                List<EpicTask> listOfEpicTasks = gson.fromJson(list, List.class);
+                System.out.println(listOfEpicTasks);
+
+            } else if (list.matches(".*epicTaskId.*"))  {
+                List<EpicTask.SubTask> listOfSubTasks = gson.fromJson(list, List.class);
+                System.out.println(listOfSubTasks);
+            } else {
+                List<Task> listOfTasks = gson.fromJson(list, List.class);
+                System.out.println(listOfTasks);
+            }
+        }
+
         return hTTPTaskManager;
     }
 

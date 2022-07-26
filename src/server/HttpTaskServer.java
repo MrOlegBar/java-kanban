@@ -90,7 +90,7 @@ public class HttpTaskServer {
             HTTPTaskManager manager = null;
 
             try {
-                manager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
+                manager = HTTPTaskManager.managerFromJson();
                 //String managerToJson = manager.getKVTaskClient().load("key1");
             } catch (InterruptedException e) {
                 e.printStackTrace();
