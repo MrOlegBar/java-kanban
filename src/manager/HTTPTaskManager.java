@@ -39,25 +39,25 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         String managerToJson = "";
         if (getListOfTasks().size() != 0) {
             System.out.println(getListOfTasks());
-            managerToJson += gson.toJson(getListOfTasks());
+            managerToJson += gson.toJson(getListOfTasks()) + "|";
             System.out.println(managerToJson);
         }
 
         if (getListOfEpicTasks().size() != 0) {
             System.out.println(getListOfEpicTasks());
-            managerToJson += gson.toJson(getListOfEpicTasks());
+            managerToJson += gson.toJson(getListOfEpicTasks()) + "|";
             System.out.println(managerToJson);
         }
 
         if (getListOfSubTasks().size() != 0) {
             System.out.println(getListOfSubTasks());
-            managerToJson += gson.toJson(getListOfSubTasks());
+            managerToJson += gson.toJson(getListOfSubTasks()) + "|";
             System.out.println(managerToJson);
         }
 
         try {
             System.out.println(getListOfTaskHistory());
-            managerToJson += "|" + gson.toJson(getListOfTaskHistory());
+            managerToJson += gson.toJson(getListOfTaskHistory());
             System.out.println(managerToJson);
         } catch (ManagerGetException e) {
             return managerToJson;
@@ -65,6 +65,12 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         return managerToJson;
     }
 
+    public HTTPTaskManager managerFromJson(String manager) {
+        HTTPTaskManager hTTPTaskManager = null;
+        String[] arrayManager = manager.split("|");
+        System.out.println(arrayManager);
+        return hTTPTaskManager;
+    }
 
         /**
          * Добавляет id подзадачи в список id подзадач Epic задачи, а id Epic задачи в подзадачу

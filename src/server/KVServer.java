@@ -30,7 +30,7 @@ public class KVServer {
 
     private void register(HttpExchange httpExchange) throws IOException {
         try {
-            System.out.println("\n/register");
+            //System.out.println("\n/register");
             if ("GET".equals(httpExchange.getRequestMethod())) {
                 sendText(httpExchange, apiToken);
             } else {

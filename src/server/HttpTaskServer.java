@@ -88,8 +88,10 @@ public class HttpTaskServer {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException {
             HTTPTaskManager manager = null;
+
             try {
                 manager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
+                //String managerToJson = manager.getKVTaskClient().load("key1");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -304,7 +306,11 @@ public class HttpTaskServer {
 
                             EpicTask epicTask = manager.getterEpicTaskFromRequest(body);
                             manager.createTask(epicTask);
-                            System.out.println(manager.managerToJson());
+                            try {
+                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
@@ -319,8 +325,8 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(subTask);
-                                System.out.println(manager.managerToJson());
-                            } catch (ManagerCreateException | ManagerSaveException e) {
+                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+                            } catch (ManagerCreateException | ManagerSaveException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);

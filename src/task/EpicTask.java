@@ -47,14 +47,14 @@ public class EpicTask extends Task {
         try {
             if (getStartTime() != null) {
                 returnString = "EpicTask{" +
-                        "id='" + getId() + '\'' +
+                        "id='" + getId() + '\''  +
                         ", name='" + getName() + '\'' +
                         ", description='" + getDescription() + '\'' +
                         ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
-                        ", status=" + getStatus() +
-                        ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                        ", duration=" + getDuration() +
-                        ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                        ", status='" + getStatus() + '\''  +
+                        ", startTime='" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
+                        ", duration='" + getDuration() + '\''  +
+                        ", endTime='" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
                         "}\n";
             } else {
                 returnString = "EpicTask{" +
@@ -62,10 +62,10 @@ public class EpicTask extends Task {
                         ", name='" + getName() + '\'' +
                         ", description='" + getDescription() + '\'' +
                         ", listOfSubTaskId='" + listOfSubTaskId + '\'' +
-                        ", status=" + getStatus() +
-                        ", startTime=" + null +
-                        ", duration=" + getDuration() +
-                        ", endTime=" + null +
+                        ", status='" + getStatus() + '\''  +
+                        ", startTime='" + null + '\''  +
+                        ", duration='" + getDuration() + '\''  +
+                        ", endTime='" + null + '\''  +
                         "}\n";
             }
         } catch (NullPointerException e) {
@@ -151,10 +151,10 @@ public class EpicTask extends Task {
                             ", epicTaskId='" + epicTaskId + '\'' +
                             ", name='" + getName() + '\'' +
                             ", description='" + getDescription() + '\'' +
-                            ", status=" + getStatus() +
-                            ", startTime=" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
-                            ", duration=" + getDuration() +
-                            ", endTime=" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) +
+                            ", status='" + getStatus() + '\''  +
+                            ", startTime='" + getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
+                            ", duration='" + getDuration() + '\''  +
+                            ", endTime='" + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
                             "}\n";
                 } else {
                     returnString = "SubTask{" +
@@ -162,10 +162,10 @@ public class EpicTask extends Task {
                             ", epicTaskId='" + epicTaskId + '\'' +
                             ", name='" + getName() + '\'' +
                             ", description='" + getDescription() + '\'' +
-                            ", status=" + getStatus() +
-                            ", startTime=" + null +
-                            ", duration=" + getDuration() +
-                            ", endTime=" + null +
+                            ", status='" + getStatus() + '\''  +
+                            ", startTime='" + null + '\''  +
+                            ", duration='" + getDuration() + '\''  +
+                            ", endTime='" + null + '\''  +
                             "}\n";
                 }
             } catch (NullPointerException e) {
