@@ -69,6 +69,7 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         HTTPTaskManager hTTPTaskManager = null;
         String[] arrayManager = manager.split("|");
         System.out.println(arrayManager);
+        System.out.println(arrayManager);
         return hTTPTaskManager;
     }
 
