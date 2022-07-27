@@ -87,28 +87,30 @@ public class HttpTaskServer {
     static class HelloHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException {
-            HTTPTaskManager manager = null;
-
-            try {
-                manager = HTTPTaskManager.managerFromJson();
-                //String managerToJson = manager.getKVTaskClient().load("key1");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            //FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(new File("Autosave.csv"));
             Headers requestHeaders = httpExchange.getRequestHeaders();
             List<String> contentTypeValues = requestHeaders.get("Content-type");
             String method = httpExchange.getRequestMethod();
-            String path = String.valueOf(httpExchange.getRequestURI());
+            String path = String.valueOf(httpExchange.getRequestURI()); //tasks/task?key=key1
+            String key = path.split("=")[1];
+            if (key.contains("&")) {
+                key = key.replaceFirst("&.*$", ""); //tasks/task?key={key}&id=
+            }
             System.out.println(httpExchange.getRequestURI());
             System.out.println("Началась обработка запроса " + path + " от клиента.");
             String response;
             String body;
 
+            HTTPTaskManager manager = null;
+            try {
+                manager = HTTPTaskManager.managerFromJson(key);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             if ((contentTypeValues != null) && (contentTypeValues.contains("application/json"))) {
                 switch (method) {
                     case "GET":
-                        if (path.endsWith("/tasks/task")) {
+                        if (path.endsWith("/tasks/task?key=" + key)) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
@@ -124,7 +126,7 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.endsWith("/tasks/epictask")) {
+                        } else if (path.endsWith("/tasks/epictask?key=" + key)) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
@@ -140,7 +142,7 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        }  else if (path.endsWith("/tasks/subtask")) {
+                        }  else if (path.endsWith("/tasks/subtask?key=" + key)) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
@@ -156,15 +158,14 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.startsWith("/tasks/task?id=")) {
+                        } else if (path.startsWith("/tasks/task?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
                                 try {
                                     response = gson.toJson(manager.getTaskById(id));
-                                    //manager.saveToCSV();
-                                    manager.getKVTaskClient().put("key1", gson.toJson(this));
+                                    manager.getKVTaskClient().put(key, manager.managerToJson());
                                 } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -175,15 +176,15 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.startsWith("/tasks/epictask?id=")) {
+                        } else if (path.startsWith("/tasks/epictask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
                                 try {
                                     response = gson.toJson(manager.getEpicTaskById(id));
-                                    manager.saveToCSV();
-                                } catch (ManagerGetException e) {
+                                    manager.getKVTaskClient().put(key, manager.managerToJson());
+                                } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
                                     os.write(response.getBytes(DEFAULT_CHARSET));
@@ -193,15 +194,15 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.startsWith("/tasks/subtask?id=")) {
+                        } else if (path.startsWith("/tasks/subtask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
                                 try {
                                     response = gson.toJson(manager.getSubTaskById(id));
-                                    manager.saveToCSV();
-                                } catch (ManagerGetException e) {
+                                    manager.getKVTaskClient().put(key, manager.managerToJson());
+                                } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
                                     os.write(response.getBytes(DEFAULT_CHARSET));
@@ -211,9 +212,9 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.startsWith("/tasks/subtask/epictask?id=")) {
+                        } else if (path.startsWith("/tasks/subtask/epictask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (OutputStream os = httpExchange.getResponseBody()) {
                                 List<EpicTask.SubTask> listOfSubtask = new ArrayList<>();
 
@@ -236,7 +237,7 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.endsWith("/tasks")) {
+                        } else if (path.endsWith("/tasks?key=" + key)) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
@@ -252,7 +253,7 @@ public class HttpTaskServer {
                                 os.write(response.getBytes(DEFAULT_CHARSET));
                                 return;
                             }
-                        } else if (path.endsWith("/tasks/history")) {
+                        } else if (path.endsWith("/tasks/history?key=" + key)) {
 
                             try (OutputStream os = httpExchange.getResponseBody()) {
 
@@ -274,17 +275,17 @@ public class HttpTaskServer {
                         }
                         break;
                     case "POST":
-                        if (path.endsWith("/tasks/task")) {
-
+                        if (path.endsWith("/tasks/task?key=" + key)) {
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            Task task = manager.getterTaskFromRequest(body);
+                            Task task = gson.fromJson(body, Task.class);
+                            System.out.println(task);
 
                             try {
                                 manager.createTask(task);
-                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
 
                             } catch (ManagerCreateException | InterruptedException e) {
 
@@ -298,16 +299,19 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(manager.getKVTaskClient().response.statusCode(), 0);
                             httpExchange.close();
                             return;
-                        } else if (path.endsWith("/tasks/epictask")) {
+                        } else if (path.endsWith("/tasks/epictask?key=" + key)) {
 
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask epicTask = manager.getterEpicTaskFromRequest(body);
+                            EpicTask epicTask = gson.fromJson(body, EpicTask.class);
+                            System.out.println(epicTask);
+
                             manager.createTask(epicTask);
+
                             try {
-                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -315,17 +319,18 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.endsWith("/tasks/subtask")) {
+                        } else if (path.endsWith("/tasks/subtask?key=" + key)) {
 
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask.SubTask subTask = manager.getterSubTaskFromRequest(body);
+                            EpicTask.SubTask subTask = gson.fromJson(body, EpicTask.SubTask.class);
+                            System.out.println(subTask);
 
                             try {
                                 manager.createTask(subTask);
-                                manager.getKVTaskClient().put("key1", manager.managerToJson());
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
                             } catch (ManagerCreateException | ManagerSaveException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -338,14 +343,14 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/task?id=")) {
+                        } else if (path.startsWith("/tasks/task?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            Task taskData = manager.getterTaskFromRequest(body);
+                            Task taskData = gson.fromJson(body, Task.class);
                             Task task = new Task(
                                     id
                                     , taskData.getName()
@@ -355,8 +360,8 @@ public class HttpTaskServer {
                                     , taskData.getDuration());
                             try {
                                 manager.updateTask(task);
-                                manager.saveToCSV();
-                            } catch (ManagerCreateException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -368,14 +373,14 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/epictask?id=")) {
+                        } else if (path.startsWith("/tasks/epictask?key=" + key + "&id=")) {
                             
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask epictaskData = manager.getterEpicTaskFromRequest(body);
+                            EpicTask epictaskData = gson.fromJson(body, EpicTask.class);
                             EpicTask epicTask = new EpicTask(
                                     id
                                     , epictaskData.getName()
@@ -386,8 +391,8 @@ public class HttpTaskServer {
                                     , epictaskData.getDuration());
                             try {
                                 manager.updateEpicTask(epicTask);
-                                manager.saveToCSV();
-                            } catch (ManagerCreateException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -399,14 +404,14 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/subtask?id=")) {
+                        } else if (path.startsWith("/tasks/subtask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try (InputStream is = httpExchange.getRequestBody()) {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask.SubTask subtaskData = manager.getterSubTaskFromRequest(body);
+                            EpicTask.SubTask subtaskData = gson.fromJson(body, EpicTask.SubTask.class);
                             EpicTask.SubTask subTask = new EpicTask.SubTask(
                                     id
                                     , subtaskData.getEpicTaskId()
@@ -417,8 +422,8 @@ public class HttpTaskServer {
                                     , subtaskData.getDuration());
                             try {
                                 manager.updateSubTask(subTask);
-                                manager.saveToCSV();
-                            } catch (ManagerCreateException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -436,12 +441,12 @@ public class HttpTaskServer {
                         }
                         break;
                     case "DELETE":
-                        if (path.endsWith("/tasks/task")) {
+                        if (path.endsWith("/tasks/task?key=" + key)) {
 
                             try {
                                 manager.deleteAllTasks();
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -453,12 +458,12 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.endsWith("/tasks/epictask")) {
+                        } else if (path.endsWith("/tasks/epictask?key=" + key)) {
 
                             try {
                                 manager.deleteAllEpicTasks();
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -470,12 +475,12 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.endsWith("/tasks/subtask")) {
+                        } else if (path.endsWith("/tasks/subtask?key=" + key)) {
 
                             try {
                                 manager.deleteAllSubTasks();
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -487,13 +492,13 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/task?id=")) {
+                        } else if (path.startsWith("/tasks/task?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeTaskById(id);
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -505,13 +510,13 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/epictask?id=")) {
+                        } else if (path.startsWith("/tasks/epictask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeEpicTaskById(id);
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);
@@ -523,13 +528,13 @@ public class HttpTaskServer {
                             httpExchange.sendResponseHeaders(201, 0);
                             httpExchange.close();
                             return;
-                        } else if (path.startsWith("/tasks/subtask?id=")) {
+                        } else if (path.startsWith("/tasks/subtask?key=" + key + "&id=")) {
 
-                            int id = Integer.parseInt(path.split("=")[1]);
+                            int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeSubTaskById(id);
-                                manager.saveToCSV();
-                            } catch (ManagerDeleteException e) {
+                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                            } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
                                     httpExchange.sendResponseHeaders(404, 0);

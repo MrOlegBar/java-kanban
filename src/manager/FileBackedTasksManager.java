@@ -334,7 +334,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return result;
     }
 
-    private Task taskFromRequest(String body) {
+    private static Task taskFromRequest(String body) {
 
         String[] keyValueArray;
         String name = null;
@@ -815,7 +815,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return super.getterPrioritizedTasks();
     }
 
-    public Task getterTaskFromRequest(String body) {
+    public static Task getterTaskFromRequest(String body) {
         return taskFromRequest(body);
     }
 

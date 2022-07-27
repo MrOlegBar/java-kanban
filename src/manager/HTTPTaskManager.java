@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class HTTPTaskManager extends FileBackedTasksManager implements Serializable {
     public KVTaskClient getKVTaskClient() {
@@ -37,54 +35,84 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
             .create();
 
     public String managerToJson() {
-        String managerToJson = "";
+        final List<Task> manager = new ArrayList<>();
         if (getListOfTasks().size() != 0) {
             System.out.println(getListOfTasks());
-            managerToJson += gson.toJson(getListOfTasks()) + "|";
-            System.out.println(managerToJson);
+            manager.addAll(getListOfTasks());
+            System.out.println(manager);
         }
 
         if (getListOfEpicTasks().size() != 0) {
             System.out.println(getListOfEpicTasks());
-            managerToJson += gson.toJson(getListOfEpicTasks()) + "|";
-            System.out.println(managerToJson);
+            manager.addAll(getListOfEpicTasks());
+            System.out.println(manager);
         }
 
         if (getListOfSubTasks().size() != 0) {
             System.out.println(getListOfSubTasks());
-            managerToJson += gson.toJson(getListOfSubTasks()) + "|";
-            System.out.println(managerToJson);
+            manager.addAll(getListOfSubTasks());
+            System.out.println(manager);
         }
 
         try {
-            System.out.println(getListOfTaskHistory());
-            managerToJson += gson.toJson(getListOfTaskHistory());
-            System.out.println(managerToJson);
+            if (getListOfTaskHistory().size() != 0) {
+                System.out.println(getListOfTaskHistory());
+                manager.addAll(getListOfTaskHistory());
+                System.out.println(manager);
+            }
+            System.out.println(gson.toJson(manager));
         } catch (ManagerGetException e) {
-            return managerToJson;
+            System.out.println(gson.toJson(manager));
+            return gson.toJson(manager);
         }
-        return managerToJson;
+        return gson.toJson(manager);
     }
 
-    public static HTTPTaskManager managerFromJson(String manager) throws IOException, InterruptedException {
+    public static HTTPTaskManager managerFromJson(String key) throws IOException, InterruptedException {
         HTTPTaskManager hTTPTaskManager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
-        String[] arrayManager = manager.split("\\|");
-        System.out.println(Arrays.toString(arrayManager));
-        for (String list : arrayManager) {
-            System.out.println(list);
-            if (list.matches(".*listOfSubTaskId.*"))  {
-                List<EpicTask> listOfEpicTasks = gson.fromJson(list, List.class);
-                System.out.println(listOfEpicTasks);
+        String managerFromGson = hTTPTaskManager.getKVTaskClient().load(key);
+        System.out.println(managerFromGson);
 
-            } else if (list.matches(".*epicTaskId.*"))  {
-                List<EpicTask.SubTask> listOfSubTasks = gson.fromJson(list, List.class);
-                System.out.println(listOfSubTasks);
+        if (!managerFromGson.equals("")) {
+            managerFromGson = managerFromGson.replaceFirst("\\[\\s*", "");
+            managerFromGson = managerFromGson.replaceFirst("\\s*]", "");
+            if (managerFromGson.contains("},")) {
+                String[] array = managerFromGson.split("},\n\\s*");
+                for (String gsonFormat : array) {
+                    if (!gsonFormat.contains("}")) {
+                        gsonFormat += "}";
+                    }
+
+                    if (gsonFormat.matches(".*listOfSubTaskId.*")) {
+                        EpicTask epicTask = gson.fromJson(gsonFormat, EpicTask.class);
+                        System.out.println(epicTask);
+                        hTTPTaskManager.createTask(epicTask);
+                    } else if (gsonFormat.matches(".*epicTaskId.*")) {
+                        EpicTask.SubTask subTask = gson.fromJson(gsonFormat, EpicTask.SubTask.class);
+                        System.out.println(subTask);
+                        hTTPTaskManager.createTask(subTask);
+                    } else {
+                        Task task = gson.fromJson(gsonFormat, Task.class);
+                        System.out.println(task);
+                        hTTPTaskManager.createTask(task);
+                    }
+                }
             } else {
-                List<Task> listOfTasks = gson.fromJson(list, List.class);
-                System.out.println(listOfTasks);
+                if (managerFromGson.matches(".*listOfSubTaskId.*")) {
+                    EpicTask epicTask = gson.fromJson(managerFromGson, EpicTask.class);
+                    System.out.println(epicTask);
+                    hTTPTaskManager.createTask(epicTask);
+                } else if (managerFromGson.matches(".*epicTaskId.*")) {
+                    EpicTask.SubTask subTask = gson.fromJson(managerFromGson, EpicTask.SubTask.class);
+                    System.out.println(subTask);
+                    hTTPTaskManager.createTask(subTask);
+                } else {
+                    Task task = gson.fromJson(managerFromGson, Task.class);
+                    System.out.println(task);
+                    hTTPTaskManager.createTask(task);
+                }
             }
         }
-
         return hTTPTaskManager;
     }
 
@@ -319,11 +347,6 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
     @Override
     public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
         return super.getterPrioritizedTasks();
-    }
-
-    @Override
-    public Task getterTaskFromRequest(String body) {
-        return super.getterTaskFromRequest(body);
     }
 
     @Override

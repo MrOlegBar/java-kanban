@@ -115,9 +115,9 @@ public class Task {
                         ", name='" + name + '\'' +
                         ", description='" + description + '\'' +
                         ", status='" + status + '\''  +
-                        ", startTime'=" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
-                        ", duration'=" + duration + '\''  +
-                        ", endTime'=" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
+                        ", startTime='" + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
+                        ", duration='" + duration + '\''  +
+                        ", endTime='" + endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + '\''  +
                         "}\n";
             } else {
                 returnString = "Task{" +
