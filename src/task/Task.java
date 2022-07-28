@@ -16,6 +16,22 @@ public class Task {
     private long duration;
     private LocalDateTime endTime;
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
     public Task(String taskName, String taskDescription, Status taskStatus, LocalDateTime startTime, long duration) {
         this.name = taskName;
         this.description = taskDescription;

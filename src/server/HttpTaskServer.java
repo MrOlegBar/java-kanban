@@ -1,8 +1,7 @@
 package server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.Headers;
@@ -20,14 +19,15 @@ import task.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
@@ -35,26 +35,20 @@ public class HttpTaskServer {
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
-            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new HTTPTaskManager.LocalDateTimeAdapter())
+            .registerTypeAdapter(EpicTask.class, new HTTPTaskManager.EpicTaskAdapter())
             .create();
+
     private final HttpServer httpServer;
 
 
     public HttpTaskServer() throws IOException {
         httpServer = HttpServer.create();
         httpServer.bind(new InetSocketAddress(PORT), 0);
-
         httpServer.createContext("/tasks/task", new HelloHandler());
-        httpServer.createContext("/tasks/task?id={id}", new HelloHandler());
-
         httpServer.createContext("/tasks/epictask", new HelloHandler());
-        httpServer.createContext("/tasks/epictask?id={id}", new HelloHandler());
-
         httpServer.createContext("/tasks/subtask", new HelloHandler());
-        httpServer.createContext("/tasks/subtask?id={id}", new HelloHandler());
-
-        httpServer.createContext("/tasks/subtask/epictask?id={id}", new HelloHandler());
-
+        httpServer.createContext("/tasks/subtask/epictask", new HelloHandler());
         httpServer.createContext("/tasks/history", new HelloHandler());
         httpServer.createContext("/tasks", new HelloHandler());
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
@@ -62,26 +56,6 @@ public class HttpTaskServer {
 
     public void start() {
         httpServer.start();
-    }
-
-    public static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-        private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-        private final DateTimeFormatter formatterReader = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
-        @Override
-        public void write(JsonWriter jsonWriter, LocalDateTime localDateTime) throws IOException {
-            if (localDateTime != null) {
-                jsonWriter.value(localDateTime.format(formatterWriter));
-            } else {
-                jsonWriter.value("null");
-            }
-        }
-
-        @Override
-        public LocalDateTime read(JsonReader jsonReader) throws IOException {
-            return LocalDateTime.parse(jsonReader.nextString(), formatterReader);
-        }
-
     }
 
     static class HelloHandler implements HttpHandler {
@@ -281,7 +255,6 @@ public class HttpTaskServer {
                             }
 
                             Task task = gson.fromJson(body, Task.class);
-                            System.out.println(task);
 
                             try {
                                 manager.createTask(task);
@@ -306,8 +279,6 @@ public class HttpTaskServer {
                             }
 
                             EpicTask epicTask = gson.fromJson(body, EpicTask.class);
-                            System.out.println(epicTask);
-
                             manager.createTask(epicTask);
 
                             try {
@@ -316,7 +287,7 @@ public class HttpTaskServer {
                                 e.printStackTrace();
                             }
 
-                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.sendResponseHeaders(manager.getKVTaskClient().response.statusCode(), 0);
                             httpExchange.close();
                             return;
                         } else if (path.endsWith("/tasks/subtask?key=" + key)) {
@@ -326,7 +297,6 @@ public class HttpTaskServer {
                             }
 
                             EpicTask.SubTask subTask = gson.fromJson(body, EpicTask.SubTask.class);
-                            System.out.println(subTask);
 
                             try {
                                 manager.createTask(subTask);

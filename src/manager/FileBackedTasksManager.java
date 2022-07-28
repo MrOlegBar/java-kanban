@@ -334,7 +334,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return result;
     }
 
-    private static Task taskFromRequest(String body) {
+    /*private static Task taskFromRequest(String body) {
 
         String[] keyValueArray;
         String name = null;
@@ -377,9 +377,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
         return new Task(name, description, status, startTime, duration);
-    }
+    }*/
 
-    private EpicTask epictaskFromRequest(String body) {
+    private EpicTask epictaskFromGson(String body) {
         List<Integer> listOfSubTaskId = new ArrayList<>();
         String[] keyValueArray;
         String name = null;
@@ -441,7 +441,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return new EpicTask(name, description, listOfSubTaskId, status, startTime, duration);
     }
 
-    private EpicTask.SubTask subtaskFromRequest(String body) {
+    public EpicTask getEpictaskFromGson(String body) {
+        return epictaskFromGson(body);
+    }
+
+    /*private EpicTask.SubTask subtaskFromRequest(String body) {
         int epicTaskId = 0;
         String[] keyValueArray;
         String name = null;
@@ -487,7 +491,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
         return new EpicTask.SubTask(epicTaskId, name, description, status, startTime, duration);
-    }
+    }*/
 
     /**
      * Сохраняет менеджер истории в CSV
@@ -813,17 +817,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
         return super.getterPrioritizedTasks();
-    }
-
-    public static Task getterTaskFromRequest(String body) {
-        return taskFromRequest(body);
-    }
-
-    public EpicTask getterEpicTaskFromRequest(String body) {
-        return epictaskFromRequest(body);
-    }
-
-    public EpicTask.SubTask getterSubTaskFromRequest(String body) {
-        return subtaskFromRequest(body);
     }
 }

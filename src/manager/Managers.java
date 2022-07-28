@@ -1,6 +1,7 @@
 package manager;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Managers {
 
@@ -8,8 +9,8 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getDefaultFileBackedTasksManager() {
-        return new FileBackedTasksManager(new File("Autosave.csv"));
+    public static TaskManager getDefaultManager(String key) throws IOException, InterruptedException {
+        return HTTPTaskManager.managerFromJson(key);
     }
 
     public static HistoryManager getDefaultHistory() {
