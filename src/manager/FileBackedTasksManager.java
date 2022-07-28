@@ -379,9 +379,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return new Task(name, description, status, startTime, duration);
     }*/
 
-    private EpicTask epictaskFromGson(String body) {
+    private static EpicTask getEpictaskFromGson(String body) {
         List<Integer> listOfSubTaskId = new ArrayList<>();
         String[] keyValueArray;
+        int id = 0;
         String name = null;
         String description = null;
         Task.Status status = null;
@@ -408,10 +409,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                                 .replaceAll("\\s", "")
                                 .replaceFirst("]", "")
                                 .split(",");
-                        for (String id : stringArrayValue) {
-                            listOfSubTaskId.add(Integer.valueOf(id));
+                        for (String idSubTask : stringArrayValue) {
+                            listOfSubTaskId.add(Integer.valueOf(idSubTask));
                         }
                     }
+                    continue;
+                case "id":
+                    id = Integer.parseInt(value);
                     continue;
                 case "name":
                     name = value;
@@ -421,28 +425,32 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     continue;
                 case "status":
                     if (listOfSubTaskId.size() != 0) {
-                        status = getterEpicTaskStatus(listOfSubTaskId);
+                        status = Task.Status.valueOf(value);
                     }
                     continue;
                 case "startTime":
                     if (listOfSubTaskId.size() != 0) {
-                        startTime = getterEpicTaskStartTime(listOfSubTaskId);
+                        startTime = LocalDateTime.parse(value, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
                     }
                     continue;
                 case "duration":
                     if (listOfSubTaskId.size() != 0) {
-                        duration = getterEpicTaskDuration(listOfSubTaskId);
+                        duration = Long.parseLong(value);
                     }
                     continue;
                 default:
                     break;
             }
         }
-        return new EpicTask(name, description, listOfSubTaskId, status, startTime, duration);
+        if (id != 0) {
+            return new EpicTask(id, name, description, listOfSubTaskId, status, startTime, duration);
+        } else {
+            return new EpicTask(name, description, listOfSubTaskId, status, startTime, duration);
+        }
     }
 
-    public EpicTask getEpictaskFromGson(String body) {
-        return epictaskFromGson(body);
+    public static EpicTask getterEpictaskFromGson(String body) {
+        return getEpictaskFromGson(body);
     }
 
     /*private EpicTask.SubTask subtaskFromRequest(String body) {
@@ -492,7 +500,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         return new EpicTask.SubTask(epicTaskId, name, description, status, startTime, duration);
     }*/
-
     /**
      * Сохраняет менеджер истории в CSV
      */
@@ -742,7 +749,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public void createSubTaskFromString(EpicTask.SubTask subTask) throws ManagerCreateException {
         super.createTask(subTask);
-        super.saveSubTask(subTask);
+        saveSubTask(subTask);
     }
 
     /**

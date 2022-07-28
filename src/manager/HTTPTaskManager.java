@@ -2,20 +2,17 @@ package manager;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
 import exception.ManagerGetException;
 import exception.ManagerSaveException;
-import server.HttpTaskServer;
 import server.KVTaskClient;
 import task.EpicTask;
 import task.Task;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,7 +33,6 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
             .setPrettyPrinting()
             .serializeNulls()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-            .registerTypeAdapter(EpicTask.class, new EpicTaskAdapter())
             .create();
 
     public static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
@@ -58,115 +54,33 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
 
     }
 
-    public static class EpicTaskAdapter extends TypeAdapter<EpicTask> {
-        @Override
-        public void write(JsonWriter jsonWriter, EpicTask epicTask) throws IOException {
-            String epicTaskToGson = "{\n\t\t\"listOfSubTaskId\": " + epicTask.getListOfSubTaskId() +
-                    ",\n\t\t\"name\": \"" + epicTask.getName() +
-                    "\",\"\n\t\t\"description\": \"" + epicTask.getDescription() +
-                    "\",\"\n\t\t\"status\": \"" + epicTask.getStatus() +
-                    "\",\"\n\t\t\"startTime\": \"" + epicTask.getStartTime() +
-                    "\",\"\n\t\t\"duration\": " + epicTask.getDuration() +
-                    ",\"\n\t\t\"endTime\": \"" + epicTask.getEndTime() +
-                    "\",\"\n\t}";
-
-            jsonWriter.value(epicTaskToGson);
-        }
-
-        @Override
-        public EpicTask read(JsonReader reader) throws IOException {
-            String epicTaskName = null;
-            String epicTaskDescription = null;
-            List<Integer> listOfSubTaskIdOfTheEpicTask = new ArrayList<>();
-            Task.Status epicTaskStatus = null;
-            LocalDateTime startTime = null;
-            long duration = 0;
-
-            reader.beginObject();
-            String fieldname = null;
-
-            while (reader.hasNext()) {
-                JsonToken token = reader.peek();
-
-                if (token.equals(JsonToken.NAME)) {
-                    //get the current token
-                    fieldname = reader.nextName();
-                }
-
-                if ("listOfSubTaskId".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    listOfSubTaskIdOfTheEpicTask = new ArrayList<>();
-                }
-
-                if("name".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    epicTaskName = reader.nextString();
-                }
-
-                if("description".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    epicTaskDescription = reader.nextString();
-                }
-
-                if("status".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    epicTaskStatus = Task.Status.valueOf(reader.nextString());
-                }
-
-                if("startTime".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    startTime = LocalDateTime.parse(reader.nextString()
-                            , DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-                }
-
-                if("duration".equals(fieldname)) {
-                    //move to next token
-                    token = reader.peek();
-                    duration = reader.nextLong();
-                }
-            }
-            reader.endObject();
-            return new EpicTask(epicTaskName, epicTaskDescription, listOfSubTaskIdOfTheEpicTask, epicTaskStatus, startTime, duration);
-        }
-    }
-
     public String managerToJson() {
         final List<Task> manager = new ArrayList<>();
         if (getListOfTasks().size() != 0) {
-            System.out.println(getListOfTasks());
             manager.addAll(getListOfTasks());
-            System.out.println(manager);
         }
 
         if (getListOfEpicTasks().size() != 0) {
-            System.out.println(getListOfEpicTasks());
             manager.addAll(getListOfEpicTasks());
-            System.out.println(manager);
         }
 
         if (getListOfSubTasks().size() != 0) {
-            System.out.println(getListOfSubTasks());
             manager.addAll(getListOfSubTasks());
-            System.out.println(manager);
         }
 
-        try {
-            if (getListOfTaskHistory().size() != 0) {
-                System.out.println(getListOfTaskHistory());
-                manager.addAll(getListOfTaskHistory());
-                System.out.println(manager);
+        String taskManager = gson.toJson(manager);
+
+        if (getListOfTaskHistory().size() != 0) {
+            List<Integer> listOfIdsFromHistory = new ArrayList<>();
+            List<Task> list = getListOfTaskHistory();
+            for (Task task : list) {
+                listOfIdsFromHistory.add(task.getId());
             }
-            System.out.println(gson.toJson(manager));
-        } catch (ManagerGetException e) {
-            System.out.println(gson.toJson(manager));
-            return gson.toJson(manager);
+            taskManager = taskManager.replaceFirst("\\s+]$", ",\n  {\n    \"listOfIdsFromHistory\": ");
+            taskManager += gson.toJson(listOfIdsFromHistory) + "\n}\n]";
+
         }
-        return gson.toJson(manager);
+        return taskManager;
     }
 
     public static HTTPTaskManager managerFromJson(String key) throws IOException, InterruptedException {
@@ -175,7 +89,7 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
 
         if (!managerFromGson.equals("")) {
             managerFromGson = managerFromGson.replaceFirst("\\[\\s*", "");
-            managerFromGson = managerFromGson.replaceFirst("\\s*]", "");
+            managerFromGson = managerFromGson.replaceFirst("\\s+]$", "");
             if (managerFromGson.contains("},")) {
                 String[] array = managerFromGson.split("},\n\\s*");
                 for (String gsonFormat : array) {
@@ -184,21 +98,26 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
                     }
 
                     if (gsonFormat.contains("listOfSubTaskId")) {
-                        /*EpicTask epicTask = epictaskFromGson(gsonFormat);
-                        hTTPTaskManager.createTask(epicTask);*/
+                        EpicTask epicTask = getEpictaskFromGson(gsonFormat);
+                        hTTPTaskManager.createTask(epicTask);
                     } else if (gsonFormat.contains("epicTaskId")) {
                         EpicTask.SubTask subTask = gson.fromJson(gsonFormat, EpicTask.SubTask.class);
                         hTTPTaskManager.createTask(subTask);
+                    } else if (gsonFormat.contains("listOfIdsFromHistory")) {
+                        gsonFormat = gsonFormat
+                                .replaceFirst(".*listOfIdsFromHistory\": \\{\n\\[\n", "")
+                                .replaceFirst("\\s]\\s}\\s]$", "");
+                        System.out.println(gsonFormat);
                     } else {
                         Task task = gson.fromJson(gsonFormat, Task.class);
                         hTTPTaskManager.createTask(task);
                     }
                 }
             } else {
-                if (managerFromGson.matches(".*listOfSubTaskId.*")) {
-                    /*EpicTask epicTask = epictaskFromGson();
-                    hTTPTaskManager.createTask(epicTask);*/
-                } else if (managerFromGson.matches(".*epicTaskId.*")) {
+                if (managerFromGson.contains("listOfSubTaskId")) {
+                    EpicTask epicTask = getEpictaskFromGson(managerFromGson);
+                    hTTPTaskManager.createTask(epicTask);
+                } else if (managerFromGson.contains("epicTaskId")) {
                     EpicTask.SubTask subTask = gson.fromJson(managerFromGson, EpicTask.SubTask.class);
                     System.out.println(subTask);
                     hTTPTaskManager.createTask(subTask);
@@ -445,7 +364,7 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         return super.getterPrioritizedTasks();
     }
 
-    public EpicTask epictaskFromGson(String body) {
-        return super.getEpictaskFromGson(body);
+    public static EpicTask getEpictaskFromGson(String body) {
+        return FileBackedTasksManager.getterEpictaskFromGson(body);
     }
 }

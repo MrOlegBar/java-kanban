@@ -1,9 +1,6 @@
 package server;
 
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -19,15 +16,12 @@ import task.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
@@ -36,7 +30,6 @@ public class HttpTaskServer {
             .setPrettyPrinting()
             .serializeNulls()
             .registerTypeAdapter(LocalDateTime.class, new HTTPTaskManager.LocalDateTimeAdapter())
-            .registerTypeAdapter(EpicTask.class, new HTTPTaskManager.EpicTaskAdapter())
             .create();
 
     private final HttpServer httpServer;
@@ -278,7 +271,7 @@ public class HttpTaskServer {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask epicTask = gson.fromJson(body, EpicTask.class);
+                            EpicTask epicTask = manager.getEpictaskFromGson(body);
                             manager.createTask(epicTask);
 
                             try {
@@ -310,7 +303,7 @@ public class HttpTaskServer {
                                 }
                             }
 
-                            httpExchange.sendResponseHeaders(201, 0);
+                            httpExchange.sendResponseHeaders(manager.getKVTaskClient().response.statusCode(), 0);
                             httpExchange.close();
                             return;
                         } else if (path.startsWith("/tasks/task?key=" + key + "&id=")) {
