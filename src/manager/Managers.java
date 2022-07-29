@@ -9,7 +9,7 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getDefaultManager(String key) throws IOException, InterruptedException {
+    public static TaskManager getDefaultManager(String key) throws IOException {
         return HTTPTaskManager.managerFromJson(key);
     }
 

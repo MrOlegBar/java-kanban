@@ -4,6 +4,7 @@ import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
 import exception.ManagerGetException;
 import exception.ManagerSaveException;
+import server.KVTaskClient;
 import task.EpicTask;
 import task.Task;
 
@@ -218,12 +219,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу по id и добавляет ее в историю задач
      */
     @Override
-    public Task getTaskById(int id) throws ManagerGetException {
+    public Task getTaskById(int id) {
         Task task = taskStorage.get(id);
         if (task != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(task);
-        } else {
-            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return task;
     }
@@ -232,12 +231,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает Epic задачу по id и добавляет ее в историю задач
      */
     @Override
-    public EpicTask getEpicTaskById(int id) throws ManagerGetException {
+    public EpicTask getEpicTaskById(int id) {
         EpicTask epicTask = epicTaskStorage.get(id);
         if (epicTask != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(epicTask);
-        } else {
-            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return epicTask;
     }
@@ -246,12 +243,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает подзадачу по id и добавляет ее в историю задач
      */
     @Override
-    public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
+    public EpicTask.SubTask getSubTaskById(int id) {
         EpicTask.SubTask subTask = subTaskStorage.get(id);
         if (subTask != null) {
             inMemoryHistoryManager.addTaskToTaskHistory(subTask);
-        } else {
-            throw new ManagerGetException("Задача с таким ID отсутвует");
         }
         return subTask;
     }
@@ -344,12 +339,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает из коллекции список всех задач
      */
     @Override
-    public List<Task> getListOfTasks() throws ManagerGetException {
-        List<Task> listOfTasks;
+    public List<Task> getListOfTasks() {
+        List<Task> listOfTasks = new ArrayList<>();
         if (!taskStorage.isEmpty()) {
             listOfTasks = new ArrayList<>(taskStorage.values());
-        } else {
-            throw new ManagerGetException("Задачи отсутсвуют");
         }
         return listOfTasks;
     }
@@ -358,12 +351,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает из коллекции список всех Epic задач
      */
     @Override
-    public List<EpicTask> getListOfEpicTasks() throws ManagerGetException {
-        List<EpicTask> listOfEpicTasks;
+    public List<EpicTask> getListOfEpicTasks() {
+        List<EpicTask> listOfEpicTasks = new ArrayList<>();
         if (!epicTaskStorage.isEmpty()) {
             listOfEpicTasks = new ArrayList<>(epicTaskStorage.values());
-        } else {
-            throw new ManagerGetException("Задачи отсутсвуют");
         }
         return listOfEpicTasks;
     }
@@ -372,12 +363,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает из коллекции список всех подзадач
      */
     @Override
-    public List<EpicTask.SubTask> getListOfSubTasks() throws ManagerGetException {
-        List<EpicTask.SubTask> listOfSubTasks;
+    public List<EpicTask.SubTask> getListOfSubTasks() {
+        List<EpicTask.SubTask> listOfSubTasks = new ArrayList<>();
         if (!subTaskStorage.isEmpty()) {
             listOfSubTasks = new ArrayList<>(subTaskStorage.values());
-        } else {
-            throw new ManagerGetException("Задачи отсутсвуют");
         }
         return listOfSubTasks;
     }
@@ -398,8 +387,6 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = taskStorage.get(id);
         if (task != null) {
             listOfPrioritizedTasks.remove(task);
-        } else {
-            throw new ManagerDeleteException("Задача с таким ID отсутвует");
         }
 
         inMemoryHistoryManager.removeTaskFromTaskHistory(id);
@@ -536,6 +523,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskFromTaskHistory(int id) {
         inMemoryHistoryManager.removeTaskFromTaskHistory(id);
+    }
+
+    @Override
+    public KVTaskClient getKVTaskClient() {
+        return null;
+    }
+
+    @Override
+    public String managerToJson() {
+        return null;
     }
 
     /**

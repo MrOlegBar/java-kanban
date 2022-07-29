@@ -1,5 +1,6 @@
 package manager;
 
+import server.KVTaskClient;
 import task.EpicTask;
 import task.Task;
 
@@ -163,4 +164,8 @@ public interface TaskManager {
      * Удаляет по id задачу из просмотра
      */
     void removeTaskFromTaskHistory(int id);
+
+    KVTaskClient getKVTaskClient();
+
+    String managerToJson();
 }

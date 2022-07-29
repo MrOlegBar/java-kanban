@@ -11,6 +11,8 @@ import exception.ManagerGetException;
 import exception.ManagerSaveException;
 import manager.FileBackedTasksManager;
 import manager.HTTPTaskManager;
+import manager.Managers;
+import manager.TaskManager;
 import task.EpicTask;
 import task.Task;
 
@@ -68,7 +70,7 @@ public class HttpTaskServer {
             String response;
             String body;
 
-            HTTPTaskManager manager = HTTPTaskManager.managerFromJson(key);
+            TaskManager manager = Managers.getDefaultManager(key);
 
             if ((contentTypeValues != null) && (contentTypeValues.contains("application/json"))) {
                 switch (method) {

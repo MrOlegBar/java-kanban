@@ -12,13 +12,12 @@ import task.EpicTask;
 import task.Task;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class HTTPTaskManager extends FileBackedTasksManager implements Serializable {
+public class HTTPTaskManager extends FileBackedTasksManager {
     public KVTaskClient getKVTaskClient() {
         return kVTaskClient;
     }

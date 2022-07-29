@@ -2,13 +2,13 @@ package manager.test;
 
 import manager.Managers;
 import manager.TaskManager;
-
 import java.io.IOException;
 
-class InMemoryTaskManagerTest extends TaskManagerTest {
-    TaskManager manager = Managers.getDefaultInMemoryTaskManager();
+class HTTPTaskManagerTest extends TaskManagerTest {
+    String key = "key1";
+    TaskManager manager = Managers.getDefaultManager(key);
 
-    protected InMemoryTaskManagerTest() throws IOException {
+    HTTPTaskManagerTest() throws IOException {
     }
 
     @Override

@@ -2,8 +2,10 @@ package manager.test;
 
 import manager.TaskManager;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.KVServer;
 import task.EpicTask;
 import task.Task;
 
@@ -19,6 +21,10 @@ import static task.Task.Status.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
     T manager;
+
+    protected TaskManagerTest() throws IOException {
+    }
+
     abstract T createManager();
     Task task1;
     Task task2;
@@ -39,10 +45,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
     List<Task> listOfTasks;
     List<EpicTask> listOfEpicTasks;
     List<EpicTask.SubTask> listOfSubTasks;
+    KVServer kVServer = new KVServer();
 
     @BeforeEach
     private void BeforeEach() throws IOException, InterruptedException {
-
+        kVServer.start();
         manager = createManager();
 
         task1 = manager.createTask(new Task(
@@ -130,6 +137,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.saveEpicTask(epicTask2);
     }
+
+
 
     @Test
     void addSubtaskToEpicTask() {
@@ -507,7 +516,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 "Начать учебу"
                 , "Научиться программированию"
                 , new ArrayList<>(List.of(4, 5, 6))
-                , NEW
+                , IN_PROGRESS
                 , LocalDateTime.of(3033, 3, 30, 13, 33)
                 , 33L
         );
@@ -761,5 +770,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<EpicTask.SubTask> actual = manager.getListOfSubTasks();
 
         assertTrue(actual.isEmpty(),"Подзадачи удалены не верно");
+    }
+
+    @AfterEach
+    private void AfterEach() {
+        kVServer.stop();
     }
 }
