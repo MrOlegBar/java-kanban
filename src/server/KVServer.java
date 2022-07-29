@@ -29,7 +29,7 @@ public class KVServer {
     }
 
     public void stop() {
-        server.stop(0);
+        server.stop(3);
     }
 
     private void register(HttpExchange httpExchange) throws IOException {
