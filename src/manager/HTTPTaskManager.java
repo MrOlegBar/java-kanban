@@ -93,7 +93,7 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
             e.printStackTrace();
         }
 
-        if ((hTTPTaskManager != null) && (managerFromGson != null) && (managerFromGson.equals(""))) {
+        if ((hTTPTaskManager != null) && (managerFromGson != null) && (!managerFromGson.equals(""))) {
             managerFromGson = managerFromGson.replaceFirst("\\[\\s*", "");
             managerFromGson = managerFromGson.replaceFirst("\\s+]$", "");
             if (managerFromGson.contains("},")) {
