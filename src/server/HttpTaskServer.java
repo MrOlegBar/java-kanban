@@ -9,6 +9,7 @@ import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
 import exception.ManagerGetException;
 import exception.ManagerSaveException;
+import manager.FileBackedTasksManager;
 import manager.HTTPTaskManager;
 import task.EpicTask;
 import task.Task;
@@ -53,7 +54,7 @@ public class HttpTaskServer {
 
     static class HelloHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException {
+        public void handle(HttpExchange httpExchange) throws IOException, ManagerCreateException, NullPointerException {
             Headers requestHeaders = httpExchange.getRequestHeaders();
             List<String> contentTypeValues = requestHeaders.get("Content-type");
             String method = httpExchange.getRequestMethod();
@@ -67,12 +68,7 @@ public class HttpTaskServer {
             String response;
             String body;
 
-            HTTPTaskManager manager = null;
-            try {
-                manager = HTTPTaskManager.managerFromJson(key);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            HTTPTaskManager manager = HTTPTaskManager.managerFromJson(key);
 
             if ((contentTypeValues != null) && (contentTypeValues.contains("application/json"))) {
                 switch (method) {
@@ -271,7 +267,7 @@ public class HttpTaskServer {
                                 body = new String(is.readAllBytes(), DEFAULT_CHARSET);
                             }
 
-                            EpicTask epicTask = manager.getEpictaskFromGson(body);
+                            EpicTask epicTask = FileBackedTasksManager.getterEpictaskFromGson(body);
                             manager.createTask(epicTask);
 
                             try {

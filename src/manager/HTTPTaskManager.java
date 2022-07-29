@@ -78,16 +78,22 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
             }
             taskManager = taskManager.replaceFirst("\\s+]$", ",\n  {\n    \"listOfIdsFromHistory\": ");
             taskManager += gson.toJson(listOfIdsFromHistory) + "\n}\n]";
-
         }
         return taskManager;
     }
 
-    public static HTTPTaskManager managerFromJson(String key) throws IOException, InterruptedException {
-        HTTPTaskManager hTTPTaskManager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
-        String managerFromGson = hTTPTaskManager.getKVTaskClient().load(key);
+    public static HTTPTaskManager managerFromJson(String key) throws IOException {
+        HTTPTaskManager hTTPTaskManager = null;
+        String managerFromGson = null;
 
-        if (!managerFromGson.equals("")) {
+        try {
+            hTTPTaskManager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
+            managerFromGson = hTTPTaskManager.getKVTaskClient().load(key);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if ((hTTPTaskManager != null) && (managerFromGson != null) && (managerFromGson.equals(""))) {
             managerFromGson = managerFromGson.replaceFirst("\\[\\s*", "");
             managerFromGson = managerFromGson.replaceFirst("\\s+]$", "");
             if (managerFromGson.contains("},")) {
@@ -98,16 +104,40 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
                     }
 
                     if (gsonFormat.contains("listOfSubTaskId")) {
-                        EpicTask epicTask = getEpictaskFromGson(gsonFormat);
+                        EpicTask epicTask = FileBackedTasksManager.getterEpictaskFromGson(gsonFormat);
                         hTTPTaskManager.createTask(epicTask);
                     } else if (gsonFormat.contains("epicTaskId")) {
                         EpicTask.SubTask subTask = gson.fromJson(gsonFormat, EpicTask.SubTask.class);
                         hTTPTaskManager.createTask(subTask);
                     } else if (gsonFormat.contains("listOfIdsFromHistory")) {
-                        gsonFormat = gsonFormat
-                                .replaceFirst(".*listOfIdsFromHistory\": \\{\n\\[\n", "")
-                                .replaceFirst("\\s]\\s}\\s]$", "");
-                        System.out.println(gsonFormat);
+                        String ids = gsonFormat
+                                .replaceFirst("\\{\\s*\"listOfIdsFromHistory\": \\[\\s*", "")
+                                .replaceFirst("\\s*]\\s*}", "");
+
+                        if (ids.contains(",")) {
+                            String[] arrayOfIdsFromHistory = ids.split(",\\s*");
+                            for (String id : arrayOfIdsFromHistory) {
+                                try {
+                                    hTTPTaskManager.getTaskById(Integer.parseInt(id));
+                                } catch (ManagerGetException e) {
+                                    try {
+                                        hTTPTaskManager.getEpicTaskById(Integer.parseInt(id));
+                                    } catch (ManagerGetException ex) {
+                                        hTTPTaskManager.getSubTaskById(Integer.parseInt(id));
+                                    }
+                                }
+                            }
+                        } else {
+                            try {
+                                hTTPTaskManager.getTaskById(Integer.parseInt(ids));
+                            } catch (ManagerGetException e) {
+                                try {
+                                    hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
+                                } catch (ManagerGetException ex) {
+                                    hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
+                                }
+                            }
+                        }
                     } else {
                         Task task = gson.fromJson(gsonFormat, Task.class);
                         hTTPTaskManager.createTask(task);
@@ -115,15 +145,43 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
                 }
             } else {
                 if (managerFromGson.contains("listOfSubTaskId")) {
-                    EpicTask epicTask = getEpictaskFromGson(managerFromGson);
+                    EpicTask epicTask = FileBackedTasksManager.getterEpictaskFromGson(managerFromGson);
                     hTTPTaskManager.createTask(epicTask);
                 } else if (managerFromGson.contains("epicTaskId")) {
                     EpicTask.SubTask subTask = gson.fromJson(managerFromGson, EpicTask.SubTask.class);
                     System.out.println(subTask);
                     hTTPTaskManager.createTask(subTask);
+                } else if (managerFromGson.contains("listOfIdsFromHistory")) {
+                    String ids = managerFromGson
+                            .replaceFirst("\\{\\s*\"listOfIdsFromHistory\": \\[\\s*", "")
+                            .replaceFirst("\\s*]\\s*}", "");
+
+                    if (ids.contains(",")) {
+                        String[] arrayOfIdsFromHistory = ids.split(", ");
+                        for (String id : arrayOfIdsFromHistory) {
+                            try {
+                                hTTPTaskManager.getTaskById(Integer.parseInt(id));
+                            } catch (ManagerGetException e) {
+                                try {
+                                    hTTPTaskManager.getEpicTaskById(Integer.parseInt(id));
+                                } catch (ManagerGetException ex) {
+                                    hTTPTaskManager.getSubTaskById(Integer.parseInt(id));
+                                }
+                            }
+                        }
+                    } else {
+                        try {
+                            hTTPTaskManager.getTaskById(Integer.parseInt(ids));
+                        } catch (ManagerGetException e) {
+                            try {
+                                hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
+                            } catch (ManagerGetException ex) {
+                                hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
+                            }
+                        }
+                    }
                 } else {
                     Task task = gson.fromJson(managerFromGson, Task.class);
-                    System.out.println(task);
                     hTTPTaskManager.createTask(task);
                 }
             }
@@ -143,7 +201,7 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
      * Метод для сохранения задач
      */
     @Override
-    public void saveTask(Task task) throws InterruptedException, IOException {
+    public void saveTask(Task task) throws IOException {
         super.saveTask(task);
     }
 
@@ -211,26 +269,11 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
         return super.getSubTaskById(id);
     }
 
-    @Override
-    public void createTaskHistoryFromString(int id) {
-        super.createTaskHistoryFromString(id);
-    }
-
-    @Override
-    public void createEpicTaskHistoryFromString(int id) {
-        super.createEpicTaskHistoryFromString(id);
-    }
-
-    @Override
-    public void createSubTaskHistoryFromString(int id) {
-        super.createSubTaskHistoryFromString(id);
-    }
-
     /**
      * Создание задачи
      */
     @Override
-    public Task createTask(Task task) throws ManagerCreateException, IOException, InterruptedException {
+    public Task createTask(Task task) throws ManagerCreateException, IOException {
         return super.createTask(task);
     }
 
@@ -362,9 +405,5 @@ public class HTTPTaskManager extends FileBackedTasksManager implements Serializa
     @Override
     public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
         return super.getterPrioritizedTasks();
-    }
-
-    public static EpicTask getEpictaskFromGson(String body) {
-        return FileBackedTasksManager.getterEpictaskFromGson(body);
     }
 }

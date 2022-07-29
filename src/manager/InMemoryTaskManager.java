@@ -144,7 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает задачу Task после проверки на пересечение по времени выполнения
      */
     @Override
-    public Task createTask(Task task) throws ManagerCreateException, IOException, InterruptedException {
+    public Task createTask(Task task) throws ManagerCreateException, IOException {
         checkIntersectionByTaskTime(task);
         if (task.getId() != 0) {
             return new Task(task.getId(), task.getName(), task.getDescription(), task.getStatus(), task.getStartTime(), task.getDuration());
@@ -188,7 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Сохраняет задачу в коллекцию
      */
     @Override
-    public void saveTask(Task task) throws IOException, InterruptedException {
+    public void saveTask(Task task) throws IOException {
         int taskId = idGeneration(task);
         taskStorage.put(taskId, task);
         listOfPrioritizedTasks.add(task);
