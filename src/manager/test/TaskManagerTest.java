@@ -778,4 +778,33 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         assertTrue(actual.isEmpty(),"Подзадачи удалены не верно");
     }
+
+    @Test
+    void managerToJson() throws IOException, InterruptedException {
+
+        //a. Проверка работы с пустым списком задач
+        listOfTasks = manager.getListOfTasks();
+        assertNotNull(listOfSubTasks, "Список задач пуст");
+        listOfEpicTasks = manager.getListOfEpicTasks();
+        assertNotNull(listOfSubTasks, "Список Epic задач пуст");
+        listOfSubTasks = manager.getListOfSubTasks();
+        assertNotNull(listOfSubTasks, "Список подзадач пуст");
+
+        manager.managerToJson("key1");
+
+
+        //Проверка работы с несуществующем идентификатором
+        assertNotNull(manager.getTaskById(task1.getId()), "ID задачи 1 не существует");
+        assertNotNull(manager.getTaskById(task2.getId()), "ID задачи 2 не существует");
+        assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic задачи 1 не существует");
+        assertNotNull(manager.getEpicTaskById(epicTask2.getId()), "ID Epic задачи 2 не существует");
+        assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи 1 не существует");
+        assertNotNull(manager.getSubTaskById(subTask2.getId()), "ID подзадачи 2 не существует");
+        assertNotNull(manager.getSubTaskById(subTask3.getId()), "ID подзадачи 3 не существует");
+
+        //Проверка работы со стандартым поведением
+        manager.deleteAllSubTasks();
+        //manager.getKVTaskClient().response.statusCode()
+        //assertTrue(actual.isEmpty(),"Подзадачи удалены не верно");
+    }
 }

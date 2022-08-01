@@ -202,51 +202,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return result;
     }
 
-    /*private static Task taskFromRequest(String body) {
-
-        String[] keyValueArray;
-        String name = null;
-        String description = null;
-        Task.Status status = null;
-        LocalDateTime startTime = null;
-        long duration = 0;
-
-        String[] stringArray = body
-                .replaceFirst("\\{\\s*", "")
-                .replaceAll("\"", "")
-                .replaceFirst("\\s*}", "")
-                .split(",\\s*");
-
-        for (String string : stringArray) {
-            keyValueArray = string.split(": ");
-            String key = keyValueArray[0];
-            String value = keyValueArray[1];
-
-            switch (key) {
-                case "name":
-                    name = value;
-                    continue;
-                case "description":
-                    description = value;
-                    continue;
-                case "status":
-                    status = Task.Status.valueOf(value);
-                    continue;
-                case "startTime":
-                    if (!value.equals("null")) {
-                        startTime = LocalDateTime.parse(value, formatter);
-                    }
-                    continue;
-                case "duration":
-                    duration = Long.parseLong(value);
-                    continue;
-                default:
-                    break;
-            }
-        }
-        return new Task(name, description, status, startTime, duration);
-    }*/
-
     private static EpicTask getEpictaskFromGson(String body) {
         List<Integer> listOfSubTaskId = new ArrayList<>();
         String[] keyValueArray;
@@ -321,53 +276,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return getEpictaskFromGson(body);
     }
 
-    /*private EpicTask.SubTask subtaskFromRequest(String body) {
-        int epicTaskId = 0;
-        String[] keyValueArray;
-        String name = null;
-        String description = null;
-        Task.Status status = null;
-        LocalDateTime startTime = null;
-        long duration = 0;
-
-        String[] stringArray = body
-                .replaceFirst("\\{\\s*\"", "")
-                .replaceAll("\"", "")
-                .replaceFirst("\\s*}", "")
-                .split(",\\s*");
-
-        for (String string : stringArray) {
-            keyValueArray = string.split(": ");
-            String key = keyValueArray[0];
-            String value = keyValueArray[1];
-
-            switch (key) {
-                case "epicTaskId":
-                    epicTaskId = Integer.parseInt(value);
-                    continue;
-                case "name":
-                    name = value;
-                    continue;
-                case "description":
-                    description = value;
-                    continue;
-                case "status":
-                    status = Task.Status.valueOf(value);
-                    continue;
-                case "startTime":
-                    if (!value.equals("null")) {
-                        startTime = LocalDateTime.parse(value, formatter);
-                    }
-                    continue;
-                case "duration":
-                    duration = Long.parseLong(value);
-                    continue;
-                default:
-                    break;
-            }
-        }
-        return new EpicTask.SubTask(epicTaskId, name, description, status, startTime, duration);
-    }*/
     /**
      * Сохраняет менеджер истории в CSV
      */

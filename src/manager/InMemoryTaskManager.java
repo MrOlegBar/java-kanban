@@ -531,8 +531,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public String managerToJson() {
-        return null;
+    public void managerToJson(String key) throws IOException, InterruptedException {
     }
 
     /**

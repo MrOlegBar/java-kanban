@@ -1,8 +1,7 @@
 package manager;
 
+import adapter.LocalDateTimeAdapter;
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
 import exception.ManagerGetException;
@@ -14,7 +13,6 @@ import task.Task;
 import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class HTTPTaskManager extends FileBackedTasksManager {
@@ -34,26 +32,7 @@ public class HTTPTaskManager extends FileBackedTasksManager {
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
 
-    public static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
-        @Override
-        public void write(JsonWriter jsonWriter, LocalDateTime localDateTime) throws IOException {
-            if (localDateTime != null) {
-                jsonWriter.value(localDateTime.format(formatter));
-            } else {
-                jsonWriter.value("null");
-            }
-        }
-
-        @Override
-        public LocalDateTime read(JsonReader jsonReader) throws IOException {
-            return LocalDateTime.parse(jsonReader.nextString(), formatter);
-        }
-
-    }
-
-    public String managerToJson() {
+    public void managerToJson(String key) throws IOException, InterruptedException {
         final List<Task> manager = new ArrayList<>();
         if (getListOfTasks().size() != 0) {
             manager.addAll(getListOfTasks());
@@ -78,7 +57,8 @@ public class HTTPTaskManager extends FileBackedTasksManager {
             taskManager = taskManager.replaceFirst("\\s+]$", ",\n  {\n    \"listOfIdsFromHistory\": ");
             taskManager += gson.toJson(listOfIdsFromHistory) + "\n}\n]";
         }
-        return taskManager;
+
+        kVTaskClient.put(key, taskManager);
     }
 
     public static HTTPTaskManager managerFromJson(String key) throws IOException {

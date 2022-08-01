@@ -1,5 +1,6 @@
 package server;
 
+import adapter.LocalDateTimeAdapter;
 import com.google.gson.*;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -10,7 +11,6 @@ import exception.ManagerDeleteException;
 import exception.ManagerGetException;
 import exception.ManagerSaveException;
 import manager.FileBackedTasksManager;
-import manager.HTTPTaskManager;
 import manager.Managers;
 import manager.TaskManager;
 import task.EpicTask;
@@ -32,7 +32,7 @@ public class HttpTaskServer {
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
-            .registerTypeAdapter(LocalDateTime.class, new HTTPTaskManager.LocalDateTimeAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
 
     private final HttpServer httpServer;
@@ -130,7 +130,7 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getTaskById(id));
-                                    manager.getKVTaskClient().put(key, manager.managerToJson());
+                                    manager.managerToJson(key);
                                 } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -148,7 +148,7 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getEpicTaskById(id));
-                                    manager.getKVTaskClient().put(key, manager.managerToJson());
+                                    manager.managerToJson(key);
                                 } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -166,7 +166,7 @@ public class HttpTaskServer {
 
                                 try {
                                     response = gson.toJson(manager.getSubTaskById(id));
-                                    manager.getKVTaskClient().put(key, manager.managerToJson());
+                                    manager.managerToJson(key);
                                 } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
@@ -192,7 +192,8 @@ public class HttpTaskServer {
                                         }
                                     }
                                     response = gson.toJson(listOfSubtask);
-                                } catch (ManagerGetException e) {
+                                    manager.managerToJson(key);
+                                } catch (ManagerGetException | InterruptedException e) {
                                     httpExchange.sendResponseHeaders(404, 0);
                                     response = e.getMessage();
                                     os.write(response.getBytes(DEFAULT_CHARSET));
@@ -249,7 +250,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(task);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
 
                             } catch (ManagerCreateException | InterruptedException e) {
 
@@ -271,9 +272,8 @@ public class HttpTaskServer {
 
                             EpicTask epicTask = FileBackedTasksManager.getterEpictaskFromGson(body);
                             manager.createTask(epicTask);
-
                             try {
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -291,7 +291,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.createTask(subTask);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerCreateException | ManagerSaveException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -321,7 +321,7 @@ public class HttpTaskServer {
                                     , taskData.getDuration());
                             try {
                                 manager.updateTask(task);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -352,7 +352,7 @@ public class HttpTaskServer {
                                     , epictaskData.getDuration());
                             try {
                                 manager.updateEpicTask(epicTask);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -383,7 +383,7 @@ public class HttpTaskServer {
                                     , subtaskData.getDuration());
                             try {
                                 manager.updateSubTask(subTask);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerCreateException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -406,7 +406,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllTasks();
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -423,7 +423,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllEpicTasks();
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -440,7 +440,7 @@ public class HttpTaskServer {
 
                             try {
                                 manager.deleteAllSubTasks();
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -458,7 +458,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeTaskById(id);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -476,7 +476,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeEpicTaskById(id);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
@@ -494,7 +494,7 @@ public class HttpTaskServer {
                             int id = Integer.parseInt(path.split("=")[2]);
                             try {
                                 manager.removeSubTaskById(id);
-                                manager.getKVTaskClient().put(key, manager.managerToJson());
+                                manager.managerToJson(key);
                             } catch (ManagerDeleteException | InterruptedException e) {
 
                                 try (OutputStream os = httpExchange.getResponseBody()) {
