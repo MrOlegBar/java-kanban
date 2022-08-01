@@ -28,10 +28,6 @@ public class KVServer {
         System.out.println("KVServer-сервер запущен на " + PORT + " порту!");
     }
 
-    public void stop() {
-        server.stop(3);
-    }
-
     private void register(HttpExchange httpExchange) throws IOException {
         try {
             if ("GET".equals(httpExchange.getRequestMethod())) {

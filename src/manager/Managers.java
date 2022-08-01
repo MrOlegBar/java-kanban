@@ -1,6 +1,5 @@
 package manager;
 
-import java.io.File;
 import java.io.IOException;
 
 public class Managers {
@@ -10,7 +9,7 @@ public class Managers {
     }
 
     public static TaskManager getDefaultManager(String key) throws IOException {
-        return HTTPTaskManager.managerFromJson(key);
+        return HTTPTaskManager.fromJson(key);
     }
 
     public static HistoryManager getDefaultHistory() {

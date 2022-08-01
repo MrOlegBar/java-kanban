@@ -16,14 +16,6 @@ public class Task {
     private long duration;
     private LocalDateTime endTime;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
@@ -102,7 +94,8 @@ public class Task {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
+        if (this.getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return id == task.id && duration == task.duration && name.equals(task.name)
                 && description.equals(task.description) && status == task.status

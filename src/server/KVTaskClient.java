@@ -10,7 +10,12 @@ public class KVTaskClient {
     private final String apiToken;
     URI uri;
     HttpClient client = HttpClient.newHttpClient();
-    HttpResponse<String> response;
+
+    public HttpResponse<String> getResponse() {
+        return response;
+    }
+
+    private HttpResponse<String> response;
 
     public KVTaskClient(URI uri) throws IOException, InterruptedException {
         this.uri = uri;

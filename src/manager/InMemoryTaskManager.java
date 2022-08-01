@@ -375,7 +375,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Геттер для метода, который возвращает список всех задач
      * , отсортированный по дате и времени начала самой ранней задачи
      */
-    public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
+    public Set<Task> getterPrioritizedTasks() {
         return getPrioritizedTasks();
     }
 
@@ -507,14 +507,8 @@ public class InMemoryTaskManager implements TaskManager {
      * Возвращает список истории задач
      */
     @Override
-    public List<Task> getListOfTaskHistory() throws ManagerGetException {
-        List<Task> listOfTaskHistory = new ArrayList<>();
-        try {
-            listOfTaskHistory = inMemoryHistoryManager.getTaskHistory();
-        } catch (ManagerGetException e) {
-            return listOfTaskHistory;
-        }
-        return listOfTaskHistory;
+    public List<Task> getListOfTaskHistory() {
+        return inMemoryHistoryManager.getTaskHistory();
     }
 
     /**
@@ -531,7 +525,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void managerToJson(String key) throws IOException, InterruptedException {
+    public Integer toJson(String key) throws IOException, InterruptedException {
+        return null;
     }
 
     /**
@@ -651,10 +646,7 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Возвращает список задач, отсортированный по дате и времени начала самой ранней задачи
      */
-    private Set<Task> getPrioritizedTasks() throws ManagerGetException {
-        if (listOfPrioritizedTasks.isEmpty()) {
-            throw new ManagerGetException("Задачи отсутсвуют");
-        }
+    private Set<Task> getPrioritizedTasks() {
         return listOfPrioritizedTasks;
     }
 }

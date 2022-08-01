@@ -10,7 +10,7 @@ import java.util.Objects;
  * Класс для создания Epic задач
  */
 public class EpicTask extends Task {
-    private List<Integer> listOfSubTaskId;
+    private final List<Integer> listOfSubTaskId;
 
     public EpicTask(String epicTaskName
             , String epicTaskDescription
@@ -39,10 +39,6 @@ public class EpicTask extends Task {
 
     public List<Integer> getListOfSubTaskId() {
         return listOfSubTaskId;
-    }
-
-    public void setListOfSubTaskId(List<Integer> listOfSubTaskId) {
-        this.listOfSubTaskId = listOfSubTaskId;
     }
 
     @Override
@@ -82,9 +78,11 @@ public class EpicTask extends Task {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         EpicTask epicTask = (EpicTask) o;
-        return Objects.equals(listOfSubTaskId, epicTask.listOfSubTaskId);
+        return getId() == epicTask.getId() && getDuration() == epicTask.getDuration() && getName().equals(epicTask.getName())
+                && getDescription().equals(epicTask.getDescription()) && getStatus() == epicTask.getStatus()
+                && Objects.equals(getStartTime(), epicTask.getStartTime()) && Objects.equals(getEndTime(), epicTask.getEndTime())
+                && Objects.equals(listOfSubTaskId, epicTask.listOfSubTaskId);
     }
 
     @Override

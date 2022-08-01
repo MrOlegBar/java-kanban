@@ -1,7 +1,9 @@
 package manager.test;
 
+import exception.ManagerCreateException;
 import manager.TaskManager;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +18,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static manager.Managers.getDefaultManager;
 import static org.junit.jupiter.api.Assertions.*;
 import static task.Task.Status.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
-    T manager;
+    TaskManager manager;
 
     abstract T createManager();
+
     Task task1;
     Task task2;
     List<Integer> listOfSubtaskIdOfEpicTask1;
@@ -42,7 +46,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
     List<Task> listOfTasks;
     List<EpicTask> listOfEpicTasks;
     List<EpicTask.SubTask> listOfSubTasks;
+    List<Task> listOfTaskHistory;
     static KVServer kVServer;
+    String key;
+    Integer statusCode;
 
     static {
         try {
@@ -58,7 +65,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @BeforeEach
-    public void BeforeEach() throws IOException, InterruptedException {
+    public void BeforeEach() throws IOException, InterruptedException, ManagerCreateException {
+        key = "key1";
         manager = createManager();
 
         task1 = manager.createTask(new Task(
@@ -68,7 +76,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , LocalDateTime.of(2022, 2, 26, 22, 22)
                 , 30L
         ));
-        manager.saveTask(task1);
 
         task2 = manager.createTask(new Task(
                 "Поспать"
@@ -77,7 +84,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , LocalDateTime.of(2022, 7, 11, 11, 11)
                 , 600L
         ));
-        manager.saveTask(task2);
 
         listOfSubtaskIdOfEpicTask1 = new ArrayList<>();
         statusOfEpicTask1 = manager.getterEpicTaskStatus(listOfSubtaskIdOfEpicTask1);
@@ -92,7 +98,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , startTimeOfEpicTask1
                 , durationOfEpicTask1
         ));
-        manager.saveEpicTask(epicTask1);
 
         subTask1 = manager.createTask(new EpicTask.SubTask(
                 epicTask1.getId()
@@ -102,7 +107,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , LocalDateTime.of(2022, 2, 27, 22, 22)
                 , 150_000L
         ));
-        manager.saveSubTask(subTask1);
 
         subTask2 = manager.createTask(new EpicTask.SubTask(
                 epicTask1.getId()
@@ -112,7 +116,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , LocalDateTime.of(2022, 11, 11, 11, 11)
                 , 250_000L
         ));
-        manager.saveSubTask(subTask2);
 
         subTask3 = manager.createTask(new EpicTask.SubTask(
                 epicTask1.getId()
@@ -122,7 +125,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , LocalDateTime.of(2222, 2, 2, 22, 22)
                 , 4_320L
         ));
-        manager.saveSubTask(subTask3);
 
         manager.addSubtaskToEpicTask(subTask1, epicTask1);
         manager.addSubtaskToEpicTask(subTask2, epicTask1);
@@ -143,8 +145,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 , startTimeOfEpicTask2
                 , durationOfEpicTask2
         ));
-
-        manager.saveEpicTask(epicTask2);
     }
 
     @Test
@@ -154,7 +154,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         int expected = epicTask1.getId();
         int actual = subTask1.getEpicTaskId();
 
-        assertEquals(expected, actual,"ID Epic задачи не добавился в подзадачу");
+        assertEquals(expected, actual, "ID Epic задачи не добавился в подзадачу");
         assertNotNull(epicTask1.getListOfSubTaskId(), "ID подзадачи не добавился в список ID подзадач Epic задачи");
 
         //Проверка работы с несуществующем идентификатором
@@ -187,7 +187,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         listOfSubTaskByEpicTask = manager.getListOfSubTaskByEpicTaskId(epicTask1.getId());
 
         assertNotNull(listOfSubTaskByEpicTask, "Список подзадач пуст");
-        
+
         //d. Подзадачи со статусами NEW и DONE
         Task.Status actual1 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
@@ -199,7 +199,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Task.Status actual2 = manager.getterEpicTaskStatus(epicTask1.getListOfSubTaskId());
 
         assertEquals(NEW, actual2, "Статус Epic задачи NEW рассчитан не правильно");
-        
+
         //c. Все подзадачи со статусом DONE.
         subTask1.setStatus(DONE);
         subTask2.setStatus(DONE);
@@ -294,7 +294,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         Task actual1 = task1;
 
-        assertEquals(expected1, actual1,"Задача создана не верно");
+        assertEquals(expected1, actual1, "Задача создана не верно");
 
         EpicTask expected2 = new EpicTask(
                 3,
@@ -307,7 +307,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask actual2 = epicTask1;
 
-        assertEquals(expected2, actual2,"Epic Задача создана не верно");
+        assertEquals(expected2, actual2, "Epic Задача создана не верно");
 
         EpicTask.SubTask expected3 = new EpicTask.SubTask(
                 4,
@@ -320,7 +320,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask.SubTask actual3 = subTask1;
 
-        assertEquals(expected3, actual3,"Подадача создана не верно");
+        assertEquals(expected3, actual3, "Подадача создана не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи не существует");
@@ -347,7 +347,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         Task actual = manager.getTaskById(1);
 
-        assertEquals(expected, actual,"Задача сохранена не верно");
+        assertEquals(expected, actual, "Задача сохранена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи не существует");
@@ -373,7 +373,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask actual = manager.getEpicTaskById(epicTask1.getId());
 
-        assertEquals(expected, actual,"Epic Задача сохранена не верно");
+        assertEquals(expected, actual, "Epic Задача сохранена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic задачи не существует");
@@ -399,7 +399,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask.SubTask actual = manager.getSubTaskById(subTask1.getId());
 
-        assertEquals(expected, actual,"Подзадача сохранена не верно");
+        assertEquals(expected, actual, "Подзадача сохранена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи не существует");
@@ -424,7 +424,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         Task actual = manager.getTaskById(1);
 
-        assertEquals(expected, actual,"Задача получена не верно");
+        assertEquals(expected, actual, "Задача получена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи не существует");
@@ -450,7 +450,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask actual = manager.getEpicTaskById(epicTask1.getId());
 
-        assertEquals(expected, actual,"Epic Задача получена не верно");
+        assertEquals(expected, actual, "Epic Задача получена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic задачи не существует");
@@ -476,7 +476,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         );
         EpicTask.SubTask actual = manager.getSubTaskById(subTask1.getId());
 
-        assertEquals(expected, actual,"Подзадача получена не верно");
+        assertEquals(expected, actual, "Подзадача получена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи не существует");
@@ -503,7 +503,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.updateTask(expected);
         Task actual = manager.getTaskById(1);
 
-        assertEquals(expected, actual,"Задача обновлена не верно");
+        assertEquals(expected, actual, "Задача обновлена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи не существует");
@@ -531,7 +531,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.updateEpicTask(expected);
         EpicTask actual = manager.getEpicTaskById(epicTask1.getId());
 
-        assertEquals(expected, actual,"Epic Задача обновлена не верно");
+        assertEquals(expected, actual, "Epic Задача обновлена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic задачи не существует");
@@ -559,7 +559,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.updateSubTask(expected);
         EpicTask.SubTask actual = manager.getSubTaskById(subTask1.getId());
 
-        assertEquals(expected, actual,"Подзадача обновлена не верно");
+        assertEquals(expected, actual, "Подзадача обновлена не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи не существует");
@@ -577,7 +577,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<Task> expected = new ArrayList<>(List.of(task1, task2));
         List<Task> actual = manager.getListOfTasks();
 
-        assertEquals(expected, actual,"Список задач получен не верно");
+        assertEquals(expected, actual, "Список задач получен не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи 1 не существует");
@@ -596,7 +596,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<EpicTask> expected = new ArrayList<>(List.of(epicTask1, epicTask2));
         List<EpicTask> actual = manager.getListOfEpicTasks();
 
-        assertEquals(expected, actual,"Список Epic задач получен не верно");
+        assertEquals(expected, actual, "Список Epic задач получен не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic 1 задачи не существует");
@@ -615,7 +615,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<EpicTask.SubTask> expected = new ArrayList<>(List.of(subTask1, subTask2, subTask3));
         List<EpicTask.SubTask> actual = manager.getListOfSubTasks();
 
-        assertEquals(expected, actual,"Список подзадач получен не верно");
+        assertEquals(expected, actual, "Список подзадач получен не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи 1 не существует");
@@ -652,7 +652,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Set<Task> actual = manager.getterPrioritizedTasks();
 
-        assertEquals(expected, actual,"Список отсортированных задач получен не верно");
+        assertEquals(expected, actual, "Список отсортированных задач получен не верно");
 
         //Проверка работы с несуществующем идентификатором
         assertNotNull(manager.getTaskById(task1.getId()), "ID задачи 1 не существует");
@@ -663,6 +663,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertNotNull(manager.getSubTaskById(subTask2.getId()), "ID подзадачи 2 не существует");
         assertNotNull(manager.getSubTaskById(subTask3.getId()), "ID подзадачи 3 не существует");
     }
+
+
 
     @Test
     void removeTaskById() {
@@ -679,7 +681,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.removeTaskById(task1.getId());
         Task actual = manager.getTaskById(task1.getId());
 
-        assertNull(actual,"Задача удалена не верно");
+        assertNull(actual, "Задача удалена не верно");
     }
 
     @Test
@@ -697,9 +699,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.removeEpicTaskById(epicTask1.getId());
         EpicTask actual = manager.getEpicTaskById(epicTask1.getId());
 
-        assertNull(actual,"Epic задача удалена не верно");
+        assertNull(actual, "Epic задача удалена не верно");
     }
-    
+
     @Test
     void removeSubTaskById() {
 
@@ -715,7 +717,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.removeSubTaskById(subTask1.getId());
         EpicTask.SubTask actual = manager.getSubTaskById(subTask1.getId());
 
-        assertNull(actual,"Подзадача удалена не верно");
+        assertNull(actual, "Подзадача удалена не верно");
     }
 
     @Test
@@ -734,7 +736,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.deleteAllTasks();
         List<Task> actual = manager.getListOfTasks();
 
-        assertTrue(actual.isEmpty(),"Задачи удалены не верно");
+        assertTrue(actual.isEmpty(), "Задачи удалены не верно");
     }
 
     @Test
@@ -755,8 +757,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<EpicTask> actual1 = manager.getListOfEpicTasks();
         List<EpicTask.SubTask> actual2 = manager.getListOfSubTasks();
 
-        assertTrue(actual1.isEmpty(),"Epic Задачи удалены не верно");
-        assertTrue(actual2.isEmpty(),"Подзадачи удалены не верно");
+        assertTrue(actual1.isEmpty(), "Epic Задачи удалены не верно");
+        assertTrue(actual2.isEmpty(), "Подзадачи удалены не верно");
     }
 
     @Test
@@ -776,35 +778,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
         manager.deleteAllSubTasks();
         List<EpicTask.SubTask> actual = manager.getListOfSubTasks();
 
-        assertTrue(actual.isEmpty(),"Подзадачи удалены не верно");
-    }
-
-    @Test
-    void managerToJson() throws IOException, InterruptedException {
-
-        //a. Проверка работы с пустым списком задач
-        listOfTasks = manager.getListOfTasks();
-        assertNotNull(listOfSubTasks, "Список задач пуст");
-        listOfEpicTasks = manager.getListOfEpicTasks();
-        assertNotNull(listOfSubTasks, "Список Epic задач пуст");
-        listOfSubTasks = manager.getListOfSubTasks();
-        assertNotNull(listOfSubTasks, "Список подзадач пуст");
-
-        manager.managerToJson("key1");
-
-
-        //Проверка работы с несуществующем идентификатором
-        assertNotNull(manager.getTaskById(task1.getId()), "ID задачи 1 не существует");
-        assertNotNull(manager.getTaskById(task2.getId()), "ID задачи 2 не существует");
-        assertNotNull(manager.getEpicTaskById(epicTask1.getId()), "ID Epic задачи 1 не существует");
-        assertNotNull(manager.getEpicTaskById(epicTask2.getId()), "ID Epic задачи 2 не существует");
-        assertNotNull(manager.getSubTaskById(subTask1.getId()), "ID подзадачи 1 не существует");
-        assertNotNull(manager.getSubTaskById(subTask2.getId()), "ID подзадачи 2 не существует");
-        assertNotNull(manager.getSubTaskById(subTask3.getId()), "ID подзадачи 3 не существует");
-
-        //Проверка работы со стандартым поведением
-        manager.deleteAllSubTasks();
-        //manager.getKVTaskClient().response.statusCode()
-        //assertTrue(actual.isEmpty(),"Подзадачи удалены не верно");
+        assertTrue(actual.isEmpty(), "Подзадачи удалены не верно");
     }
 }

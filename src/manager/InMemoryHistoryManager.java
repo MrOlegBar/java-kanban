@@ -1,6 +1,5 @@
 package manager;
 
-import exception.ManagerGetException;
 import task.Task;
 
 import java.util.*;
@@ -46,11 +45,12 @@ public class InMemoryHistoryManager implements HistoryManager {
      * Возвращает список истории задач
      */
     @Override
-    public List<Task> getTaskHistory() throws ManagerGetException {
-        if (getTasks().isEmpty()) {
-            throw new ManagerGetException("Задачи отсутствуют");
+    public List<Task> getTaskHistory() {
+        List<Task> taskHistory = new ArrayList<>();
+        if (!getTasks().isEmpty()) {
+            taskHistory = getTasks();
         }
-        return getTasks();
+        return taskHistory;
     }
 
     /**

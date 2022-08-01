@@ -1,4 +1,3 @@
-import manager.Managers;
 import server.HttpTaskServer;
 import server.KVServer;
 
@@ -8,7 +7,7 @@ import java.io.IOException;
  * «Трекер задач»
  */
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         KVServer kVServer = new KVServer();
         HttpTaskServer httpTaskServer = new HttpTaskServer();
         kVServer.start();

@@ -167,5 +167,5 @@ public interface TaskManager {
 
     KVTaskClient getKVTaskClient();
 
-    void managerToJson(String key) throws IOException, InterruptedException;
+    Integer toJson(String key) throws IOException, InterruptedException;
 }

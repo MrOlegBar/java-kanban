@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static task.Task.Status.*;
 import static task.Task.Type.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -247,8 +248,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     description = value;
                     continue;
                 case "status":
-                    if (listOfSubTaskId.size() != 0) {
-                        status = Task.Status.valueOf(value);
+                    switch (value) {
+                        case "NEW":
+                            status = NEW;
+                            continue;
+                        case "IN_PROGRESS":
+                            status = IN_PROGRESS;
+                            continue;
+                        case "DONE":
+                            status = DONE;
+                            continue;
                     }
                     continue;
                 case "startTime":
@@ -391,36 +400,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Получение списка всех задач
      */
     @Override
-    public List<Task> getListOfTasks() throws ManagerGetException {
-        List<Task> listOfTasks = new ArrayList<>();
-        try {
-            listOfTasks = super.getListOfTasks();
-        } catch (ManagerGetException e) {
-            return listOfTasks;
-        }
-        return listOfTasks;
+    public List<Task> getListOfTasks() {
+        return super.getListOfTasks();
     }
 
     @Override
-    public List<EpicTask> getListOfEpicTasks() throws ManagerGetException {
-        List<EpicTask> listOfEpicTasks = new ArrayList<>();
-        try {
-            listOfEpicTasks = super.getListOfEpicTasks();
-        } catch (ManagerGetException e) {
-            return listOfEpicTasks;
-        }
-        return listOfEpicTasks;
+    public List<EpicTask> getListOfEpicTasks() {
+        return super.getListOfEpicTasks();
     }
 
     @Override
-    public List<EpicTask.SubTask> getListOfSubTasks() throws ManagerGetException {
-        List<EpicTask.SubTask> listOfSubTasks = new ArrayList<>();
-        try {
-            listOfSubTasks = super.getListOfSubTasks();
-        } catch (ManagerGetException e) {
-            return listOfSubTasks;
-        }
-        return listOfSubTasks;
+    public List<EpicTask.SubTask> getListOfSubTasks() {
+        return super.getListOfSubTasks();
     }
 
     /**
@@ -445,17 +436,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Получение задачи по идентификатору
      */
     @Override
-    public Task getTaskById(int id) throws ManagerGetException {
+    public Task getTaskById(int id) {
         return super.getTaskById(id);
     }
 
     @Override
-    public EpicTask getEpicTaskById(int id) throws ManagerGetException {
+    public EpicTask getEpicTaskById(int id) {
         return super.getEpicTaskById(id);
     }
 
     @Override
-    public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
+    public EpicTask.SubTask getSubTaskById(int id) {
         return super.getSubTaskById(id);
     }
 
@@ -546,7 +537,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * История просмотров задач
      */
     @Override
-    public List<Task> getListOfTaskHistory() throws ManagerGetException {
+    public List<Task> getListOfTaskHistory() {
         return super.getListOfTaskHistory();
     }
 
@@ -586,7 +577,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Метод для возвращения списка задач и подзадач в заданном порядке
      */
     @Override
-    public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
+    public Set<Task> getterPrioritizedTasks() {
         return super.getterPrioritizedTasks();
     }
 }

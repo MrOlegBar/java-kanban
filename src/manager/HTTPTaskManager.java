@@ -4,7 +4,6 @@ import adapter.LocalDateTimeAdapter;
 import com.google.gson.*;
 import exception.ManagerCreateException;
 import exception.ManagerDeleteException;
-import exception.ManagerGetException;
 import exception.ManagerSaveException;
 import server.KVTaskClient;
 import task.EpicTask;
@@ -32,7 +31,7 @@ public class HTTPTaskManager extends FileBackedTasksManager {
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
 
-    public void managerToJson(String key) throws IOException, InterruptedException {
+    public Integer toJson(String key) throws IOException, InterruptedException {
         final List<Task> manager = new ArrayList<>();
         if (getListOfTasks().size() != 0) {
             manager.addAll(getListOfTasks());
@@ -59,9 +58,10 @@ public class HTTPTaskManager extends FileBackedTasksManager {
         }
 
         kVTaskClient.put(key, taskManager);
+        return kVTaskClient.getResponse().statusCode();
     }
 
-    public static HTTPTaskManager managerFromJson(String key) throws IOException {
+    public static TaskManager fromJson(String key) throws IOException {
         HTTPTaskManager hTTPTaskManager = null;
         String managerFromGson = null;
 
@@ -96,25 +96,25 @@ public class HTTPTaskManager extends FileBackedTasksManager {
                         if (ids.contains(",")) {
                             String[] arrayOfIdsFromHistory = ids.split(",\\s*");
                             for (String id : arrayOfIdsFromHistory) {
-                                try {
+                                if (hTTPTaskManager.getTaskById(Integer.parseInt(id)) != null) {
                                     hTTPTaskManager.getTaskById(Integer.parseInt(id));
-                                } catch (ManagerGetException e) {
-                                    try {
+                                } else if (hTTPTaskManager.getEpicTaskById(Integer.parseInt(id)) != null) {
                                         hTTPTaskManager.getEpicTaskById(Integer.parseInt(id));
-                                    } catch (ManagerGetException ex) {
+                                } else if (hTTPTaskManager.getSubTaskById(Integer.parseInt(id)) != null) {
                                         hTTPTaskManager.getSubTaskById(Integer.parseInt(id));
-                                    }
+                                } else {
+                                    return null;
                                 }
                             }
                         } else {
-                            try {
+                            if (hTTPTaskManager.getTaskById(Integer.parseInt(ids)) != null) {
                                 hTTPTaskManager.getTaskById(Integer.parseInt(ids));
-                            } catch (ManagerGetException e) {
-                                try {
-                                    hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
-                                } catch (ManagerGetException ex) {
-                                    hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
-                                }
+                            } else if (hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids)) != null) {
+                                hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
+                            } else if (hTTPTaskManager.getSubTaskById(Integer.parseInt(ids)) != null) {
+                                hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
+                            } else {
+                                return null;
                             }
                         }
                     } else {
@@ -128,7 +128,6 @@ public class HTTPTaskManager extends FileBackedTasksManager {
                     hTTPTaskManager.createTask(epicTask);
                 } else if (managerFromGson.contains("epicTaskId")) {
                     EpicTask.SubTask subTask = gson.fromJson(managerFromGson, EpicTask.SubTask.class);
-                    System.out.println(subTask);
                     hTTPTaskManager.createTask(subTask);
                 } else if (managerFromGson.contains("listOfIdsFromHistory")) {
                     String ids = managerFromGson
@@ -138,25 +137,25 @@ public class HTTPTaskManager extends FileBackedTasksManager {
                     if (ids.contains(",")) {
                         String[] arrayOfIdsFromHistory = ids.split(", ");
                         for (String id : arrayOfIdsFromHistory) {
-                            try {
+                            if (hTTPTaskManager.getTaskById(Integer.parseInt(id)) != null) {
                                 hTTPTaskManager.getTaskById(Integer.parseInt(id));
-                            } catch (ManagerGetException e) {
-                                try {
-                                    hTTPTaskManager.getEpicTaskById(Integer.parseInt(id));
-                                } catch (ManagerGetException ex) {
-                                    hTTPTaskManager.getSubTaskById(Integer.parseInt(id));
-                                }
+                            } else if (hTTPTaskManager.getEpicTaskById(Integer.parseInt(id)) != null) {
+                                hTTPTaskManager.getEpicTaskById(Integer.parseInt(id));
+                            } else if (hTTPTaskManager.getSubTaskById(Integer.parseInt(id)) != null) {
+                                hTTPTaskManager.getSubTaskById(Integer.parseInt(id));
+                            } else {
+                                return null;
                             }
                         }
                     } else {
-                        try {
+                        if (hTTPTaskManager.getTaskById(Integer.parseInt(ids)) != null) {
                             hTTPTaskManager.getTaskById(Integer.parseInt(ids));
-                        } catch (ManagerGetException e) {
-                            try {
-                                hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
-                            } catch (ManagerGetException ex) {
-                                hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
-                            }
+                        } else if (hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids)) != null) {
+                            hTTPTaskManager.getEpicTaskById(Integer.parseInt(ids));
+                        } else if (hTTPTaskManager.getSubTaskById(Integer.parseInt(ids)) != null) {
+                            hTTPTaskManager.getSubTaskById(Integer.parseInt(ids));
+                        } else {
+                            return null;
                         }
                     }
                 } else {
@@ -198,17 +197,17 @@ public class HTTPTaskManager extends FileBackedTasksManager {
      * Получение списка всех задач
      */
     @Override
-    public List<Task> getListOfTasks() throws ManagerGetException {
+    public List<Task> getListOfTasks() {
         return super.getListOfTasks();
     }
 
     @Override
-    public List<EpicTask> getListOfEpicTasks() throws ManagerGetException {
+    public List<EpicTask> getListOfEpicTasks() {
         return super.getListOfEpicTasks();
     }
 
     @Override
-    public List<EpicTask.SubTask> getListOfSubTasks() throws ManagerGetException {
+    public List<EpicTask.SubTask> getListOfSubTasks() {
         return super.getListOfSubTasks();
     }
 
@@ -234,17 +233,17 @@ public class HTTPTaskManager extends FileBackedTasksManager {
      * Получение задачи по идентификатору
      */
     @Override
-    public Task getTaskById(int id) throws ManagerGetException {
+    public Task getTaskById(int id) {
         return super.getTaskById(id);
     }
 
     @Override
-    public EpicTask getEpicTaskById(int id) throws ManagerGetException {
+    public EpicTask getEpicTaskById(int id) {
         return super.getEpicTaskById(id);
     }
 
     @Override
-    public EpicTask.SubTask getSubTaskById(int id) throws ManagerGetException {
+    public EpicTask.SubTask getSubTaskById(int id) {
         return super.getSubTaskById(id);
     }
 
@@ -329,7 +328,7 @@ public class HTTPTaskManager extends FileBackedTasksManager {
      * История просмотров задач
      */
     @Override
-    public List<Task> getListOfTaskHistory() throws ManagerGetException {
+    public List<Task> getListOfTaskHistory() {
         return super.getListOfTaskHistory();
     }
 
@@ -382,7 +381,7 @@ public class HTTPTaskManager extends FileBackedTasksManager {
      * Метод для возвращения списка задач и подзадач в заданном порядке
      */
     @Override
-    public Set<Task> getterPrioritizedTasks() throws ManagerGetException {
+    public Set<Task> getterPrioritizedTasks() {
         return super.getterPrioritizedTasks();
     }
 }
