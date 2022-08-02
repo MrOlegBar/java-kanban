@@ -30,7 +30,7 @@ class HistoryManagerTest extends InMemoryTaskManager {
     EpicTask.SubTask subtask1;
 
     @BeforeEach
-    private void beforeEach() throws IOException, InterruptedException {
+    private void beforeEach() throws IOException {
         historyManager = new InMemoryHistoryManager();
 
         task1 = new Task(

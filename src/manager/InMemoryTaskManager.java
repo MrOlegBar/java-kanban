@@ -588,18 +588,23 @@ public class InMemoryTaskManager implements TaskManager {
 
             LocalDateTime startTimeMin = null;
             if (listOfSubTaskId.size() != 0) {
-                subTaskForStartTimeMin = subTaskStorage.get(listOfSubTaskId.get(0));
-                startTimeMin = subTaskForStartTimeMin.getStartTime();
+                EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(0));
+                if (subTask != null) {
+                    subTaskForStartTimeMin = subTaskStorage.get(listOfSubTaskId.get(0));
+                    startTimeMin = subTaskForStartTimeMin.getStartTime();
+                }
             }
             for (int i = 1; i < listOfSubTaskId.size(); i++) {
                 EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(i));
-                if (subTask.getStartTime().isBefore(startTimeMin)) {
-                    startTimeMin = subTask.getStartTime();
+                if (subTask != null && startTimeMin != null) {
+                    if (subTask.getStartTime().isBefore(startTimeMin)) {
+                        startTimeMin = subTask.getStartTime();
+                    }
                 }
             }
             return startTimeMin;
         } catch (ClassCastException | NullPointerException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -627,18 +632,23 @@ public class InMemoryTaskManager implements TaskManager {
 
             LocalDateTime startTimeMax = null;
             if (listOfSubTaskId.size() != 0) {
-                subTaskForStartTimeMax = subTaskStorage.get(listOfSubTaskId.get(0));
-                startTimeMax = subTaskForStartTimeMax.getEndTime();
+                EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(0));
+                if (subTask != null) {
+                    subTaskForStartTimeMax = subTaskStorage.get(listOfSubTaskId.get(0));
+                    startTimeMax = subTaskForStartTimeMax.getEndTime();
+                }
             }
             for (int i = 1; i < listOfSubTaskId.size(); i++) {
                 EpicTask.SubTask subTask = subTaskStorage.get(listOfSubTaskId.get(i));
-                if (subTask.getEndTime().isAfter(startTimeMax)) {
-                    startTimeMax = subTask.getEndTime();
+                if (subTask != null && startTimeMax != null) {
+                    if (subTask.getEndTime().isAfter(startTimeMax)) {
+                        startTimeMax = subTask.getEndTime();
+                    }
                 }
             }
             return startTimeMax;
         } catch (ClassCastException | NullPointerException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

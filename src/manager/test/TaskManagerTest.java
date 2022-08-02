@@ -3,7 +3,6 @@ package manager.test;
 import exception.ManagerCreateException;
 import manager.TaskManager;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static manager.Managers.getDefaultManager;
 import static org.junit.jupiter.api.Assertions.*;
 import static task.Task.Status.*;
 
@@ -51,16 +49,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     String key;
     Integer statusCode;
 
-    static {
-        try {
-            kVServer = new KVServer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @BeforeAll
-    public static void start() {
+    public static void start() throws IOException {
+        kVServer = new KVServer();
         kVServer.start();
     }
 

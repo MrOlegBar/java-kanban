@@ -1,12 +1,13 @@
 package manager.test;
 
-import manager.Managers;
+import manager.HTTPTaskManager;
 import manager.TaskManager;
 import org.junit.jupiter.api.Test;
 import task.EpicTask;
 import task.Task;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import static manager.Managers.getDefaultManager;
@@ -15,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HTTPTaskManagerTest extends TaskManagerTest {
     String key = "key1";
-    TaskManager manager = Managers.getDefaultManager(key);
+    TaskManager manager = new HTTPTaskManager(URI.create("http://localhost:8081/"));
 
-    HTTPTaskManagerTest() throws IOException {
+    HTTPTaskManagerTest() throws IOException, InterruptedException {
     }
 
     @Override
