@@ -1,5 +1,5 @@
-import server.HttpTaskServer;
-import server.KVServer;
+import servers.HttpTaskServer;
+import servers.KVServer;
 
 import java.io.IOException;
 
